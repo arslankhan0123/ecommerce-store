@@ -27,7 +27,7 @@ class ProductController extends Controller
             $query->where('status', $request->status);
         }
 
-        $products = $query->paginate(2)->withQueryString();
+        $products = $query->paginate(12)->withQueryString();
         $categories = \App\Models\Category::orderBy('name')->get();
 
         return view('admin.products.index', compact('products', 'categories'));

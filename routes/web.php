@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ImportExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -39,6 +40,12 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         Route::get('/',                  [ProductController::class, 'index'])    ->name('index');
         Route::get('/create',            [ProductController::class, 'create'])   ->name('create');
         Route::post('/',                 [ProductController::class, 'store'])    ->name('store');
+        // Import / Export (must be before /{product} to avoid route model binding conflict)
+        Route::get('/export',            [ImportExportController::class, 'export'])        ->name('export');
+        Route::get('/sample-template',   [ImportExportController::class, 'sampleTemplate'])->name('sample');
+        Route::get('/import',            [ImportExportController::class, 'importForm'])    ->name('import');
+        Route::post('/import',           [ImportExportController::class, 'importProcess']) ->name('import.process');
+        // Single product routes
         Route::get('/{product}',         [ProductController::class, 'show'])     ->name('show');
         Route::get('/{product}/edit',    [ProductController::class, 'edit'])     ->name('edit');
         Route::put('/{product}',         [ProductController::class, 'update'])   ->name('update');
