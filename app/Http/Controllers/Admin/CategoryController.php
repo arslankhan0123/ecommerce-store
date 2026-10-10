@@ -25,15 +25,20 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
-            'slug'        => 'nullable|string|unique:categories,slug|max:255',
+            // slug is auto-generated server-side
             'parent_id'   => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
             'status'      => 'required|in:active,inactive',
         ]);
 
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['name']);
+        // Always auto-generate slug from name, ensure uniqueness
+        $baseSlug = Str::slug($validated['name']);
+        $slug = $baseSlug;
+        $i = 1;
+        while (\App\Models\Category::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $i++;
         }
+        $validated['slug'] = $slug;
 
         Category::create($validated);
 
@@ -60,14 +65,23 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
-            'slug'        => 'nullable|string|unique:categories,slug,' . $category->id . '|max:255',
+            // slug is auto-generated server-side (excluded from update to preserve existing)
             'parent_id'   => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
             'status'      => 'required|in:active,inactive',
         ]);
 
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['name']);
+        // Auto-regenerate slug only if name changed; exclude self from uniqueness check
+        if ($category->name !== $validated['name']) {
+            $baseSlug = Str::slug($validated['name']);
+            $slug = $baseSlug;
+            $i = 1;
+            while (\App\Models\Category::where('slug', $slug)->where('id', '!=', $category->id)->exists()) {
+                $slug = $baseSlug . '-' . $i++;
+            }
+            $validated['slug'] = $slug;
+        } else {
+            $validated['slug'] = $category->slug;
         }
 
         $category->update($validated);

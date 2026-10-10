@@ -41,7 +41,7 @@
                            value="{{ old('name') }}"
                            class="form-input @error('name') border-red-400 @enderror"
                            placeholder="e.g. Electronics, Fashion, Home & Garden"
-                           oninput="generateSlug(this.value)"
+                           
                            required>
                     @error('name')
                         <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
@@ -55,19 +55,20 @@
                 <div class="mb-5">
                     <label class="form-label">
                         Slug
-                        <span class="text-gray-400 font-normal text-xs ml-1">(auto-generated from name, must be unique)</span>
+                        <span class="text-gray-400 font-normal text-xs ml-1">(auto-generated from name)</span>
                     </label>
                     <div class="relative">
                         <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium select-none">/</span>
                         <input type="text" name="slug" id="catSlug"
                                value="{{ old('slug') }}"
-                               class="form-input pl-6 @error('slug') border-red-400 @enderror"
-                               placeholder="auto-generated">
+                               readonly disabled
+                               class="form-input pl-6 bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed select-none @error('slug') border-red-400 @enderror"
+                               placeholder="will be generated from name…">
                     </div>
                     @error('slug')
                         <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                     @enderror
-                    <p class="text-gray-400 text-xs mt-1.5">Leave empty to auto-generate from name. Only lowercase letters, numbers, and hyphens.</p>
+                    <p class="text-gray-400 text-xs mt-1.5">Auto-generated from the category name — unique and URL-safe.</p>
                 </div>
 
                 <!-- Parent Category -->
@@ -117,27 +118,28 @@
     <div class="space-y-5">
 
         <!-- Status -->
-        <div class="bg-white rounded-2xl p-5" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+        <div class="bg-white rounded-2xl p-5" style="box-shadow:0 2px 16px rgba(0,0,0,.06)"
+             x-data="{ selectedStatus: '{{ old('status', 'active') }}' }">
             <h3 class="font-semibold text-gray-700 mb-4">Status</h3>
             <div class="space-y-2">
                 <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition"
-                       :class="selectedStatus === 'active' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'"
-                       x-data="{ selectedStatus: '{{ old('status', 'active') }}' }"
-                       x-init="$root.__x = $data">
-                    <input type="radio" name="status" value="active"
+                       :class="selectedStatus === 'active' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'">
+                    <input type="radio" name="status" value="active" form="categoryForm"
                            {{ old('status', 'active') === 'active' ? 'checked' : '' }}
                            class="text-indigo-600 w-4 h-4"
-                           @change="selectedStatus='active'">
+                           x-on:change="selectedStatus = 'active'">
                     <div>
                         <div class="text-sm font-semibold text-gray-700">Active</div>
                         <div class="text-xs text-gray-400">Visible in the storefront</div>
                     </div>
                     <span class="ml-auto badge-active">Active</span>
                 </label>
-                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition border-gray-200 hover:border-gray-300">
-                    <input type="radio" name="status" value="inactive"
+                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition"
+                       :class="selectedStatus === 'inactive' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'">
+                    <input type="radio" name="status" value="inactive" form="categoryForm"
                            {{ old('status') === 'inactive' ? 'checked' : '' }}
-                           class="text-indigo-600 w-4 h-4">
+                           class="text-indigo-600 w-4 h-4"
+                           x-on:change="selectedStatus = 'inactive'">
                     <div>
                         <div class="text-sm font-semibold text-gray-700">Inactive</div>
                         <div class="text-xs text-gray-400">Hidden from customers</div>
@@ -180,25 +182,23 @@
 
 @push('scripts')
 <script>
-function generateSlug(val) {
-    const slugField = document.getElementById('catSlug');
-    // Only auto-generate if user hasn't manually typed a slug
-    if (!slugField.dataset.manual) {
-        slugField.value = val
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .trim()
-            .replace(/[\s]+/g, '-')
-            .replace(/-+/g, '-');
-    }
+// Auto-slug: driven entirely by the name field, field is read-only
+function slugify(val) {
+    return val.toLowerCase().trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/[\s]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
 }
-document.getElementById('catSlug').addEventListener('input', function() {
-    this.dataset.manual = 'true';
-    // Clean what user types
-    this.value = this.value
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, '')
-        .replace(/-+/g, '-');
+document.getElementById('catName')?.addEventListener('input', function() {
+    document.getElementById('catSlug').value = slugify(this.value);
+});
+// Fallback: find name input by any ID
+const nameInputs = document.querySelectorAll('input[name="name"]');
+nameInputs.forEach(function(el) {
+    el.addEventListener('input', function() {
+        document.getElementById('catSlug').value = slugify(this.value);
+    });
 });
 </script>
 @endpush

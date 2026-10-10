@@ -289,7 +289,8 @@
         sidebarMobile: false,
         profileOpen: false,
         notifOpen: false,
-        catOpen: @yield('cat_open', 'false')
+        catOpen: @yield('cat_open', 'false'),
+        prodOpen: @yield('prod_open', 'false')
       }"
       @resize.window="sidebarOpen = window.innerWidth > 768">
 
@@ -371,14 +372,31 @@
             </div>
         </div>
 
-        <!-- Products (placeholder) -->
-        <a href="#" class="nav-item opacity-50 cursor-not-allowed">
-            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-            </svg>
-            <span class="nav-label">Products</span>
-            <span class="nav-label ml-auto text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">Soon</span>
-        </a>
+        <!-- Products -->
+        <div>
+            <button @click="prodOpen = !prodOpen"
+                    class="nav-item w-full {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <span class="nav-label flex-1 text-left">Products</span>
+                <svg :class="{ 'rotate-180': prodOpen }" class="nav-label w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div class="submenu" :style="prodOpen ? 'max-height:200px' : 'max-height:0'">
+                <a href="{{ route('admin.products.index') }}"
+                   class="sub-item {{ request()->routeIs('admin.products.index') ? 'active' : '' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                    All Products
+                </a>
+                <a href="{{ route('admin.products.create') }}"
+                   class="sub-item {{ request()->routeIs('admin.products.create') ? 'active' : '' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                    Add New
+                </a>
+            </div>
+        </div>
 
         <!-- Orders group -->
         <div class="nav-label px-5 mb-1 mt-4">

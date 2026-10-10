@@ -36,17 +36,17 @@
                     <label class="form-label">Category Name <span class="text-red-500">*</span></label>
                     <input type="text" name="name" id="catName" value="{{ old('name', $category->name) }}"
                            class="form-input @error('name') border-red-400 @enderror"
-                           placeholder="Category name" oninput="generateSlug(this.value)" required>
+                           placeholder="Category name"  required>
                     @error('name') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="mb-5">
-                    <label class="form-label">Slug <span class="text-gray-400 font-normal text-xs ml-1">(unique URL identifier)</span></label>
+                    <label class="form-label">Slug <span class="text-gray-400 font-normal text-xs ml-1">(auto-generated from name)</span></label>
                     <div class="relative">
                         <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">/</span>
                         <input type="text" name="slug" id="catSlug" value="{{ old('slug', $category->slug) }}"
-                               class="form-input pl-6 @error('slug') border-red-400 @enderror"
-                               data-manual="true">
+                               readonly disabled
+                               class="form-input pl-6 bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed select-none @error('slug') border-red-400 @enderror">
                     </div>
                     @error('slug') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                 </div>
@@ -153,15 +153,18 @@
 
 @push('scripts')
 <script>
-function generateSlug(val) {
-    const s = document.getElementById('catSlug');
-    if (!s.dataset.manual || s.dataset.manual === 'false') {
-        s.value = val.toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
-    }
+// Slug auto-updates when name changes; field is read-only
+function slugify(val) {
+    return val.toLowerCase().trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/[\s]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
 }
-document.getElementById('catSlug').addEventListener('input', function() {
-    this.dataset.manual = 'true';
-    this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/-+/g,'-');
+document.querySelectorAll('input[name="name"]').forEach(function(el) {
+    el.addEventListener('input', function() {
+        document.getElementById('catSlug').value = slugify(this.value);
+    });
 });
 </script>
 @endpush
