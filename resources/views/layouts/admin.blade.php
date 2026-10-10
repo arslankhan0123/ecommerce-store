@@ -287,13 +287,12 @@
         }
 
         .data-table tbody tr {
-            transition: all .2s;
+            transition: background-color .15s ease;
             background: white;
         }
 
         .data-table tbody tr:hover {
             background: #f8fafc;
-            transform: scale(1.002);
         }
 
         /* Badges */
