@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ImportExportController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -51,6 +53,28 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         Route::put('/{product}',         [ProductController::class, 'update'])   ->name('update');
         Route::patch('/{product}',       [ProductController::class, 'update'])   ->name('patch');
         Route::delete('/{product}',      [ProductController::class, 'destroy'])  ->name('destroy');
+    });
+
+    // Customers
+    Route::prefix('customers')->name('customers.')->group(function () {
+        Route::get('/',                   [CustomerController::class, 'index'])   ->name('index');
+        Route::get('/create',             [CustomerController::class, 'create'])  ->name('create');
+        Route::post('/',                  [CustomerController::class, 'store'])   ->name('store');
+        Route::get('/{customer}',         [CustomerController::class, 'show'])    ->name('show');
+        Route::get('/{customer}/edit',    [CustomerController::class, 'edit'])    ->name('edit');
+        Route::put('/{customer}',         [CustomerController::class, 'update'])  ->name('update');
+        Route::delete('/{customer}',      [CustomerController::class, 'destroy']) ->name('destroy');
+    });
+
+    // Orders
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/',                [OrderController::class, 'index'])   ->name('index');
+        Route::get('/create',          [OrderController::class, 'create'])  ->name('create');
+        Route::post('/',               [OrderController::class, 'store'])   ->name('store');
+        Route::get('/{order}',         [OrderController::class, 'show'])    ->name('show');
+        Route::get('/{order}/edit',    [OrderController::class, 'edit'])    ->name('edit');
+        Route::put('/{order}',         [OrderController::class, 'update'])  ->name('update');
+        Route::delete('/{order}',      [OrderController::class, 'destroy']) ->name('destroy');
     });
 
 });

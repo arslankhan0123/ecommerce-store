@@ -313,6 +313,12 @@
             font-size: 12px;
             font-weight: 600;
         }
+        .badge-yellow { background:#fef9c3;color:#a16207;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+        .badge-blue   { background:#dbeafe;color:#1d4ed8;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+        .badge-indigo { background:#e0e7ff;color:#4338ca;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+        .badge-green  { background:#dcfce7;color:#16a34a;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+        .badge-red    { background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
+        .badge-draft  { background:#f1f5f9;color:#64748b;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600; }
 
         /* Form controls */
         .form-input {
@@ -662,25 +668,31 @@
                 <span class="text-white/30 text-xs font-semibold uppercase tracking-widest">Commerce</span>
             </div>
 
-            <a href="#" class="nav-item opacity-50 cursor-not-allowed">
+            <a href="{{ route('admin.orders.index') }}" class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <span class="nav-label">Orders</span>
-                <span
-                    class="nav-label ml-auto text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">Soon</span>
             </a>
+            @if(request()->routeIs('admin.orders.*'))
+            <a href="{{ route('admin.orders.create') }}" class="nav-item ml-8 text-sm py-1.5 {{ request()->routeIs('admin.orders.create') ? 'active' : '' }}">
+                <span class="nav-label">+ New Order</span>
+            </a>
+            @endif
 
-            <a href="#" class="nav-item opacity-50 cursor-not-allowed">
+            <a href="{{ route('admin.customers.index') }}" class="nav-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span class="nav-label">Customers</span>
-                <span
-                    class="nav-label ml-auto text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">Soon</span>
             </a>
+            @if(request()->routeIs('admin.customers.*'))
+            <a href="{{ route('admin.customers.create') }}" class="nav-item ml-8 text-sm py-1.5 {{ request()->routeIs('admin.customers.create') ? 'active' : '' }}">
+                <span class="nav-label">+ Add Customer</span>
+            </a>
+            @endif
 
             <!-- Settings -->
             <div class="nav-label px-5 mb-1 mt-4">
