@@ -549,7 +549,9 @@
         profileOpen: false,
         notifOpen: false,
         catOpen: @yield('cat_open', 'false'),
-        prodOpen: @yield('prod_open', 'false')
+        prodOpen: @yield('prod_open', 'false'),
+        orderOpen: @yield('order_open', 'false'),
+        custOpen: @yield('cust_open', 'false')
       }" @resize.window="sidebarOpen = window.innerWidth > 768">
 
     <!-- Mobile overlay -->
@@ -668,31 +670,61 @@
                 <span class="text-white/30 text-xs font-semibold uppercase tracking-widest">Commerce</span>
             </div>
 
-            <a href="{{ route('admin.orders.index') }}" class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span class="nav-label">Orders</span>
-            </a>
-            @if(request()->routeIs('admin.orders.*'))
-            <a href="{{ route('admin.orders.create') }}" class="nav-item ml-8 text-sm py-1.5 {{ request()->routeIs('admin.orders.create') ? 'active' : '' }}">
-                <span class="nav-label">+ New Order</span>
-            </a>
-            @endif
+            <!-- Orders -->
+            <div>
+                <button @click="orderOpen = !orderOpen"
+                    class="nav-item w-full {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span class="nav-label flex-1 text-left">Orders</span>
+                    <svg :class="{ 'rotate-180': orderOpen }" class="nav-label w-4 h-4 transition-transform" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="submenu" :style="orderOpen ? 'max-height:200px' : 'max-height:0'">
+                    <a href="{{ route('admin.orders.index') }}"
+                        class="sub-item {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                        All Orders
+                    </a>
+                    <a href="{{ route('admin.orders.create') }}"
+                        class="sub-item {{ request()->routeIs('admin.orders.create') ? 'active' : '' }}">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                        New Order
+                    </a>
+                </div>
+            </div>
 
-            <a href="{{ route('admin.customers.index') }}" class="nav-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span class="nav-label">Customers</span>
-            </a>
-            @if(request()->routeIs('admin.customers.*'))
-            <a href="{{ route('admin.customers.create') }}" class="nav-item ml-8 text-sm py-1.5 {{ request()->routeIs('admin.customers.create') ? 'active' : '' }}">
-                <span class="nav-label">+ Add Customer</span>
-            </a>
-            @endif
+            <!-- Customers -->
+            <div>
+                <button @click="custOpen = !custOpen"
+                    class="nav-item w-full {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
+                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="nav-label flex-1 text-left">Customers</span>
+                    <svg :class="{ 'rotate-180': custOpen }" class="nav-label w-4 h-4 transition-transform" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="submenu" :style="custOpen ? 'max-height:200px' : 'max-height:0'">
+                    <a href="{{ route('admin.customers.index') }}"
+                        class="sub-item {{ request()->routeIs('admin.customers.index') ? 'active' : '' }}">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                        All Customers
+                    </a>
+                    <a href="{{ route('admin.customers.create') }}"
+                        class="sub-item {{ request()->routeIs('admin.customers.create') ? 'active' : '' }}">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0"></span>
+                        Add Customer
+                    </a>
+                </div>
+            </div>
 
             <!-- Settings -->
             <div class="nav-label px-5 mb-1 mt-4">
