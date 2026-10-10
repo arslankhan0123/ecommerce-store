@@ -68,7 +68,7 @@
         </div>
 
         <div class="flex gap-3">
-            <button type="submit" class="flex-1 py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 transition shadow-sm">Save Changes</button>
+            <button type="submit" class="btn-primary flex-1">Save Changes</button>
             <a href="{{ route('admin.orders.show', $order) }}" class="px-5 py-2.5 border border-gray-200 text-gray-600 font-semibold text-sm rounded-xl hover:bg-gray-50 transition">Cancel</a>
         </div>
     </form>

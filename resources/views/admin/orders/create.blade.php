@@ -161,7 +161,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 transition shadow-sm">
+                <button type="submit" class="btn-primary w-full">
                     Create Order
                 </button>
             </div>

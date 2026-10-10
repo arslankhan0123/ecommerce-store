@@ -251,7 +251,7 @@
 
                 <!-- Actions -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-3">
-                    <button type="submit" class="w-full py-2.5 px-4 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                    <button type="submit" class="btn-primary w-full">
                         Create Product
                     </button>
                     <a href="{{ route('admin.products.index') }}"
