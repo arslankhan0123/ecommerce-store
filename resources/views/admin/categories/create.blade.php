@@ -80,7 +80,7 @@
                         <option value="">— None (Top-level category) —</option>
                         @foreach($parents as $parent)
                             <option value="{{ $parent->id }}" {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
-                                {{ $parent->name }}
+                                {{ $parent->parent_id ? '— ' . $parent->parent->name . ' › ' . $parent->name : $parent->name }}
                             </option>
                         @endforeach
                     </select>

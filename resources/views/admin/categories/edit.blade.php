@@ -77,7 +77,9 @@
                     <select name="parent_id" class="form-input @error('parent_id') border-red-400 @enderror">
                         <option value="">— None (Top-level) —</option>
                         @foreach($parents as $parent)
-                            <option value="{{ $parent->id }}" {{ old('parent_id', $category->parent_id) == $parent->id ? 'selected' : '' }}>{{ $parent->name }}</option>
+                            <option value="{{ $parent->id }}" {{ old('parent_id', $category->parent_id) == $parent->id ? 'selected' : '' }}>
+                                {{ $parent->parent_id ? '— ' . $parent->parent->name . ' › ' . $parent->name : $parent->name }}
+                            </option>
                         @endforeach
                     </select>
                     @error('parent_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
