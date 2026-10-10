@@ -18,6 +18,52 @@
     </a>
 </div>
 
+<!-- Filters -->
+<form method="GET" action="{{ route('admin.categories.index') }}"
+      class="bg-white rounded-2xl px-5 py-4 mb-4 flex flex-wrap items-center gap-3" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+
+    {{-- Search --}}
+    <div class="relative flex-1 min-w-48">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" name="search" value="{{ request('search') }}"
+               placeholder="Search by name or slug…"
+               class="form-input pl-9 w-full text-sm">
+    </div>
+
+    {{-- Status --}}
+    <select name="status" class="form-input text-sm w-40">
+        <option value="">All Statuses</option>
+        <option value="active"   {{ request('status') === 'active'   ? 'selected' : '' }}>Active</option>
+        <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+    </select>
+
+    {{-- Parent filter --}}
+    <select name="parent" class="form-input text-sm w-44">
+        <option value="">All Categories</option>
+        <option value="top" {{ request('parent') === 'top' ? 'selected' : '' }}>Top-level only</option>
+        @foreach($allParents as $p)
+            <option value="{{ $p->id }}" {{ request('parent') == $p->id ? 'selected' : '' }}>
+                Under: {{ $p->name }}
+            </option>
+        @endforeach
+    </select>
+
+    {{-- Buttons --}}
+    <button type="submit" class="btn-primary text-sm px-4 py-2 flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
+        Filter
+    </button>
+    @if(request()->hasAny(['search','status','parent']))
+        <a href="{{ route('admin.categories.index') }}"
+           class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            Clear
+        </a>
+    @endif
+</form>
+
 <!-- Table card -->
 <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
 
@@ -80,6 +126,11 @@
                     <td class="text-gray-400 text-xs">{{ $cat->created_at->format('M d, Y') }}</td>
                     <td>
                         <div class="flex items-center gap-2">
+                            <a href="{{ route('admin.categories.show', $cat) }}"
+                               class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 transition"
+                               title="View">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </a>
                             <a href="{{ route('admin.categories.edit', $cat) }}"
                                class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center text-indigo-600 transition"
                                title="Edit">

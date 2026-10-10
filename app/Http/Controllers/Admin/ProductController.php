@@ -27,7 +27,7 @@ class ProductController extends Controller
             $query->where('status', $request->status);
         }
 
-        $products   = $query->paginate(12)->withQueryString();
+        $products = $query->paginate(2)->withQueryString();
         $categories = \App\Models\Category::orderBy('name')->get();
 
         return view('admin.products.index', compact('products', 'categories'));
@@ -42,18 +42,18 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'              => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             // slug auto-generated server-side
-            'category_id'       => 'nullable|exists:categories,id',
-            'sku'               => 'nullable|string|unique:products,sku|max:100',
-            'purchase_price'    => 'required|numeric|min:0',
-            'sale_price'        => 'nullable|numeric|min:0',
-            'quantity'          => 'required|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'sku' => 'nullable|string|unique:products,sku|max:100',
+            'purchase_price' => 'required|numeric|min:0',
+            'sale_price' => 'nullable|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
             'short_description' => 'nullable|string|max:500',
-            'description'       => 'nullable|string',
-            'status'            => 'required|in:active,inactive,draft',
-            'feature_image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'gallery_images.*'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive,draft',
+            'feature_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'gallery_images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         // Always auto-generate slug from name, ensure uniqueness
@@ -105,18 +105,18 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'name'              => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             // slug auto-generated server-side
-            'category_id'       => 'nullable|exists:categories,id',
-            'sku'               => 'nullable|string|unique:products,sku,' . $product->id . '|max:100',
-            'purchase_price'    => 'required|numeric|min:0',
-            'sale_price'        => 'nullable|numeric|min:0',
-            'quantity'          => 'required|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'sku' => 'nullable|string|unique:products,sku,' . $product->id . '|max:100',
+            'purchase_price' => 'required|numeric|min:0',
+            'sale_price' => 'nullable|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
             'short_description' => 'nullable|string|max:500',
-            'description'       => 'nullable|string',
-            'status'            => 'required|in:active,inactive,draft',
-            'feature_image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'gallery_images.*'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive,draft',
+            'feature_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'gallery_images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         // Auto-regenerate slug only if name changed; exclude self from uniqueness check
