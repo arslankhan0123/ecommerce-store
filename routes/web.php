@@ -6,12 +6,14 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ImportExportController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Shop\ShopController;
+use App\Http\Controllers\Shop\CartController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// ── Shop / Frontend Routes ──
+Route::view('/', 'welcome')->name('welcome');
 
+// ── Dashboard ──
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -25,58 +27,51 @@ Route::middleware('auth')->group(function () {
 // ── Admin Routes ──
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
 
-    // Categories
     Route::prefix('categories')->name('categories.')->group(function () {
-        Route::get('/',                  [CategoryController::class, 'index'])   ->name('index');
-        Route::get('/create',            [CategoryController::class, 'create'])  ->name('create');
-        Route::post('/',                 [CategoryController::class, 'store'])   ->name('store');
-        Route::get('/{category}',        [CategoryController::class, 'show'])    ->name('show');
-        Route::get('/{category}/edit',   [CategoryController::class, 'edit'])    ->name('edit');
-        Route::put('/{category}',        [CategoryController::class, 'update'])  ->name('update');
-        Route::patch('/{category}',      [CategoryController::class, 'update'])  ->name('patch');
-        Route::delete('/{category}',     [CategoryController::class, 'destroy']) ->name('destroy');
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::patch('/{category}', [CategoryController::class, 'update'])->name('patch');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
     });
 
-    // Products
     Route::prefix('products')->name('products.')->group(function () {
-        Route::get('/',                  [ProductController::class, 'index'])    ->name('index');
-        Route::get('/create',            [ProductController::class, 'create'])   ->name('create');
-        Route::post('/',                 [ProductController::class, 'store'])    ->name('store');
-        // Import / Export (must be before /{product} to avoid route model binding conflict)
-        Route::get('/export',            [ImportExportController::class, 'export'])        ->name('export');
-        Route::get('/sample-template',   [ImportExportController::class, 'sampleTemplate'])->name('sample');
-        Route::get('/import',            [ImportExportController::class, 'importForm'])    ->name('import');
-        Route::post('/import',           [ImportExportController::class, 'importProcess']) ->name('import.process');
-        // Single product routes
-        Route::get('/{product}',         [ProductController::class, 'show'])     ->name('show');
-        Route::get('/{product}/edit',    [ProductController::class, 'edit'])     ->name('edit');
-        Route::put('/{product}',         [ProductController::class, 'update'])   ->name('update');
-        Route::patch('/{product}',       [ProductController::class, 'update'])   ->name('patch');
-        Route::delete('/{product}',      [ProductController::class, 'destroy'])  ->name('destroy');
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+        Route::get('/export', [ImportExportController::class, 'export'])->name('export');
+        Route::get('/sample-template', [ImportExportController::class, 'sampleTemplate'])->name('sample');
+        Route::get('/import', [ImportExportController::class, 'importForm'])->name('import');
+        Route::post('/import', [ImportExportController::class, 'importProcess'])->name('import.process');
+        Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+        Route::patch('/{product}', [ProductController::class, 'update'])->name('patch');
+        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
     });
 
-    // Customers
     Route::prefix('customers')->name('customers.')->group(function () {
-        Route::get('/',                   [CustomerController::class, 'index'])   ->name('index');
-        Route::get('/create',             [CustomerController::class, 'create'])  ->name('create');
-        Route::post('/',                  [CustomerController::class, 'store'])   ->name('store');
-        Route::get('/{customer}',         [CustomerController::class, 'show'])    ->name('show');
-        Route::get('/{customer}/edit',    [CustomerController::class, 'edit'])    ->name('edit');
-        Route::put('/{customer}',         [CustomerController::class, 'update'])  ->name('update');
-        Route::delete('/{customer}',      [CustomerController::class, 'destroy']) ->name('destroy');
+        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::get('/create', [CustomerController::class, 'create'])->name('create');
+        Route::post('/', [CustomerController::class, 'store'])->name('store');
+        Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+        Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
+        Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
+        Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
     });
 
-    // Orders
     Route::prefix('orders')->name('orders.')->group(function () {
-        Route::get('/',                [OrderController::class, 'index'])   ->name('index');
-        Route::get('/create',          [OrderController::class, 'create'])  ->name('create');
-        Route::post('/',               [OrderController::class, 'store'])   ->name('store');
-        Route::get('/{order}',         [OrderController::class, 'show'])    ->name('show');
-        Route::get('/{order}/edit',    [OrderController::class, 'edit'])    ->name('edit');
-        Route::put('/{order}',         [OrderController::class, 'update'])  ->name('update');
-        Route::delete('/{order}',      [OrderController::class, 'destroy']) ->name('destroy');
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/create', [OrderController::class, 'create'])->name('create');
+        Route::post('/', [OrderController::class, 'store'])->name('store');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+        Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('edit');
+        Route::put('/{order}', [OrderController::class, 'update'])->name('update');
+        Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
     });
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

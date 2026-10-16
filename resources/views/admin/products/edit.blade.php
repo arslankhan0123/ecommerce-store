@@ -283,13 +283,11 @@
                         Cancel
                     </a>
                     <hr class="border-gray-200 dark:border-gray-700">
-                    <form method="POST" action="{{ route('admin.products.destroy', $product) }}"
-                          onsubmit="return confirm('Permanently delete this product and all its images?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="w-full py-2.5 px-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-200 dark:border-red-800">
-                            Delete Product
-                        </button>
-                    </form>
+                    <button type="submit" form="deleteProductForm"
+                            onclick="return confirm('Permanently delete this product and all its images?')"
+                            class="w-full py-2.5 px-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-200 dark:border-red-800">
+                        Delete Product
+                    </button>
                 </div>
 
                 <!-- Product Info -->
@@ -305,6 +303,11 @@
             </div>
         </div>
     </form>
+
+{{-- Delete form outside main form to avoid nested form bug --}}
+<form id="deleteProductForm" method="POST" action="{{ route('admin.products.destroy', $product) }}" style="display:none">
+    @csrf @method('DELETE')
+</form>
 </div>
 @endsection
 
