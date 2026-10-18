@@ -147,3 +147,24 @@ if (!function_exists('zpkr')) {
         return 'PKR ' . number_format((float) $amount, 0);
     }
 }
+
+if (!function_exists('zlogo')) {
+    /** Inline an SVG from public/images (so its animations run). $suffix makes ids unique per instance. */
+    function zlogo(string $file, string $suffix = ''): string
+    {
+        static $cache = [];
+        $key = $file . '|' . $suffix;
+        if (!isset($cache[$key])) {
+            $path = public_path('images/' . $file);
+            $svg  = is_file($path) ? file_get_contents($path) : '';
+            if ($svg === '') return '<img src="' . asset('images/' . $file) . '" alt="Zelari">';
+            if ($suffix !== '') {
+                $svg = preg_replace('/id="([a-z]+-)([a-z]+)"/i', 'id="$1$2' . $suffix . '"', $svg);
+                $svg = preg_replace('/url\(#([a-z]+-)([a-z]+)\)/i', 'url(#$1$2' . $suffix . ')', $svg);
+            }
+            $svg = preg_replace('/\s(width|height)="[^"]*"/', '', $svg, 2);
+            $cache[$key] = $svg;
+        }
+        return $cache[$key];
+    }
+}

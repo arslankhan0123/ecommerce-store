@@ -7,6 +7,13 @@
 <title>@yield('title', 'Shop') · Zelari</title>
 <meta name="description" content="@yield('meta_description', 'Zelari — a smarter way to shop. Curated products, honest prices, fast delivery across Pakistan.')">
 
+<link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-192.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
+<link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+<meta name="theme-color" content="#6a3df5">
+<meta property="og:image" content="{{ asset('images/logo.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -107,9 +114,10 @@ button,input,select,textarea{font-family:inherit}
 .topbar-loc{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .topbar-loc i{color:var(--p2)}
 .topbar-marquee{flex:1;overflow:hidden;position:relative;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.topbar-marquee span{display:inline-block;white-space:nowrap;animation:marquee 28s linear infinite;padding-right:60px}
+.topbar-marquee span{display:inline-block;white-space:nowrap;animation:marquee 34s linear infinite}
 .topbar-marquee b{color:#fff}
 .topbar-marquee em{font-style:normal;color:var(--p2);font-weight:700}
+.topbar-marquee .sep{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--p2);margin:0 34px;vertical-align:middle;opacity:.8}
 .topbar-sel{display:flex;gap:14px;white-space:nowrap}
 .topbar-sel .sel{display:flex;align-items:center;gap:5px;cursor:pointer;color:#fff}
 .topbar-sel .sel i{font-size:10px;opacity:.7}
@@ -119,12 +127,11 @@ button,input,select,textarea{font-family:inherit}
 .header{position:sticky;top:0;z-index:1000;background:#fff;box-shadow:0 1px 0 var(--line)}
 .header.scrolled{box-shadow:0 8px 30px -14px rgba(39,30,92,.25)}
 .hdr-main{height:var(--head-h);display:flex;align-items:center;gap:20px}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:27px;letter-spacing:-1px;color:var(--ink);flex-shrink:0}
-.logo:hover{color:var(--ink)}
-.logo-mark{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:20px;font-weight:800;position:relative;transform-style:preserve-3d;transition:transform .5s}
-.logo:hover .logo-mark{transform:rotateY(180deg)}
-.logo-mark::after{content:"";position:absolute;inset:-3px;border-radius:14px;background:var(--grad);filter:blur(10px);opacity:.45;z-index:-1}
-.logo b{color:var(--p)}
+.logo{display:flex;align-items:center;flex-shrink:0;position:relative}
+.logo svg,.logo img{height:46px;width:auto;display:block;transition:transform .35s cubic-bezier(.2,.7,.2,1),filter .35s}
+.logo:hover svg,.logo:hover img{transform:translateY(-1px) scale(1.03);filter:drop-shadow(0 10px 18px rgba(106,61,245,.35))}
+.logo.sm svg{height:36px}.logo.lg svg{height:66px}
+@media(max-width:576px){.logo svg,.logo img{height:38px}}
 .loc-pill{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;flex-shrink:0;transition:.2s}
 .loc-pill:hover{border-color:var(--p)}
 .loc-pill i.fa-location-dot{color:var(--p);font-size:15px}
@@ -173,10 +180,10 @@ button,input,select,textarea{font-family:inherit}
 .cat-list a .n{margin-left:auto;font-size:11px;color:var(--faint);font-weight:700;background:var(--surface);padding:2px 8px;border-radius:999px}
 .cat-list .all{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;color:var(--p);justify-content:center}
 /* ─── Cascading category menu ─── */
-.cmenu{list-style:none;margin:0;padding:8px;min-width:250px;max-height:440px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#cfd3e6 transparent}
+.cmenu{list-style:none;margin:0;padding:8px;min-width:250px;max-height:300px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#cfd3e6 transparent}
 .cmenu::-webkit-scrollbar{width:6px}.cmenu::-webkit-scrollbar-thumb{background:#cfd3e6;border-radius:6px}.cmenu::-webkit-scrollbar-track{background:transparent}
 .cmenu li{position:relative}
-.cmenu li>a{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--ink-2);transition:.15s;white-space:nowrap}
+.cmenu li>a{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--ink-2);transition:.15s;white-space:nowrap}
 .cmenu li>a .ci{width:30px;height:30px;border-radius:9px;background:var(--surface);display:grid;place-items:center;font-size:14px;color:var(--p);flex-shrink:0}
 .cmenu li>a .nm{flex:1}
 .cmenu li>a .arr{font-size:10px;color:var(--faint);transition:transform .2s}
@@ -188,7 +195,7 @@ button,input,select,textarea{font-family:inherit}
 .cmenu li.has-sub:hover>.cmenu-sub{opacity:1;visibility:visible;transform:none}
 .cmenu-sub li>a{font-weight:600;font-size:13.5px}
 .shop-dd{display:flex;align-items:stretch;width:auto;padding:0;left:-60px;overflow:visible}
-.shop-dd .cmenu-root{padding:10px;border-right:1px solid var(--line);max-height:480px}
+.shop-dd .cmenu-root{padding:8px;border-right:1px solid var(--line);max-height:320px}
 .shop-dd.sub-open .shop-promo,.shop-dd:has(.cmenu-root > li.has-sub:hover) .shop-promo{display:none}
 .shop-dd.sub-open .cmenu-root,.shop-dd:has(.cmenu-root > li.has-sub:hover) .cmenu-root{border-right:0}
 .shop-dd .shop-promo{width:250px;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;border-radius:0 16px 16px 0;background:var(--grad);color:#fff;position:relative;overflow:hidden}
@@ -375,13 +382,9 @@ body.drawer-open .drawer{transform:none}
     <div class="topbar-loc"><i class="fa-solid fa-location-dot"></i><span>Gulberg III, Lahore, Pakistan</span></div>
     <div class="topbar-marquee">
       <span>
-        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000 &nbsp;·&nbsp; Use code <em>ZELARI10</em> for 10% off your first order &nbsp;·&nbsp; Weekend deals refresh every Friday &nbsp;·&nbsp; Cash on delivery available nationwide &nbsp;&nbsp;&nbsp;&nbsp;
-        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000 &nbsp;·&nbsp; Use code <em>ZELARI10</em> for 10% off your first order &nbsp;·&nbsp; Weekend deals refresh every Friday &nbsp;·&nbsp; Cash on delivery available nationwide &nbsp;&nbsp;&nbsp;&nbsp;
+        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i>Use code <em>ZELARI10</em> for 10% off your first order<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>
+        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i>Use code <em>ZELARI10</em> for 10% off your first order<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>
       </span>
-    </div>
-    <div class="topbar-sel">
-      <div class="sel"><i class="fa-solid fa-globe"></i> English <i class="fa-solid fa-chevron-down"></i></div>
-      <div class="sel">PKR <i class="fa-solid fa-chevron-down"></i></div>
     </div>
   </div>
 </div>
@@ -392,9 +395,8 @@ body.drawer-open .drawer{transform:none}
     <div class="hdr-main">
       <button class="icon-btn burger" id="burger" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
 
-      <a href="{{ route('home') }}" class="logo"><span class="logo-mark">Z</span>Zelari<b>.</b></a>
+      <a href="{{ route('home') }}" class="logo" aria-label="Zelari home">{!! zlogo('logo.svg') !!}</a>
 
-      <a href="#" class="loc-pill"><i class="fa-solid fa-location-dot"></i> Your Location <i class="fa-solid fa-chevron-down"></i></a>
 
       <div class="search">
         <form action="{{ route('shop.index') }}" method="GET">
@@ -466,7 +468,7 @@ body.drawer-open .drawer{transform:none}
 <div class="drawer-bg" id="drawerBg"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-head">
-    <a href="{{ route('home') }}" class="logo" style="font-size:22px"><span class="logo-mark" style="width:34px;height:34px;font-size:16px">Z</span>Zelari<b>.</b></a>
+    <a href="{{ route('home') }}" class="logo sm">{!! zlogo('logo.svg', 'd') !!}</a>
     <button class="icon-btn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <form action="{{ route('shop.index') }}" method="GET"><input type="text" name="q" placeholder="Search products…"><button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button></form>
@@ -527,7 +529,7 @@ body.drawer-open .drawer{transform:none}
 
     <div class="f-main">
       <div class="f-brand">
-        <a href="{{ route('home') }}" class="logo"><span class="logo-mark">Z</span>Zelari<b>.</b></a>
+        <a href="{{ route('home') }}" class="logo lg">{!! zlogo('logo-tagline.svg') !!}</a>
         <p>A smarter way to shop. We curate quality products, keep prices honest, and deliver fast across Pakistan — with cash on delivery everywhere.</p>
         <div class="fl"><i class="fa-solid fa-location-dot"></i> Gulberg III, Lahore, Pakistan</div>
         <div class="fl"><i class="fa-solid fa-envelope"></i> support@zelari.com</div>
