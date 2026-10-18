@@ -489,6 +489,9 @@ body.drawer-open .drawer{transform:none}
 
       <ul class="nav-main">
         <li class="nav-item"><a href="{{ route('home') }}" class="{{ request()->routeIs('home')?'active':'' }}">Home</a></li>
+        <li class="nav-item"><a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*')?'active':'' }}">Shop</a></li>
+        {{-- Shop mega-dropdown (categories + Weekend Deals promo) — disabled for now.
+             To bring it back: delete the plain <li> above and remove this comment wrapper.
         <li class="nav-item">
           <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*')?'active':'' }}">Shop <i class="fa-solid fa-chevron-down"></i></a>
           <div class="dd shop-dd">
@@ -505,6 +508,7 @@ body.drawer-open .drawer{transform:none}
             </div>
           </div>
         </li>
+        --}}
         <li class="nav-item"><a href="{{ route('about') }}" class="{{ request()->routeIs('about')?'active':'' }}">About</a></li>
         <li class="nav-item"><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact')?'active':'' }}">Contact</a></li>
       </ul>
