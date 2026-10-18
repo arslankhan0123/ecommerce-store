@@ -1,0 +1,149 @@
+<?php
+
+if (!function_exists('zcat_icon')) {
+    /**
+     * Pick a Font Awesome icon for a category based on its name.
+     */
+    function zcat_icon(?string $name): string
+    {
+        $n = strtolower((string) $name);
+        $map = [
+            'phone|mobile|smartphone'           => 'fa-mobile-screen-button',
+            'laptop|computer|pc|notebook'       => 'fa-laptop',
+            'electronic|gadget|tech|device'     => 'fa-microchip',
+            'headphone|audio|speaker|earbud'    => 'fa-headphones',
+            'camera|photo'                      => 'fa-camera',
+            'watch|smartwatch'                  => 'fa-clock',
+            'game|gaming|console'               => 'fa-gamepad',
+            'tv|television|monitor|screen'      => 'fa-tv',
+            'fashion|cloth|apparel|wear|dress'  => 'fa-shirt',
+            'men'                               => 'fa-person',
+            'women|ladies|girl'                 => 'fa-person-dress',
+            'kid|child|baby|toy'                => 'fa-baby-carriage',
+            'shoe|footwear|sneaker|sandal'      => 'fa-shoe-prints',
+            'bag|handbag|backpack|luggage'      => 'fa-bag-shopping',
+            'jewel|ring|necklace|accessor'      => 'fa-gem',
+            'beauty|cosmetic|makeup|skin|care'  => 'fa-spa',
+            'perfume|fragrance'                 => 'fa-spray-can-sparkles',
+            'health|medic|pharma|vitamin'       => 'fa-heart-pulse',
+            'sport|fitness|gym|outdoor'         => 'fa-dumbbell',
+            'home|decor|furniture|living'       => 'fa-couch',
+            'kitchen|cook|appliance'            => 'fa-blender',
+            'grocer|food|snack|fruit|vegetable' => 'fa-apple-whole',
+            'beverage|drink|coffee|tea|juice'   => 'fa-mug-hot',
+            'meat|seafood|fish'                 => 'fa-drumstick-bite',
+            'bakery|bread|breakfast|dairy'      => 'fa-bread-slice',
+            'frozen|ice'                        => 'fa-snowflake',
+            'pet|dog|cat'                       => 'fa-paw',
+            'book|stationery|office'            => 'fa-book-open',
+            'auto|car|bike|motor'               => 'fa-car',
+            'garden|plant|tool'                 => 'fa-seedling',
+            'gift'                              => 'fa-gift',
+        ];
+        foreach ($map as $keys => $icon) {
+            foreach (explode('|', $keys) as $k) {
+                if ($k !== '' && str_contains($n, $k)) {
+                    return $icon;
+                }
+            }
+        }
+        return 'fa-tag';
+    }
+}
+
+if (!function_exists('zcat_image')) {
+    /**
+     * A stock photo URL (Unsplash CDN) matching a category name. $seed varies the pick.
+     */
+    function zcat_image(?string $name, int $seed = 0, int $w = 800): string
+    {
+        $n = strtolower((string) $name);
+        $sets = [
+            'phone|mobile|smartphone'           => ['1511707171634-5f897ff02aa9','1592899677977-9c10ca588bbd','1601784551446-20c9e07cdbdb'],
+            'laptop|computer|pc|notebook'       => ['1496181133206-80ce9b88a853','1498049794561-7780e7231661','1517336714731-489689fd1ca8'],
+            'electronic|gadget|tech|device'     => ['1498049794561-7780e7231661','1550009158-9ebf69173e03','1519389950473-47ba0277781c'],
+            'headphone|audio|speaker|earbud'    => ['1505740420928-5e560c06d30e','1583394838336-acd977736f90','1484704849700-f032a568e944'],
+            'camera|photo'                      => ['1526170375885-4d8ecf77b99f','1516035069371-29a1b244cc32','1502920917128-1aa500764cbd'],
+            'watch|smartwatch'                  => ['1523275335684-37898b6baf30','1546868871-7041f2a55e12','1524592094714-0f0654e20314'],
+            'game|gaming|console'               => ['1606144042614-b2417e99c4e3','1493711662062-fa541adb3fc8','1511512578047-dfb367046420'],
+            'tv|television|monitor|screen'      => ['1593359677879-a4bb92f829d1','1527443224154-c4a3942d3acf'],
+            'fashion|cloth|apparel|wear|dress'  => ['1441986300917-64674bd600d8','1445205170230-053b83016050','1523381210434-271e8be1f52b','1434389677669-e08b4cac3105'],
+            'men'                               => ['1617137968427-85924c800a22','1490578474895-699cd4e2cf59'],
+            'women|ladies|girl'                 => ['1515886657613-9f3515b0c78f','1483985988355-763728e1935b','1490481651871-ab68de25d43d'],
+            'kid|child|baby|toy'                => ['1596461404969-9ae70f2830c1','1515488042361-ee00e0ddd4e4','1522771930-78848d9293e8'],
+            'shoe|footwear|sneaker|sandal'      => ['1542291026-7eec264c27ff','1491553895911-0055eca6402d','1560343090-f0409e92791a','1549298916-b41d501d3772'],
+            'bag|handbag|backpack|luggage'      => ['1548036328-c9fa89d128fa','1553062407-98eeb64c6a62','1590874103328-eac38a683ce7'],
+            'jewel|ring|necklace|accessor'      => ['1515562141207-7a88fb7ce338','1599643478518-a784e5dc4c8f','1535632066927-ab7c9ab60908'],
+            'beauty|cosmetic|makeup|skin|care'  => ['1556228453-efd6c1ff04f6','1596462502278-27bfdc403348','1512496015851-a90fb38ba796'],
+            'perfume|fragrance'                 => ['1585386959984-a4155224a1ad','1541643600914-78b084683601','1594035910387-fea47794261f'],
+            'health|medic|pharma|vitamin'       => ['1584308666744-24d5c474f2ae','1471864190281-a93a3070b6de'],
+            'sport|fitness|gym|outdoor'         => ['1517836357463-d25dfeac3438','1571019613454-1cb2f99b2d8b','1534438327276-14e5300c3a48'],
+            'home|decor|furniture|living'       => ['1555041469-a586c61ea9bc','1592078615290-033ee584e267','1586023492125-27b2c045efd7'],
+            'kitchen|cook|appliance'            => ['1556909114-f6e7ad7d3136','1556911220-bff31c812dba'],
+            'grocer|food|snack|fruit|vegetable' => ['1542838132-92c53300491e','1512621776951-a57141f2eefd','1610832958506-aa56368176cf','1488459716781-31db52582fe9'],
+            'beverage|drink|coffee|tea|juice'   => ['1497515114629-f71d768fd07c','1544787219-7f47ccb76574','1600271886742-f049cd451bba'],
+            'meat|seafood|fish'                 => ['1607623814075-e51df1bdc82f','1535473895227-bdecb20fb157'],
+            'bakery|bread|breakfast|dairy'      => ['1509440159596-0249088772ff','1555507036-ab1f4038808a','1550583724-b2692b85b150'],
+            'frozen|ice'                        => ['1497034825429-c343d7c6a68f','1501443762994-82bd5dace89a'],
+            'pet|dog|cat'                       => ['1548199973-03cce0bbc87b','1543852786-1cf6624b9987','1425082661705-1834bfd09dca'],
+            'book|stationery|office'            => ['1495446815901-a7297e633e8d','1512820790803-83ca734da794','1456735190827-d1262f71b8a3'],
+            'auto|car|bike|motor'               => ['1511919884226-fd3cad34687c','1503376780353-7e6692767b70'],
+            'garden|plant|tool'                 => ['1466692476868-aef1dfb1e735','1416879595882-3373a0480b5b'],
+            'gift'                              => ['1513885535751-8b9238bd345a','1549465220-1a8b9238cd48'],
+        ];
+        $generic = ['1472851294608-062f824d29cc','1607082348824-0a96f2a4b9da','1441986300917-64674bd600d8','1523275335684-37898b6baf30','1505740420928-5e560c06d30e','1542291026-7eec264c27ff','1556228453-efd6c1ff04f6','1526170375885-4d8ecf77b99f','1496181133206-80ce9b88a853','1572635196237-14b3f281503f'];
+        $ids = $generic;
+        foreach ($sets as $keys => $list) {
+            foreach (explode('|', $keys) as $k) {
+                if ($k !== '' && str_contains($n, $k)) { $ids = $list; break 2; }
+            }
+        }
+        $id = $ids[abs($seed) % count($ids)];
+        return "https://images.unsplash.com/photo-{$id}?auto=format&fit=crop&w={$w}&q=80";
+    }
+}
+
+if (!function_exists('zbg')) {
+    /** Named editorial background photos used in banners & heroes. */
+    function zbg(string $key, int $w = 1800): string
+    {
+        $ids = [
+            'hero1'   => '1607082348824-0a96f2a4b9da', // shopping bags, pastel
+            'hero2'   => '1441986300917-64674bd600d8', // clothing rack, dark
+            'hero3'   => '1483985988355-763728e1935b', // shopper with bags
+            'side'    => '1546868871-7041f2a55e12', // smart watch
+            'sidecard'=> '1523275335684-37898b6baf30', // classic watch
+            'cash'    => '1542838132-92c53300491e',    // groceries
+            'deal'    => '1472851294608-062f824d29cc', // store front
+            'shop'    => '1555529669-e69e7aa0ba9a',    // product shelf
+            'cart'    => '1556740758-90de374c12ad',    // cart / checkout
+            'about'   => '1521737604893-d14cc237f11d', // team
+            'contact' => '1423666639041-f56000c27a9a', // desk / phone
+            'news'    => '1557804506-669a67965ba0',    // envelope / notes
+            'promo1'  => '1505740420928-5e560c06d30e',
+            'promo2'  => '1542291026-7eec264c27ff',
+            'promo3'  => '1526170375885-4d8ecf77b99f',
+            'promo4'  => '1556228453-efd6c1ff04f6',
+        ];
+        $id = $ids[$key] ?? $ids['hero1'];
+        return "https://images.unsplash.com/photo-{$id}?auto=format&fit=crop&w={$w}&q=80";
+    }
+}
+
+if (!function_exists('zimg')) {
+    /**
+     * Convert a stored image path (or absolute URL) into a browser URL.
+     */
+    function zimg(?string $path): ?string
+    {
+        if (!$path) return null;
+        return \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']) ? $path : asset('storage/' . $path);
+    }
+}
+
+if (!function_exists('zpkr')) {
+    function zpkr($amount): string
+    {
+        return 'PKR ' . number_format((float) $amount, 0);
+    }
+}

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>@yield('title', 'Shop') · Zelari</title>
+<meta name="description" content="@yield('meta_description', 'Zelari — a smarter way to shop. Curated products, honest prices, fast delivery across Pakistan.')">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
+:root{
+  --p:#6a3df5; --p-dark:#5530d6; --p-soft:#efeaff; --p2:#22d3ee; --p2-soft:#e4fbff;
+  --grad:linear-gradient(135deg,#6a3df5 0%,#8b5cf6 45%,#22d3ee 100%);
+  --grad-h:linear-gradient(135deg,#5530d6 0%,#7c4dff 45%,#06b6d4 100%);
+  --ink:#0f1230; --ink-2:#2a2e52; --muted:#6b7191; --faint:#9aa0bd;
+  --surface:#f6f7fc; --line:#e7e9f3; --line-2:#d9dcec; --white:#fff;
+  --sale:#ff4d7d; --ok:#14b88a; --warn:#f6a609; --star:#ffb400;
+  --r:14px; --r-lg:22px;
+  --shadow:0 10px 30px -12px rgba(39,30,92,.18);
+  --shadow-lg:0 30px 60px -20px rgba(39,30,92,.28);
+  --glow:0 0 0 4px rgba(106,61,245,.14);
+  --head-h:74px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:#fff;margin:0;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--p)}
+img{max-width:100%}
+button,input,select,textarea{font-family:inherit}
+::selection{background:var(--p);color:#fff}
+.wrap{max-width:1420px;margin:0 auto;padding:0 24px}
+@media(max-width:576px){.wrap{padding:0 16px}}
+
+/* ═══════════════════════════════ UTILITIES ═══════════════════════════════ */
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn-g{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--grad);color:#fff;border:0;border-radius:12px;padding:12px 22px;font-weight:700;font-size:14px;cursor:pointer;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:0 10px 24px -10px rgba(106,61,245,.6)}
+.btn-g::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s}
+.btn-g:hover{color:#fff;transform:translateY(-2px);box-shadow:0 16px 30px -10px rgba(106,61,245,.7)}
+.btn-g:hover::after{transform:translateX(120%)}
+.btn-o{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:var(--ink);border:1.5px solid var(--line-2);border-radius:12px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
+.btn-o:hover{border-color:var(--p);color:var(--p);background:var(--p-soft)}
+.btn-sale{display:inline-flex;align-items:center;gap:8px;background:var(--sale);color:#fff;border:0;border-radius:10px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 10px 24px -10px rgba(255,77,125,.7);transition:.2s}
+.btn-sale:hover{color:#fff;transform:translateY(-2px);background:#ff2f68}
+
+.sec{padding:52px 0}
+@media(max-width:768px){.sec{padding:36px 0}}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.sec-title{font-size:24px;font-weight:800;letter-spacing:-.4px;margin:0 0 6px;text-transform:uppercase;color:var(--ink)}
+.sec-title.tt-none{text-transform:none}
+.sec-deco{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.sec-deco i{width:52px;height:3px;border-radius:3px;background:var(--grad)}
+.sec-deco b{width:6px;height:6px;border-radius:50%;background:var(--p2)}
+.sec-sub{color:var(--muted);font-size:14px;margin:0}
+.sec-link{font-weight:700;font-size:14px;color:var(--p);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sec-link i{transition:transform .2s}
+.sec-link:hover i{transform:translateX(4px)}
+
+/* stars */
+.stars{display:inline-flex;gap:2px;color:var(--star);font-size:11px}
+.stars .off{color:#d9dcec}
+
+/* 3D tilt */
+[data-tilt]{transform-style:preserve-3d;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .55s cubic-bezier(.2,.7,.2,1),box-shadow .3s;will-change:transform}
+[data-tilt].tilting{transition:transform .08s linear,box-shadow .3s}
+.tilt-glare{position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:radial-gradient(400px circle at var(--gx,50%) var(--gy,50%),rgba(255,255,255,.35),transparent 45%);opacity:0;transition:opacity .3s;z-index:3}
+[data-tilt].tilting .tilt-glare{opacity:1}
+.lift{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.lift:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(28px) perspective(900px) rotateX(6deg);transform-origin:top center}
+.reveal.in{opacity:1;transform:none;transition:opacity .7s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in[data-tilt]{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
+.reveal.in[data-tilt].tilting{transition:transform .08s linear,box-shadow .3s}
+.reveal[data-delay="1"].in{transition-delay:.08s}.reveal[data-delay="2"].in{transition-delay:.16s}.reveal[data-delay="3"].in{transition-delay:.24s}.reveal[data-delay="4"].in{transition-delay:.32s}
+@media(prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none}
+  [data-tilt]{transform:none!important}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+
+/* floating / glow keyframes */
+@keyframes floatY{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(1.5deg)}}
+@keyframes floatY2{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(34,211,238,.55)}70%{box-shadow:0 0 0 14px rgba(34,211,238,0)}}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes orb{0%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.1)}66%{transform:translate(-20px,15px) scale(.95)}100%{transform:translate(0,0) scale(1)}}
+@keyframes shimmer{to{background-position:200% center}}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes popIn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes cartBump{0%{transform:scale(1)}40%{transform:scale(1.35) rotate(-8deg)}100%{transform:scale(1)}}
+
+/* ═══════════════════════════════ TOP BAR ═══════════════════════════════ */
+.topbar{background:linear-gradient(90deg,#1b1740,#2b1e6b 50%,#0c3b5c);color:rgba(255,255,255,.85);font-size:12.5px;height:36px;display:flex;align-items:center;position:relative;overflow:hidden}
+.topbar::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 80px at 20% 50%,rgba(34,211,238,.18),transparent),radial-gradient(500px 80px at 80% 50%,rgba(139,92,246,.25),transparent)}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative}
+.topbar-loc{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.topbar-loc i{color:var(--p2)}
+.topbar-marquee{flex:1;overflow:hidden;position:relative;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.topbar-marquee span{display:inline-block;white-space:nowrap;animation:marquee 28s linear infinite;padding-right:60px}
+.topbar-marquee b{color:#fff}
+.topbar-marquee em{font-style:normal;color:var(--p2);font-weight:700}
+.topbar-sel{display:flex;gap:14px;white-space:nowrap}
+.topbar-sel .sel{display:flex;align-items:center;gap:5px;cursor:pointer;color:#fff}
+.topbar-sel .sel i{font-size:10px;opacity:.7}
+@media(max-width:768px){.topbar-sel,.topbar-loc span{display:none}}
+
+/* ═══════════════════════════════ HEADER ═══════════════════════════════ */
+.header{position:sticky;top:0;z-index:1000;background:#fff;box-shadow:0 1px 0 var(--line)}
+.header.scrolled{box-shadow:0 8px 30px -14px rgba(39,30,92,.25)}
+.hdr-main{height:var(--head-h);display:flex;align-items:center;gap:20px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:27px;letter-spacing:-1px;color:var(--ink);flex-shrink:0}
+.logo:hover{color:var(--ink)}
+.logo-mark{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:20px;font-weight:800;position:relative;transform-style:preserve-3d;transition:transform .5s}
+.logo:hover .logo-mark{transform:rotateY(180deg)}
+.logo-mark::after{content:"";position:absolute;inset:-3px;border-radius:14px;background:var(--grad);filter:blur(10px);opacity:.45;z-index:-1}
+.logo b{color:var(--p)}
+.loc-pill{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;flex-shrink:0;transition:.2s}
+.loc-pill:hover{border-color:var(--p)}
+.loc-pill i.fa-location-dot{color:var(--p);font-size:15px}
+.loc-pill i.fa-chevron-down{font-size:10px;color:var(--faint)}
+@media(max-width:1200px){.loc-pill{display:none}}
+.search{flex:1;display:flex;max-width:720px;margin:0 auto}
+.search form{display:flex;width:100%;border:1.5px solid var(--line-2);border-radius:14px;overflow:hidden;background:#fff;transition:.2s}
+.search form:focus-within{border-color:var(--p);box-shadow:var(--glow)}
+.search select{border:0;border-right:1.5px solid var(--line);background:var(--surface);padding:0 12px;font-size:13px;font-weight:600;color:var(--ink-2);outline:0;max-width:160px}
+.search input{flex:1;border:0;padding:0 16px;height:46px;font-size:14px;outline:0;min-width:0}
+.search button{border:0;background:var(--grad);color:#fff;width:54px;font-size:16px;cursor:pointer;transition:filter .2s}
+.search button:hover{filter:brightness(1.08)}
+@media(max-width:992px){.search{display:none}.search select{display:none}}
+.hdr-actions{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.hdr-call{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;color:var(--ink)}
+.hdr-call i{width:40px;height:40px;border-radius:12px;background:var(--p-soft);display:grid;place-items:center;color:var(--p);font-size:15px}
+.hdr-call small{display:block;font-size:11px;color:var(--muted)}
+.hdr-call strong{font-size:13.5px;display:block;line-height:1.1}
+@media(max-width:1400px){.hdr-call div{display:none}}
+.icon-btn{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--ink);font-size:18px;position:relative;transition:.2s;border:0;background:transparent;cursor:pointer}
+.icon-btn:hover{background:var(--p-soft);color:var(--p)}
+.icon-btn .cnt{position:absolute;top:4px;right:4px;min-width:18px;height:18px;border-radius:9px;background:var(--sale);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid #fff}
+.icon-btn.bump i{animation:cartBump .5s}
+.hdr-cart{display:flex;align-items:center;gap:8px;padding-right:6px;border-radius:12px;color:var(--ink)}
+.hdr-cart .icon-btn{pointer-events:none}
+.hdr-cart span{font-size:13px;font-weight:700;white-space:nowrap}
+.hdr-cart span small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+@media(max-width:1400px){.hdr-cart span{display:none}}
+.burger{display:none}
+@media(max-width:992px){.burger{display:grid}}
+
+/* ─── Nav row ─── */
+.navrow{height:58px;display:flex;align-items:center;gap:16px;border-top:1px solid var(--line)}
+@media(max-width:992px){.navrow{display:none}}
+.allcat{position:relative}
+.allcat-btn{display:flex;align-items:center;gap:10px;background:var(--grad);color:#fff;border:0;border-radius:12px;padding:0 18px;height:44px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 10px 24px -10px rgba(106,61,245,.6)}
+.allcat-btn i.fa-chevron-down{font-size:10px;margin-left:4px;transition:transform .25s}
+.allcat:hover .allcat-btn i.fa-chevron-down,.allcat.open .allcat-btn i.fa-chevron-down{transform:rotate(180deg)}
+.dd{position:absolute;top:calc(100% + 10px);left:0;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);opacity:0;visibility:hidden;transform:translateY(10px) perspective(800px) rotateX(-8deg);transform-origin:top center;transition:.25s;z-index:50}
+.allcat:hover .dd,.allcat.open .dd,.nav-item:hover .dd,.nav-item.open .dd{opacity:1;visibility:visible;transform:none}
+.dd::before{content:"";position:absolute;top:-10px;left:0;right:0;height:10px}
+.allcat .dd{width:290px;padding:8px}
+.cat-list a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink-2);transition:.15s}
+.cat-list a:hover{background:var(--p-soft);color:var(--p);transform:translateX(3px)}
+.cat-list a .ci{width:34px;height:34px;border-radius:10px;background:var(--surface);display:grid;place-items:center;font-size:14px;color:var(--p);flex-shrink:0}
+.cat-list a .n{margin-left:auto;font-size:11px;color:var(--faint);font-weight:700;background:var(--surface);padding:2px 8px;border-radius:999px}
+.cat-list .all{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;color:var(--p);justify-content:center}
+.nav-main{display:flex;align-items:center;gap:6px;margin:0;padding:0;list-style:none}
+.nav-item{position:relative}
+.nav-item>a{display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;font-weight:700;font-size:14.5px;color:var(--ink);transition:.15s}
+.nav-item>a i{font-size:10px;color:var(--faint);transition:transform .25s}
+.nav-item:hover>a{color:var(--p);background:var(--p-soft)}
+.nav-item:hover>a i{transform:rotate(180deg)}
+.nav-item>a.active{color:var(--p)}
+.nav-item>a.active::after{content:"";position:absolute;left:16px;right:16px;bottom:4px;height:3px;border-radius:3px;background:var(--grad)}
+.mega{width:720px;padding:22px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px 24px;left:-60px}
+.mega .col h6{font-size:13.5px;font-weight:800;margin:0 0 10px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.mega .col h6 i{color:var(--p);font-size:13px}
+.mega .col a{display:block;font-size:13px;color:var(--muted);padding:5px 0;transition:.15s}
+.mega .col a:hover{color:var(--p);transform:translateX(3px)}
+.mega .col a.more{color:var(--p);font-weight:700;font-size:12.5px}
+.mega-promo{grid-column:1/-1;margin-top:6px;border-radius:12px;background:var(--grad);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mega-promo b{font-size:15px}
+.mega-promo small{opacity:.85}
+.mega-promo a{background:#fff;color:var(--p);padding:8px 14px;border-radius:9px;font-size:13px;font-weight:700}
+.deal-btn{margin-left:auto;display:inline-flex;align-items:center;gap:9px;background:var(--p-soft);color:var(--p);padding:0 18px;height:44px;border-radius:12px;font-weight:700;font-size:14px;transition:.2s;position:relative}
+.deal-btn i{animation:pulseGlow 2.2s infinite;border-radius:50%}
+.deal-btn:hover{background:var(--p);color:#fff}
+
+/* ─── Mobile drawer ─── */
+.drawer-bg{position:fixed;inset:0;background:rgba(15,18,48,.55);backdrop-filter:blur(3px);z-index:1100;opacity:0;visibility:hidden;transition:.3s}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:min(340px,88vw);background:#fff;z-index:1101;transform:translateX(-100%) ;transition:transform .35s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;overflow-y:auto}
+body.drawer-open .drawer-bg{opacity:1;visibility:visible}
+body.drawer-open .drawer{transform:none}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.drawer form{display:flex;margin:14px 18px;border:1.5px solid var(--line-2);border-radius:12px;overflow:hidden}
+.drawer form input{flex:1;border:0;padding:10px 14px;outline:0;min-width:0}
+.drawer form button{border:0;background:var(--grad);color:#fff;width:46px}
+.drawer nav a{display:flex;align-items:center;gap:12px;padding:13px 18px;font-weight:700;font-size:15px;border-bottom:1px solid var(--surface)}
+.drawer nav a i{width:22px;color:var(--p)}
+.drawer .dcats{padding:8px 18px 20px}
+.drawer .dcats h6{font-size:12px;letter-spacing:.06em;color:var(--faint);margin:12px 0 6px;text-transform:uppercase}
+.drawer .dcats a{display:block;padding:8px 0;font-size:14px;color:var(--ink-2);border-bottom:1px dashed var(--line)}
+.drawer .dcats a small{color:var(--faint);margin-left:6px}
+
+/* ─── Mobile bottom nav ─── */
+.mnav{display:none;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:900;box-shadow:0 -8px 30px -14px rgba(39,30,92,.3)}
+@media(max-width:768px){.mnav{display:flex}body{padding-bottom:64px}}
+.mnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 8px;font-size:11px;font-weight:700;color:var(--muted);position:relative}
+.mnav a i{font-size:18px}
+.mnav a.active{color:var(--p)}
+.mnav a .cnt{position:absolute;top:5px;left:calc(50% + 6px);min-width:17px;height:17px;border-radius:9px;background:var(--sale);color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+
+/* ═══════════════════════════════ TOASTS ═══════════════════════════════ */
+.toasts{position:fixed;top:90px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:10px;max-width:360px}
+.toast-z{display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-lg);animation:toastIn .35s cubic-bezier(.2,.7,.2,1);font-size:14px}
+.toast-z.err{border-left-color:var(--sale)}
+.toast-z.info{border-left-color:var(--p)}
+.toast-z i.ic{font-size:18px;color:var(--ok);margin-top:1px}
+.toast-z.err i.ic{color:var(--sale)}.toast-z.info i.ic{color:var(--p)}
+.toast-z .x{margin-left:auto;background:0;border:0;color:var(--faint);cursor:pointer;font-size:14px}
+.toast-z a{color:var(--p);font-weight:700}
+
+/* ═══════════════════════════════ NEWSLETTER ═══════════════════════════════ */
+.newsletter{margin:20px 0 0}
+.nl-box{position:relative;overflow:hidden;border-radius:var(--r-lg);background:linear-gradient(120deg,#17143a 0%,#2a1f6e 50%,#0b3d5e 100%);color:#fff;padding:48px 56px;display:flex;align-items:center;justify-content:space-between;gap:30px}
+.nl-box .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.35;mix-blend-mode:luminosity}
+.nl-box>*:not(.bg){position:relative;z-index:1}
+.nl-box::before,.nl-box::after{z-index:1;content:"";position:absolute;border-radius:50%;filter:blur(40px);opacity:.6;animation:orb 14s ease-in-out infinite}
+.nl-box::before{width:260px;height:260px;background:#6a3df5;top:-100px;right:28%}
+.nl-box::after{width:220px;height:220px;background:#22d3ee;bottom:-120px;right:4%;animation-delay:-6s}
+.nl-box h3{font-size:28px;font-weight:800;margin:0 0 6px;letter-spacing:-.5px;position:relative}
+.nl-box p{margin:0 0 18px;color:#ffd36b;font-weight:600;position:relative}
+.nl-form{display:flex;max-width:520px;background:#fff;border-radius:12px;overflow:hidden;position:relative}
+.nl-form input{flex:1;border:0;padding:0 18px;height:50px;outline:0;font-size:14px;color:var(--ink);min-width:0}
+.nl-form button{border:0;background:var(--sale);color:#fff;font-weight:700;padding:0 22px;cursor:pointer}
+.nl-art{position:relative;width:260px;height:160px;flex-shrink:0;transform-style:preserve-3d}
+.nl-art .bub{position:absolute;border-radius:16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);display:grid;place-items:center;font-size:26px;animation:floatY 5s ease-in-out infinite}
+.nl-art .b1{width:76px;height:76px;left:0;top:30px}
+.nl-art .b2{width:96px;height:96px;left:90px;top:0;animation-delay:-1.5s;background:rgba(34,211,238,.18)}
+.nl-art .b3{width:64px;height:64px;left:196px;top:70px;animation-delay:-3s;background:rgba(255,77,125,.2)}
+@media(max-width:992px){.nl-box{padding:36px 28px;flex-direction:column;align-items:flex-start}.nl-art{display:none}}
+
+/* ═══════════════════════════════ FOOTER ═══════════════════════════════ */
+.footer{background:var(--surface);margin-top:56px;border-top:1px solid var(--line)}
+.f-feats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:30px 0;border-bottom:1px solid var(--line)}
+.f-feat{display:flex;align-items:center;gap:14px;padding:0 20px;border-right:1px solid var(--line)}
+.f-feat:last-child{border-right:0}
+.f-feat i{width:48px;height:48px;border-radius:14px;background:#fff;display:grid;place-items:center;color:var(--p);font-size:20px;box-shadow:var(--shadow);flex-shrink:0}
+.f-feat span{font-weight:700;font-size:14px;color:var(--ink-2)}
+@media(max-width:992px){.f-feats{grid-template-columns:repeat(2,1fr);gap:18px 0}.f-feat:nth-child(2){border-right:0}}
+@media(max-width:576px){.f-feats{grid-template-columns:1fr}.f-feat{border-right:0;padding:0}}
+.f-main{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1.3fr;gap:30px;padding:48px 0 40px}
+@media(max-width:1100px){.f-main{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:640px){.f-main{grid-template-columns:1fr 1fr;gap:26px 18px}}
+.f-brand p{color:var(--muted);font-size:14px;line-height:1.7;margin:14px 0 18px;max-width:300px}
+.f-brand .fl{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-2);margin-bottom:8px}
+.f-brand .fl i{color:var(--p);width:18px}
+.f-col h5{font-size:16px;font-weight:800;margin:0 0 18px;color:var(--ink)}
+.f-col a{display:block;font-size:14px;color:var(--muted);padding:5px 0;transition:.15s}
+.f-col a:hover{color:var(--p);transform:translateX(3px)}
+.f-contact .fc{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+.f-contact .fc i{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--p);box-shadow:var(--shadow);flex-shrink:0}
+.f-contact .fc small{display:block;color:var(--muted);font-size:12px}
+.f-contact .fc b{font-size:14px;color:var(--ink)}
+.app-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.app-badge{display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border-radius:9px;padding:7px 11px;font-size:11px;line-height:1.1;transition:.2s}
+.app-badge:hover{color:#fff;transform:translateY(-2px)}
+.app-badge i{font-size:18px}
+.app-badge b{display:block;font-size:12px}
+.f-bottom{border-top:1px solid var(--line);padding:18px 0;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.pay-icons{display:flex;gap:8px;flex-wrap:wrap}
+.pay{height:28px;padding:0 10px;border-radius:7px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.02em}
+.pay.visa{color:#1a1f71}.pay.mc{color:#eb001b}.pay.pp{color:#003087}.pay.amex{color:#2e77bb}.pay.cod{color:var(--ok)}.pay.bank{color:var(--p)}
+.socials{display:flex;gap:8px;align-items:center}
+.socials a{width:34px;height:34px;border-radius:10px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:14px;transition:.2s}
+.socials a:hover{background:var(--grad);color:#fff;border-color:transparent;transform:translateY(-3px) rotate(-6deg)}
+
+/* Back to top */
+.totop{position:fixed;right:20px;bottom:84px;width:46px;height:46px;border-radius:14px;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:var(--shadow-lg);z-index:800;opacity:0;visibility:hidden;transform:translateY(16px);transition:.3s;border:0;cursor:pointer}
+.totop.show{opacity:1;visibility:visible;transform:none}
+@media(min-width:769px){.totop{bottom:28px}}
+
+/* Breadcrumb hero shared by inner pages */
+.page-hero{position:relative;overflow:hidden;background:var(--ink)}
+.page-hero .swiper{height:300px}
+@media(max-width:768px){.page-hero .swiper{height:230px}}
+.ph-slide{height:100%;display:flex;align-items:center;position:relative;overflow:hidden}
+.ph-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transform:scale(1.04);transition:transform 7s ease-out}
+.swiper-slide-active .ph-bg{transform:scale(1.12)}
+.ph-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(15,18,48,.94) 0%,rgba(15,18,48,.8) 45%,rgba(15,18,48,.45) 75%,rgba(15,18,48,.3) 100%)}
+.ph-slide::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(600px 300px at 15% 50%,rgba(106,61,245,.5),transparent),radial-gradient(500px 300px at 85% 40%,rgba(34,211,238,.3),transparent)}
+.ph-grid{position:absolute;inset:0;z-index:1;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:44px 44px;transform:perspective(500px) rotateX(55deg) translateY(120px) scale(2.2);transform-origin:center bottom;opacity:.5}
+.ph-content{position:relative;z-index:2;color:#fff;width:100%}
+.ph-crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.7);margin-bottom:12px}
+.ph-crumb a:hover{color:#fff}
+.ph-crumb i{font-size:9px}
+.ph-content h1{font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-1px;margin:0 0 8px}
+.ph-content h1 span{background:linear-gradient(90deg,#c4b5fd,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ph-content p{color:rgba(255,255,255,.75);max-width:560px;margin:0;font-size:15px}
+.ph-art{position:absolute;z-index:2;right:6%;top:50%;transform:translateY(-50%);width:200px;height:200px;transform-style:preserve-3d;animation:floatY 6s ease-in-out infinite}
+.ph-art .cube{position:absolute;inset:30px;border-radius:28px;background:var(--grad);box-shadow:0 30px 60px -20px rgba(106,61,245,.8);transform:rotateX(18deg) rotateY(-24deg)}
+.ph-art .cube::after{content:"";position:absolute;inset:14px;border-radius:20px;border:2px solid rgba(255,255,255,.3)}
+.ph-art .ring{position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(34,211,238,.6);animation:spinSlow 20s linear infinite}
+.ph-art .ic{position:absolute;inset:0;display:grid;place-items:center;font-size:56px;color:#fff;text-shadow:0 10px 30px rgba(0,0,0,.3)}
+@media(max-width:768px){.ph-art{display:none}}
+.page-hero .swiper-slide{overflow:hidden}
+.page-hero .swiper-pagination-bullet{background:rgba(255,255,255,.5);opacity:1;width:9px;height:9px}
+.page-hero .swiper-pagination-bullet-active{background:#fff;width:26px;border-radius:5px}
+
+/* Shared form inputs */
+.fld label{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+.fld label b{color:var(--sale)}
+.inp{width:100%;border:1.5px solid var(--line-2);border-radius:12px;padding:12px 14px;font-size:14px;outline:0;color:var(--ink);transition:.2s;background:#fff}
+.inp:focus{border-color:var(--p);box-shadow:var(--glow)}
+.inp.err{border-color:var(--sale)}
+.ferr{font-size:12px;color:var(--sale);margin-top:5px}
+</style>
+@stack('styles')
+</head>
+<body>
+
+{{-- ═════════════ TOP BAR ═════════════ --}}
+<div class="topbar">
+  <div class="wrap">
+    <div class="topbar-loc"><i class="fa-solid fa-location-dot"></i><span>Gulberg III, Lahore, Pakistan</span></div>
+    <div class="topbar-marquee">
+      <span>
+        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000 &nbsp;·&nbsp; Use code <em>ZELARI10</em> for 10% off your first order &nbsp;·&nbsp; Weekend deals refresh every Friday &nbsp;·&nbsp; Cash on delivery available nationwide &nbsp;&nbsp;&nbsp;&nbsp;
+        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000 &nbsp;·&nbsp; Use code <em>ZELARI10</em> for 10% off your first order &nbsp;·&nbsp; Weekend deals refresh every Friday &nbsp;·&nbsp; Cash on delivery available nationwide &nbsp;&nbsp;&nbsp;&nbsp;
+      </span>
+    </div>
+    <div class="topbar-sel">
+      <div class="sel"><i class="fa-solid fa-globe"></i> English <i class="fa-solid fa-chevron-down"></i></div>
+      <div class="sel">PKR <i class="fa-solid fa-chevron-down"></i></div>
+    </div>
+  </div>
+</div>
+
+{{-- ═════════════ HEADER ═════════════ --}}
+<header class="header" id="header">
+  <div class="wrap">
+    <div class="hdr-main">
+      <button class="icon-btn burger" id="burger" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+
+      <a href="{{ route('home') }}" class="logo"><span class="logo-mark">Z</span>Zelari<b>.</b></a>
+
+      <a href="#" class="loc-pill"><i class="fa-solid fa-location-dot"></i> Your Location <i class="fa-solid fa-chevron-down"></i></a>
+
+      <div class="search">
+        <form action="{{ route('shop.index') }}" method="GET">
+          <select name="category" aria-label="Category">
+            <option value="">All Categories</option>
+            @foreach($navCategories ?? [] as $c)
+              <option value="{{ $c->slug }}" {{ request('category')===$c->slug?'selected':'' }}>{{ $c->name }}</option>
+            @endforeach
+          </select>
+          <input type="text" name="q" value="{{ request('q') }}" placeholder="I'm searching for…" autocomplete="off">
+          <button type="submit" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+      </div>
+
+      <div class="hdr-actions">
+        <a href="tel:+923000000000" class="hdr-call"><i class="fa-solid fa-phone"></i><div><small>Hotline 24/7</small><strong>+92 300 0000000</strong></div></a>
+        <a href="{{ route('shop.index') }}" class="icon-btn" title="Wishlist"><i class="fa-regular fa-heart"></i></a>
+        <a href="{{ route('cart.index') }}" class="hdr-cart" id="hdrCart">
+          <span class="icon-btn" id="cartIcon"><i class="fa-solid fa-cart-shopping"></i><b class="cnt" id="cartCount">{{ $cartCount ?? 0 }}</b></span>
+          <span><small>My cart</small>PKR <em id="cartTotalTxt" style="font-style:normal">{{ number_format($cartTotal ?? 0,0) }}</em></span>
+        </a>
+        @auth
+          <a href="{{ route('admin.products.index') }}" class="icon-btn" title="Admin"><i class="fa-solid fa-user-gear"></i></a>
+        @else
+          <a href="{{ route('login') }}" class="icon-btn" title="Account"><i class="fa-regular fa-user"></i></a>
+        @endauth
+      </div>
+    </div>
+
+    <div class="navrow">
+      <div class="allcat" id="allcat">
+        <button class="allcat-btn" type="button"><i class="fa-solid fa-table-cells-large"></i> All Categories <i class="fa-solid fa-chevron-down"></i></button>
+        <div class="dd cat-list">
+          @forelse($navCategories ?? [] as $c)
+            <a href="{{ route('shop.index',['category'=>$c->slug]) }}"><span class="ci"><i class="fa-solid {{ zcat_icon($c->name) }}"></i></span>{{ $c->name }}@if($c->children->count())<span class="n">{{ $c->children->count() }}</span>@endif</a>
+          @empty
+            <a href="{{ route('shop.index') }}"><span class="ci"><i class="fa-solid fa-box"></i></span>All products</a>
+          @endforelse
+          <a href="{{ route('shop.index') }}" class="all">Browse everything <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <ul class="nav-main">
+        <li class="nav-item"><a href="{{ route('home') }}" class="{{ request()->routeIs('home')?'active':'' }}">Home</a></li>
+        <li class="nav-item">
+          <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*')?'active':'' }}">Shop <i class="fa-solid fa-chevron-down"></i></a>
+          <div class="dd mega">
+            @foreach(($navCategories ?? collect())->take(6) as $c)
+              <div class="col">
+                <h6><i class="fa-solid {{ zcat_icon($c->name) }}"></i> <a href="{{ route('shop.index',['category'=>$c->slug]) }}" style="color:inherit">{{ $c->name }}</a></h6>
+                @foreach($c->children->take(5) as $ch)
+                  <a href="{{ route('shop.index',['category'=>$ch->slug]) }}">{{ $ch->name }}</a>
+                @endforeach
+                <a href="{{ route('shop.index',['category'=>$c->slug]) }}" class="more">View all <i class="fa-solid fa-arrow-right"></i></a>
+              </div>
+            @endforeach
+            <div class="mega-promo">
+              <div><b>Weekend Deals</b><br><small>Up to 50% off selected items — limited time</small></div>
+              <a href="{{ route('shop.index',['on_sale'=>1]) }}">Shop deals</a>
+            </div>
+          </div>
+        </li>
+        <li class="nav-item"><a href="{{ route('about') }}" class="{{ request()->routeIs('about')?'active':'' }}">About</a></li>
+        <li class="nav-item"><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact')?'active':'' }}">Contact</a></li>
+      </ul>
+
+      <a href="{{ route('shop.index',['on_sale'=>1]) }}" class="deal-btn"><i class="fa-solid fa-bolt"></i> Deal Today</a>
+    </div>
+  </div>
+</header>
+
+{{-- ═════════════ MOBILE DRAWER ═════════════ --}}
+<div class="drawer-bg" id="drawerBg"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <a href="{{ route('home') }}" class="logo" style="font-size:22px"><span class="logo-mark" style="width:34px;height:34px;font-size:16px">Z</span>Zelari<b>.</b></a>
+    <button class="icon-btn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <form action="{{ route('shop.index') }}" method="GET"><input type="text" name="q" placeholder="Search products…"><button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button></form>
+  <nav>
+    <a href="{{ route('home') }}"><i class="fa-solid fa-house"></i> Home</a>
+    <a href="{{ route('shop.index') }}"><i class="fa-solid fa-bag-shopping"></i> Shop</a>
+    <a href="{{ route('shop.index',['on_sale'=>1]) }}"><i class="fa-solid fa-bolt"></i> Deal Today</a>
+    <a href="{{ route('about') }}"><i class="fa-solid fa-circle-info"></i> About</a>
+    <a href="{{ route('contact') }}"><i class="fa-solid fa-envelope"></i> Contact</a>
+    <a href="{{ route('cart.index') }}"><i class="fa-solid fa-cart-shopping"></i> Cart ({{ $cartCount ?? 0 }})</a>
+  </nav>
+  <div class="dcats">
+    <h6>Categories</h6>
+    @foreach($navCategories ?? [] as $c)
+      <a href="{{ route('shop.index',['category'=>$c->slug]) }}"><i class="fa-solid {{ zcat_icon($c->name) }}" style="color:var(--p);width:20px"></i> {{ $c->name }}@if($c->children->count())<small>({{ $c->children->count() }})</small>@endif</a>
+    @endforeach
+  </div>
+</aside>
+
+{{-- ═════════════ FLASH TOASTS ═════════════ --}}
+<div class="toasts" id="toasts">
+  @if(session('cart_success'))<div class="toast-z"><i class="ic fa-solid fa-circle-check"></i><div>{{ session('cart_success') }} <a href="{{ route('cart.index') }}">View cart</a></div><button class="x" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button></div>@endif
+  @if(session('success'))<div class="toast-z"><i class="ic fa-solid fa-circle-check"></i><div>{{ session('success') }}</div><button class="x" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button></div>@endif
+  @if(session('cart_error'))<div class="toast-z err"><i class="ic fa-solid fa-circle-exclamation"></i><div>{{ session('cart_error') }}</div><button class="x" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button></div>@endif
+  @if(session('info'))<div class="toast-z info"><i class="ic fa-solid fa-circle-info"></i><div>{{ session('info') }}</div><button class="x" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button></div>@endif
+</div>
+
+{{-- ═════════════ PAGE ═════════════ --}}
+<main>
+  @yield('content')
+</main>
+
+{{-- ═════════════ NEWSLETTER ═════════════ --}}
+@unless(request()->routeIs('checkout.*') || request()->routeIs('order.*'))
+<section class="newsletter wrap reveal">
+  <div class="nl-box">
+    <img class="bg" src="{{ zbg('news') }}" alt="" loading="lazy">
+    <div>
+      <h3>Join Our Newsletter And Get…</h3>
+      <p>PKR 500 discount for your first order</p>
+      <form class="nl-form" onsubmit="event.preventDefault();zToast('Thanks! You are on the list.');this.reset()">
+        <input type="email" placeholder="Enter Your Email" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+    <div class="nl-art"><div class="bub b1">🎁</div><div class="bub b2">✨</div><div class="bub b3">💬</div></div>
+  </div>
+</section>
+@endunless
+
+{{-- ═════════════ FOOTER ═════════════ --}}
+<footer class="footer">
+  <div class="wrap">
+    <div class="f-feats">
+      <div class="f-feat"><i class="fa-solid fa-gem"></i><span>Curated Quality Products</span></div>
+      <div class="f-feat"><i class="fa-solid fa-truck-fast"></i><span>Free Delivery Over PKR 3,000</span></div>
+      <div class="f-feat"><i class="fa-solid fa-percent"></i><span>Daily Mega Discounts</span></div>
+      <div class="f-feat"><i class="fa-solid fa-tags"></i><span>Best Price On The Market</span></div>
+    </div>
+
+    <div class="f-main">
+      <div class="f-brand">
+        <a href="{{ route('home') }}" class="logo"><span class="logo-mark">Z</span>Zelari<b>.</b></a>
+        <p>A smarter way to shop. We curate quality products, keep prices honest, and deliver fast across Pakistan — with cash on delivery everywhere.</p>
+        <div class="fl"><i class="fa-solid fa-location-dot"></i> Gulberg III, Lahore, Pakistan</div>
+        <div class="fl"><i class="fa-solid fa-envelope"></i> support@zelari.com</div>
+      </div>
+      <div class="f-col">
+        <h5>Categories</h5>
+        @foreach(($navCategories ?? collect())->take(6) as $c)<a href="{{ route('shop.index',['category'=>$c->slug]) }}">{{ $c->name }}</a>@endforeach
+        @if(($navCategories ?? collect())->isEmpty())<a href="{{ route('shop.index') }}">All products</a>@endif
+      </div>
+      <div class="f-col">
+        <h5>Useful Links</h5>
+        <a href="{{ route('home') }}">Home</a>
+        <a href="{{ route('shop.index') }}">Shop</a>
+        <a href="{{ route('about') }}">About Us</a>
+        <a href="{{ route('contact') }}">Contact Us</a>
+        <a href="{{ route('cart.index') }}">Cart</a>
+      </div>
+      <div class="f-col">
+        <h5>Help Center</h5>
+        <a href="{{ route('cart.index') }}">Your Order</a>
+        <a href="{{ route('contact') }}">Track Order</a>
+        <a href="{{ route('shop.index') }}">Your Wishlist</a>
+        <a href="{{ route('shop.index') }}">Search</a>
+        <a href="{{ route('contact') }}">FAQ</a>
+      </div>
+      <div class="f-col f-contact">
+        <h5>Contact Us</h5>
+        <div class="fc"><i class="fa-solid fa-phone"></i><div><small>Hotline 24/7</small><b>+92 300 0000000</b></div></div>
+        <div class="fc"><i class="fa-solid fa-envelope"></i><div><small>Email Address</small><b>support@zelari.com</b></div></div>
+        <small style="color:var(--muted);font-size:12px">Download App :</small>
+        <div class="app-badges">
+          <a href="#" class="app-badge"><i class="fa-brands fa-google-play"></i><span>GET IT ON<b>Google Play</b></span></a>
+          <a href="#" class="app-badge"><i class="fa-brands fa-apple"></i><span>Download on<b>App Store</b></span></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="f-bottom">
+      <div>©{{ date('Y') }} Zelari. All rights reserved.</div>
+      <div class="pay-icons">
+        <span class="pay pp">PayPal</span><span class="pay visa">VISA</span><span class="pay mc">●● MC</span><span class="pay amex">AMEX</span><span class="pay cod">COD</span><span class="pay bank">BANK</span>
+      </div>
+      <div class="socials"><span style="font-size:12px;margin-right:4px">Stay connected :</span>
+        <a href="#"><i class="fa-brands fa-facebook-f"></i></a><a href="#"><i class="fa-brands fa-x-twitter"></i></a><a href="#"><i class="fa-brands fa-instagram"></i></a><a href="#"><i class="fa-brands fa-pinterest-p"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+{{-- ═════════════ MOBILE BOTTOM NAV ═════════════ --}}
+<nav class="mnav">
+  <a href="{{ route('home') }}" class="{{ request()->routeIs('home')?'active':'' }}"><i class="fa-solid fa-house"></i>Home</a>
+  <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*')?'active':'' }}"><i class="fa-solid fa-bag-shopping"></i>Shop</a>
+  <a href="{{ route('cart.index') }}" class="{{ request()->routeIs('cart.*')?'active':'' }}"><i class="fa-solid fa-cart-shopping"></i>Cart<b class="cnt js-cart-count">{{ $cartCount ?? 0 }}</b></a>
+  <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact')?'active':'' }}"><i class="fa-regular fa-comment-dots"></i>Help</a>
+</nav>
+
+<button class="totop" id="toTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+/* ───── Z engine: tilt, reveal, toasts, cart, countdown ───── */
+(function(){
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const rm   = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 3D tilt */
+  window.zTilt = function(root){
+    if(!fine || rm) return;
+    (root||document).querySelectorAll('[data-tilt]:not(.tilt-ready)').forEach(el=>{
+      el.classList.add('tilt-ready');
+      if(!el.querySelector('.tilt-glare')){ const g=document.createElement('span'); g.className='tilt-glare'; el.appendChild(g); }
+      const max = parseFloat(el.dataset.tilt)||8;
+      el.addEventListener('mousemove', e=>{
+        const r=el.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+        el.style.setProperty('--rx',(-y*max)+'deg'); el.style.setProperty('--ry',(x*max)+'deg');
+        el.style.setProperty('--gx',(x*100+50)+'%'); el.style.setProperty('--gy',(y*100+50)+'%');
+        el.classList.add('tilting');
+      });
+      el.addEventListener('mouseleave', ()=>{ el.style.setProperty('--rx','0deg'); el.style.setProperty('--ry','0deg'); el.classList.remove('tilting'); });
+    });
+  };
+
+  /* Reveal on scroll */
+  const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{rootMargin:'0px 0px -8% 0px',threshold:.08});
+  window.zReveal = function(root){ (root||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el)); };
+
+  /* Toast */
+  window.zToast = function(msg,type){
+    const t=document.createElement('div'); t.className='toast-z '+(type||'');
+    const ic = type==='err'?'fa-circle-exclamation':type==='info'?'fa-circle-info':'fa-circle-check';
+    t.innerHTML='<i class="ic fa-solid '+ic+'"></i><div>'+msg+'</div><button class="x"><i class="fa-solid fa-xmark"></i></button>';
+    t.querySelector('.x').onclick=()=>t.remove();
+    document.getElementById('toasts').appendChild(t);
+    setTimeout(()=>{ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(()=>t.remove(),400); },4200);
+  };
+  document.querySelectorAll('#toasts .toast-z').forEach(t=>setTimeout(()=>{ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(()=>t.remove(),400); },5000));
+
+  /* AJAX add-to-cart with fly animation */
+  const token = document.querySelector('meta[name=csrf-token]').content;
+  function fly(from){
+    const to=document.getElementById('cartIcon'); if(!from||!to||rm) return;
+    const a=from.getBoundingClientRect(), b=to.getBoundingClientRect();
+    const d=document.createElement('div');
+    d.style.cssText='position:fixed;z-index:3000;left:'+(a.left+a.width/2-14)+'px;top:'+(a.top+a.height/2-14)+'px;width:28px;height:28px;border-radius:50%;background:var(--grad);box-shadow:0 10px 24px -8px rgba(106,61,245,.8);transition:all .8s cubic-bezier(.2,.8,.2,1);pointer-events:none';
+    document.body.appendChild(d);
+    requestAnimationFrame(()=>{ d.style.left=(b.left+b.width/2-6)+'px'; d.style.top=(b.top+b.height/2-6)+'px'; d.style.width='12px'; d.style.height='12px'; d.style.opacity='.2'; });
+    setTimeout(()=>{ d.remove(); to.classList.add('bump'); setTimeout(()=>to.classList.remove('bump'),500); },800);
+  }
+  document.addEventListener('submit', async e=>{
+    const f=e.target; if(!f.classList.contains('js-atc')) return;
+    e.preventDefault();
+    const btn=f.querySelector('button[type=submit]'); const old=btn?btn.innerHTML:''; if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';}
+    try{
+      const r=await fetch(f.action,{method:'POST',headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData(f)});
+      if(r.ok){ const j=await r.json(); document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count); fly(btn); zToast('Added to cart. <a href="{{ route('cart.index') }}">View cart</a>'); }
+      else if(r.status===422){ const j=await r.json(); zToast(Object.values(j.errors||{}).flat()[0]||'Could not add to cart','err'); }
+      else { f.classList.remove('js-atc'); f.submit(); return; }
+    }catch(_){ f.classList.remove('js-atc'); f.submit(); return; }
+    if(btn){ btn.innerHTML='<i class="fa-solid fa-check"></i>'; setTimeout(()=>{btn.innerHTML=old;btn.disabled=false;},900); }
+  });
+
+  /* Countdown: data-end = unix ms */
+  window.zCountdown = function(el){
+    const end = parseInt(el.dataset.end,10); const b = el.querySelectorAll('[data-u]');
+    function tick(){ let d=Math.max(0,end-Date.now()); const u={d:Math.floor(d/864e5),h:Math.floor(d/36e5)%24,m:Math.floor(d/6e4)%60,s:Math.floor(d/1e3)%60}; b.forEach(x=>x.textContent=String(u[x.dataset.u]).padStart(2,'0')); }
+    tick(); setInterval(tick,1000);
+  };
+
+  /* Header + drawer + dropdowns */
+  const header=document.getElementById('header');
+  const onScroll=()=>{ header.classList.toggle('scrolled',scrollY>10); document.getElementById('toTop').classList.toggle('show',scrollY>500); };
+  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  document.getElementById('toTop').onclick=()=>scrollTo({top:0,behavior:'smooth'});
+  const open=()=>document.body.classList.add('drawer-open'), close=()=>document.body.classList.remove('drawer-open');
+  document.getElementById('burger').onclick=open; document.getElementById('drawerClose').onclick=close; document.getElementById('drawerBg').onclick=close;
+  document.querySelectorAll('.allcat-btn').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')));
+  document.addEventListener('click',e=>{ if(!e.target.closest('.allcat')) document.querySelectorAll('.allcat.open').forEach(x=>x.classList.remove('open')); });
+
+  document.addEventListener('DOMContentLoaded',()=>{ zTilt(); zReveal(); document.querySelectorAll('[data-countdown]').forEach(zCountdown); });
+})();
+</script>
+@stack('scripts')
+</body>
+</html>

@@ -8,12 +8,29 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Shop\ShopController;
 use App\Http\Controllers\Shop\CartController;
+use App\Http\Controllers\Shop\CheckoutController;
 use Illuminate\Support\Facades\Route;
 
-// ── Shop / Frontend Routes ──
-Route::view('/', 'welcome')->name('welcome');
+// ── Storefront ──────────────────────────────────────────────────────────────
+Route::get('/', [ShopController::class, 'home'])->name('home');
+Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/product/{slug}', [ShopController::class, 'show'])->name('shop.show');
+Route::get('/about', [ShopController::class, 'about'])->name('about');
+Route::match(['get','post'], '/contact', [ShopController::class, 'contact'])->name('contact');
 
-// ── Dashboard ──
+// ── Cart ────────────────────────────────────────────────────────────────────
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::get('/cart/remove/{productId}', [CartController::class, 'remove'])->name('cart.remove');
+Route::get('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+// ── Checkout ────────────────────────────────────────────────────────────────
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/order-confirmation/{orderId}', [CheckoutController::class, 'confirmation'])->name('order.confirmation');
+
+// ── Dashboard ───────────────────────────────────────────────────────────────
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -24,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// ── Admin Routes ──
+// ── Admin Routes ────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('categories')->name('categories.')->group(function () {
