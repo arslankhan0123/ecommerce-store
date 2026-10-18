@@ -265,7 +265,7 @@ body.drawer-open .drawer{transform:none}
 
 /* ═══════════════════════════════ TOASTS ═══════════════════════════════ */
 .toasts{position:fixed;top:90px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:10px;max-width:360px}
-.toast-z{display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-lg);animation:toastIn .35s cubic-bezier(.2,.7,.2,1);font-size:14px}
+.toast-z{display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--ok);line-height:1.45;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-lg);animation:toastIn .35s cubic-bezier(.2,.7,.2,1);font-size:14px}
 .toast-z.err{border-left-color:var(--sale)}
 .toast-z.info{border-left-color:var(--p)}
 .toast-z i.ic{font-size:18px;color:var(--ok);margin-top:1px}
@@ -635,17 +635,33 @@ body.drawer-open .drawer{transform:none}
     requestAnimationFrame(()=>{ d.style.left=(b.left+b.width/2-6)+'px'; d.style.top=(b.top+b.height/2-6)+'px'; d.style.width='12px'; d.style.height='12px'; d.style.opacity='.2'; });
     setTimeout(()=>{ d.remove(); to.classList.add('bump'); setTimeout(()=>to.classList.remove('bump'),500); },800);
   }
+  const CART_URL='{{ route('cart.index') }}';
+  function showGoToCart(btn){
+    if(!btn) return;
+    const a=document.createElement('a'); a.href=CART_URL; a.className=btn.className+' go-cart'; a.innerHTML='<i class="fa-solid fa-cart-shopping"></i> Go to Cart';
+    a.style.cssText='background:var(--grad);color:#fff;box-shadow:0 10px 20px -10px rgba(106,61,245,.8);text-decoration:none';
+    btn.style.display='none'; btn.insertAdjacentElement('afterend', a);
+    setTimeout(()=>{ a.remove(); btn.style.display=''; btn.disabled=false; }, 2000);
+  }
   document.addEventListener('submit', async e=>{
     const f=e.target; if(!f.classList.contains('js-atc')) return;
     e.preventDefault();
     const btn=f.querySelector('button[type=submit]'); const old=btn?btn.innerHTML:''; if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';}
+    const restore=()=>{ if(btn){btn.innerHTML=old;btn.disabled=false;} };
     try{
       const r=await fetch(f.action,{method:'POST',headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData(f)});
-      if(r.ok){ const j=await r.json(); document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count); fly(btn); zToast('Added to cart. <a href="{{ route('cart.index') }}">View cart</a>'); }
-      else if(r.status===422){ const j=await r.json(); zToast(Object.values(j.errors||{}).flat()[0]||'Could not add to cart','err'); }
-      else { f.classList.remove('js-atc'); f.submit(); return; }
-    }catch(_){ f.classList.remove('js-atc'); f.submit(); return; }
-    if(btn){ btn.innerHTML='<i class="fa-solid fa-check"></i>'; setTimeout(()=>{btn.innerHTML=old;btn.disabled=false;},900); }
+      if(r.ok){
+        const j=await r.json();
+        document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count);
+        if(j.total!==undefined){ const t=document.getElementById('cartTotalTxt'); if(t) t.textContent=Number(j.total).toLocaleString('en-PK'); }
+        fly(btn); zToast('<b>Added to cart!</b> '+(j.name?('“'+j.name+'” is in your cart. '):'')+'<a href="'+CART_URL+'">View cart</a>');
+        if(btn){ btn.innerHTML=old; showGoToCart(btn); }
+      } else {
+        let msg='Could not add to cart';
+        try{ const j=await r.json(); msg=Object.values(j.errors||{}).flat()[0]||j.message||msg; }catch(_){}
+        zToast(msg,'err'); restore();
+      }
+    }catch(_){ zToast('Network error — please try again','err'); restore(); }
   });
 
   /* Countdown: data-end = unix ms */

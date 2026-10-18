@@ -29,7 +29,11 @@ class CartController extends Controller
         $qty = (int) $request->quantity;
 
         if ($qty > $product->quantity) {
-            return back()->with('cart_error', "Sorry, only {$product->quantity} unit(s) available.");
+            $msg = "Sorry, only {$product->quantity} unit(s) available.";
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $msg], 422);
+            }
+            return back()->with('cart_error', $msg);
         }
 
         $cart = session('cart', []);
@@ -56,10 +60,15 @@ class CartController extends Controller
         session(['cart' => $cart]);
 
         if ($request->wantsJson()) {
-            return response()->json(['count' => $this->cartCount($cart), 'message' => 'Added to cart!']);
+            return response()->json([
+                'count'   => $this->cartCount($cart),
+                'total'   => array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $cart)),
+                'name'    => $product->name,
+                'message' => 'Added to cart!',
+            ]);
         }
 
-        return back()->with('cart_success', ""{$product->name}" added to your cart.");
+        return back()->with('cart_success', "\"{$product->name}\" added to your cart.");
     }
 
     /** POST /cart/update */

@@ -58,10 +58,10 @@ class CheckoutController extends Controller
                     $product = Product::lockForUpdate()->find($item['product_id']);
 
                     if (!$product || $product->status !== 'active') {
-                        throw new \Exception(""{$item['name']}" is no longer available.");
+                        throw new \Exception("\"{$item['name']}\" is no longer available.");
                     }
                     if ($product->quantity < $item['quantity']) {
-                        throw new \Exception("Only {$product->quantity} unit(s) of "{$product->name}" are in stock.");
+                        throw new \Exception("Only {$product->quantity} unit(s) of \"{$product->name}\" are in stock.");
                     }
 
                     $unitPrice = (float) ($product->sale_price ?? $product->purchase_price);
