@@ -31,7 +31,7 @@
 .sitems{max-height:300px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px}
 .sitem{display:flex;gap:12px;align-items:center}
 .sitem .im{width:56px;height:56px;border-radius:12px;background:var(--surface);display:grid;place-items:center;overflow:hidden;flex-shrink:0;position:relative}
-.sitem .im img{width:100%;height:100%;object-fit:contain;padding:4px}
+.sitem .im img{width:100%;height:100%;object-fit:cover;display:block}
 .sitem .im i{color:#c8cce3}
 .sitem .im .q{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px}
 .sitem .nm{font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -98,7 +98,7 @@
             @foreach($cart as $it)
             @php $img = zimg($it['image'] ?? null) ?? zcat_image(null,(int)($it['product_id'] ?? 0),200); @endphp
             <div class="sitem">
-              <div class="im"><img src="{{ $img }}" alt="" style="{{ ($it['image'] ?? null) ? '' : 'object-fit:cover;padding:0' }}"><span class="q">{{ $it['quantity'] }}</span></div>
+              <div class="im"><img src="{{ $img }}" alt=""><span class="q">{{ $it['quantity'] }}</span></div>
               <div style="flex:1;min-width:0"><div class="nm">{{ $it['name'] }}</div><small style="color:var(--muted)">PKR {{ number_format($it['price'],0) }} × {{ $it['quantity'] }}</small></div>
               <div class="pr">PKR {{ number_format($it['price']*$it['quantity'],0) }}</div>
             </div>
@@ -111,7 +111,7 @@
           <div class="tot"><span>Total</span><b>PKR {{ number_format($subtotal+$shipping,0) }}</b></div>
           <button type="submit" class="btn-g place" id="placeBtn"><i class="fa-solid fa-lock"></i> Place Order</button>
           <div class="secure"><i class="fa-solid fa-shield-halved"></i> Prices & stock are re-verified on our server</div>
-          <div style="display:flex;justify-content:center;gap:6px;margin-top:10px"><span class="pay visa">VISA</span><span class="pay mc">MC</span><span class="pay cod">COD</span><span class="pay bank">BANK</span></div>
+          <div style="display:flex;justify-content:center;margin-top:12px">@include('shop.partials.payment-icons', ['size' => 'sm'])</div>
           <a href="{{ route('cart.index') }}" style="display:block;text-align:center;margin-top:14px;font-size:13px;font-weight:700;color:var(--muted)"><i class="fa-solid fa-arrow-left"></i> Back to cart</a>
         </aside>
       </div>

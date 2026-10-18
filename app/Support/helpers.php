@@ -111,8 +111,8 @@ if (!function_exists('zbg')) {
             'hero1'   => '1607082348824-0a96f2a4b9da', // shopping bags, pastel
             'hero2'   => '1441986300917-64674bd600d8', // clothing rack, dark
             'hero3'   => '1483985988355-763728e1935b', // shopper with bags
-            'side'    => '1546868871-7041f2a55e12', // smart watch
-            'sidecard'=> '1523275335684-37898b6baf30', // classic watch
+            'side'    => '1523275335684-37898b6baf30', // classic watch
+            'sidecard'=> '1548036328-c9fa89d128fa', // leather bag
             'cash'    => '1542838132-92c53300491e',    // groceries
             'deal'    => '1472851294608-062f824d29cc', // store front
             'shop'    => '1555529669-e69e7aa0ba9a',    // product shelf

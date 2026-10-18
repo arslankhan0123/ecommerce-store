@@ -42,9 +42,9 @@
 .h3d .ring{position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(255,255,255,.35);animation:spinSlow 24s linear infinite;transform:translateZ(-40px)}
 .h3d .ring2{inset:36px;border-style:solid;border-color:rgba(34,211,238,.5);animation-direction:reverse;animation-duration:18s}
 .h3d .disc{position:absolute;inset:60px;border-radius:50%;background:var(--grad);filter:blur(30px);opacity:.7;box-shadow:0 40px 80px -30px rgba(106,61,245,.8);transform:translateZ(-10px);animation:floatY2 7s ease-in-out infinite}
-.h3d .glass{position:absolute;inset:50px;border-radius:32px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.45);backdrop-filter:blur(8px);display:grid;place-items:center;transform:translateZ(40px);box-shadow:0 30px 60px -20px rgba(39,30,92,.35);animation:floatY 6s ease-in-out infinite;overflow:hidden}
+.h3d .glass{position:absolute;inset:50px;border-radius:32px;background:#fff;border:5px solid #fff;backdrop-filter:none;display:grid;place-items:center;transform:translateZ(40px);box-shadow:0 30px 60px -20px rgba(39,30,92,.35);animation:floatY 6s ease-in-out infinite;overflow:hidden}
 .h3d .glass img{width:82%;height:82%;object-fit:contain;filter:drop-shadow(0 20px 30px rgba(0,0,0,.25))}
-.h3d .glass img.cover{width:100%;height:100%;object-fit:cover;border-radius:32px;filter:none}
+.h3d .glass img.cover{width:100%;height:100%;object-fit:cover;border-radius:27px;filter:none;display:block}
 .h3d .glass .emo{font-size:110px;filter:drop-shadow(0 20px 30px rgba(0,0,0,.25))}
 .chip{position:absolute;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:var(--shadow-lg);font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px;transform:translateZ(90px);animation:floatY2 5s ease-in-out infinite;white-space:nowrap}
 .chip i{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-size:12px}
@@ -69,7 +69,7 @@
 .side-banner:hover .bg{transform:scale(1.06)}
 .side-banner .shade{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,rgba(46,27,143,.2) 0%,rgba(46,27,143,.6) 50%,rgba(20,12,70,.94) 100%)}
 .side-banner>*:not(.bg):not(.shade){position:relative;z-index:1}
-.sb-art .card img.cover{width:100%;height:100%;object-fit:cover;border-radius:26px;filter:none}
+.sb-art .card img.cover{width:100%;height:100%;object-fit:cover;border-radius:22px;filter:none;display:block}
 .side-banner .off{font-size:42px;font-weight:800;line-height:1;letter-spacing:-2px}
 .side-banner .off small{font-size:14px;font-weight:700;letter-spacing:0;vertical-align:top;margin-left:4px;color:#ffd36b}
 .side-banner h3{font-size:24px;font-weight:800;margin:6px 0 8px;line-height:1.15}
@@ -77,7 +77,7 @@
 .side-banner .lnk{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:#fff;border-bottom:2px solid #22d3ee;padding-bottom:2px;align-self:flex-start}
 .side-banner .lnk:hover{color:#22d3ee}
 .sb-art{position:absolute;right:-20px;bottom:-10px;width:220px;height:220px;perspective:800px}
-.sb-art .card{position:absolute;inset:30px;border-radius:26px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);display:grid;place-items:center;transform:rotateX(14deg) rotateY(-18deg);animation:floatY 6s ease-in-out infinite}
+.sb-art .card{position:absolute;inset:30px;border-radius:26px;background:#fff;border:4px solid #fff;overflow:hidden;box-shadow:0 24px 50px -16px rgba(0,0,0,.55);display:grid;place-items:center;transform:rotateX(14deg) rotateY(-18deg);animation:floatY 6s ease-in-out infinite}
 .sb-art .card img{width:80%;height:80%;object-fit:contain;filter:drop-shadow(0 16px 24px rgba(0,0,0,.35))}
 .sb-art .card span{font-size:70px}
 .flash{position:absolute;right:26px;top:26px;width:84px;height:84px;border-radius:50%;background:#ffd36b;color:var(--ink);display:grid;place-items:center;text-align:center;font-weight:800;font-size:11px;line-height:1.1;animation:spinSlow 14s linear infinite;box-shadow:0 14px 30px -10px rgba(0,0,0,.4)}
@@ -180,9 +180,9 @@
 @php
   $hp = $heroProducts->values();
   $slides = [
-    ['cls'=>'hs-1','eyebrow'=>'Exclusive offer','pill'=>'30% Off','h'=>'Smart Shopping <br><span>Delivered Daily</span>','p'=>'Curated products, honest prices and lightning-fast delivery across Pakistan. Cash on delivery everywhere.','btn'=>'Shop Now','href'=>route('shop.index'),'bg'=>'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=700&q=80','emo'=>'🛍️','chips'=>[['fa-truck-fast','Free delivery','Orders over PKR 3,000'],['fa-bolt','Flash deal','Up to 50% off'],['fa-star','4.9 rating','2,300+ reviews']]],
-    ['cls'=>'hs-2','eyebrow'=>'Weekend sale','pill'=>'Up to 50%','h'=>'Weekend Deals <br><span>Live Right Now</span>','p'=>'Biggest discounts of the season on trending picks. Prices drop every Friday — grab them before they are gone.','btn'=>'View Deals','href'=>route('shop.index',['on_sale'=>1]),'bg'=>'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&w=700&q=80','emo'=>'🔥','chips'=>[['fa-tag','Hot price','Limited stock'],['fa-shield-halved','Secure checkout','Server-verified'],['fa-rotate-left','Easy returns','7-day policy']]],
-    ['cls'=>'hs-3','eyebrow'=>'Just landed','pill'=>'New','h'=>'Fresh Picks <br><span>Just For You</span>','p'=>'New arrivals added every week, hand-picked by our team so you always find something worth loving.','btn'=>'Explore New','href'=>route('shop.index',['sort'=>'latest']),'bg'=>'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=700&q=80','emo'=>'✨','chips'=>[['fa-wand-magic-sparkles','New arrivals','Updated weekly'],['fa-money-bill-wave','Cash on delivery','Nationwide'],['fa-headset','24/7 support','We reply fast']]],
+    ['cls'=>'hs-1','eyebrow'=>'Exclusive offer','pill'=>'30% Off','h'=>'Smart Shopping <br><span>Delivered Daily</span>','p'=>'Curated products, honest prices and lightning-fast delivery across Pakistan. Cash on delivery everywhere.','btn'=>'Shop Now','href'=>route('shop.index'),'bg'=>'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=700&q=80','emo'=>'🛍️','chips'=>[['fa-truck-fast','Free delivery','Orders over PKR 3,000'],['fa-bolt','Flash deal','Up to 50% off'],['fa-star','4.9 rating','2,300+ reviews']]],
+    ['cls'=>'hs-2','eyebrow'=>'Weekend sale','pill'=>'Up to 50%','h'=>'Weekend Deals <br><span>Live Right Now</span>','p'=>'Biggest discounts of the season on trending picks. Prices drop every Friday — grab them before they are gone.','btn'=>'View Deals','href'=>route('shop.index',['on_sale'=>1]),'bg'=>'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=700&q=80','emo'=>'🔥','chips'=>[['fa-tag','Hot price','Limited stock'],['fa-shield-halved','Secure checkout','Server-verified'],['fa-rotate-left','Easy returns','7-day policy']]],
+    ['cls'=>'hs-3','eyebrow'=>'Just landed','pill'=>'New','h'=>'Fresh Picks <br><span>Just For You</span>','p'=>'New arrivals added every week, hand-picked by our team so you always find something worth loving.','btn'=>'Explore New','href'=>route('shop.index',['sort'=>'latest']),'bg'=>'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=700&q=80','emo'=>'✨','chips'=>[['fa-wand-magic-sparkles','New arrivals','Updated weekly'],['fa-money-bill-wave','Cash on delivery','Nationwide'],['fa-headset','24/7 support','We reply fast']]],
   ];
 @endphp
 
@@ -432,7 +432,7 @@
 @push('scripts')
 <script>
 new Swiper('#heroSwiper',{loop:true,speed:1000,parallax:true,grabCursor:true,autoplay:{delay:6000,disableOnInteraction:false,pauseOnMouseEnter:true},pagination:{el:'#heroSwiper .swiper-pagination',clickable:true},navigation:{prevEl:'#heroPrev',nextEl:'#heroNext'}});
-const pOpts = (prev,next)=>({slidesPerView:1.3,spaceBetween:16,speed:600,grabCursor:true,navigation:{prevEl:prev,nextEl:next},breakpoints:{480:{slidesPerView:2.2},768:{slidesPerView:3},1024:{slidesPerView:4},1300:{slidesPerView:5}}});
+const pOpts = (prev,next)=>({slidesPerView:1.3,spaceBetween:16,speed:600,grabCursor:true,navigation:{prevEl:prev,nextEl:next},breakpoints:{480:{slidesPerView:2.2},768:{slidesPerView:3},1024:{slidesPerView:4},1300:{slidesPerView:5},1600:{slidesPerView:6}}});
 new Swiper('#dealsSwiper',pOpts('#dealsPrev','#dealsNext'));
 new Swiper('#newSwiper',pOpts('#newPrev','#newNext'));
 

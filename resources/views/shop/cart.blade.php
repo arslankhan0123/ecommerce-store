@@ -20,7 +20,7 @@
 .cprod{display:flex;align-items:center;gap:14px;min-width:0}
 .cimg{width:84px;height:84px;border-radius:14px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex-shrink:0;transform-style:preserve-3d;transition:transform .4s}
 .citem:hover .cimg{transform:perspective(500px) rotateY(-12deg) translateZ(10px)}
-.cimg img{width:100%;height:100%;object-fit:contain;padding:6px}
+.cimg img{width:100%;height:100%;object-fit:cover;display:block}
 .cimg i{color:#c8cce3;font-size:26px}
 .cname{font-weight:700;font-size:15px;color:var(--ink);display:block;line-height:1.3}
 .cname:hover{color:var(--p)}
@@ -85,7 +85,7 @@
         @php $img = zimg($it['image'] ?? null) ?? zcat_image(null,(int)$pid,300); $line = $it['price']*$it['quantity']; @endphp
         <div class="citem">
           <div class="cprod">
-            <a href="{{ route('shop.show',$it['slug']) }}" class="cimg"><img src="{{ $img }}" alt="" style="{{ ($it['image'] ?? null) ? '' : 'object-fit:cover;padding:0' }}"></a>
+            <a href="{{ route('shop.show',$it['slug']) }}" class="cimg"><img src="{{ $img }}" alt=""></a>
             <div style="min-width:0">
               <a href="{{ route('shop.show',$it['slug']) }}" class="cname">{{ $it['name'] }}</a>
               <div class="cunit">PKR {{ number_format($it['price'],0) }} each @if(($it['max_quantity'] ?? 0) <= 5)· <span style="color:var(--warn)">only {{ $it['max_quantity'] }} left</span>@endif</div>
@@ -128,7 +128,7 @@
       </div>
       <a href="{{ route('checkout.index') }}" class="btn-g"><i class="fa-solid fa-lock"></i> Proceed to Checkout</a>
       <div class="secure"><i class="fa-solid fa-shield-halved"></i> Secure, server-verified checkout</div>
-      <div style="display:flex;justify-content:center;gap:6px;margin-top:10px"><span class="pay visa">VISA</span><span class="pay mc">MC</span><span class="pay cod">COD</span><span class="pay bank">BANK</span></div>
+      <div style="display:flex;justify-content:center;margin-top:12px">@include('shop.partials.payment-icons', ['size' => 'sm'])</div>
     </aside>
   </div>
   @else

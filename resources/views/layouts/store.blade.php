@@ -276,6 +276,10 @@ body.drawer-open .drawer{transform:none}
 .app-badge i{font-size:18px}
 .app-badge b{display:block;font-size:12px}
 .f-bottom{border-top:1px solid var(--line);padding:18px 0;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.payrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.payrow .pm{height:34px;width:52px;border-radius:7px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;padding:0;overflow:hidden;box-shadow:0 1px 2px rgba(15,18,48,.05);flex:0 0 auto}
+.payrow .pm svg{display:block;height:100%;width:100%}
+.payrow.sm .pm{height:26px;width:40px;border-radius:5px}
 .pay-icons{display:flex;gap:8px;flex-wrap:wrap}
 .pay{height:28px;padding:0 10px;border-radius:7px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.02em}
 .pay.visa{color:#1a1f71}.pay.mc{color:#eb001b}.pay.pp{color:#003087}.pay.amex{color:#2e77bb}.pay.cod{color:var(--ok)}.pay.bank{color:var(--p)}
@@ -521,19 +525,14 @@ body.drawer-open .drawer{transform:none}
         <h5>Contact Us</h5>
         <div class="fc"><i class="fa-solid fa-phone"></i><div><small>Hotline 24/7</small><b>+92 300 0000000</b></div></div>
         <div class="fc"><i class="fa-solid fa-envelope"></i><div><small>Email Address</small><b>support@zelari.com</b></div></div>
-        <small style="color:var(--muted);font-size:12px">Download App :</small>
-        <div class="app-badges">
-          <a href="#" class="app-badge"><i class="fa-brands fa-google-play"></i><span>GET IT ON<b>Google Play</b></span></a>
-          <a href="#" class="app-badge"><i class="fa-brands fa-apple"></i><span>Download on<b>App Store</b></span></a>
-        </div>
+        <small style="color:var(--muted);font-size:12px;display:block;margin-bottom:8px">We accept :</small>
+        @include('shop.partials.payment-icons', ['size' => 'sm'])
       </div>
     </div>
 
     <div class="f-bottom">
       <div>©{{ date('Y') }} Zelari. All rights reserved.</div>
-      <div class="pay-icons">
-        <span class="pay pp">PayPal</span><span class="pay visa">VISA</span><span class="pay mc">●● MC</span><span class="pay amex">AMEX</span><span class="pay cod">COD</span><span class="pay bank">BANK</span>
-      </div>
+      @include('shop.partials.payment-icons')
       <div class="socials"><span style="font-size:12px;margin-right:4px">Stay connected :</span>
         <a href="#"><i class="fa-brands fa-facebook-f"></i></a><a href="#"><i class="fa-brands fa-x-twitter"></i></a><a href="#"><i class="fa-brands fa-instagram"></i></a><a href="#"><i class="fa-brands fa-pinterest-p"></i></a>
       </div>

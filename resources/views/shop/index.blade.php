@@ -38,6 +38,7 @@
 .chips a i{font-size:11px}
 .chips a.clear{background:#fff;border:1px solid var(--line-2);color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(min-width:1600px){.grid{grid-template-columns:repeat(5,1fr)}}
 @media(max-width:1400px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:640px){.grid{grid-template-columns:repeat(2,1fr);gap:10px}}
 .empty{text-align:center;padding:70px 20px;background:var(--surface);border-radius:var(--r-lg)}

@@ -5,7 +5,7 @@
 .prow:last-child{border-bottom:0}
 .prow-img{width:64px;height:64px;border-radius:12px;background:var(--surface);flex-shrink:0;display:grid;place-items:center;overflow:hidden;transition:transform .3s}
 .prow:hover .prow-img{transform:scale(1.06) rotate(-3deg)}
-.prow-img img{width:100%;height:100%;object-fit:contain;padding:6px}
+.prow-img img{width:100%;height:100%;object-fit:cover;display:block}
 .prow-img i{color:#c8cce3;font-size:22px}
 .prow-name{font-size:13.5px;font-weight:700;color:var(--ink);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .prow-name:hover{color:var(--p)}
@@ -18,7 +18,7 @@
 @php $img = $product->display_image; $real=$product->has_real_image; $n = 4 + (($product->id % 3) ? 1 : 0); @endphp
 <div class="prow">
   <a href="{{ route('shop.show',$product->slug) }}" class="prow-img">
-    <img src="{{ $img }}" alt="{{ $product->name }}" loading="lazy" style="{{ $real ? '' : 'object-fit:cover;padding:0' }}">
+    <img src="{{ $img }}" alt="{{ $product->name }}" loading="lazy">
   </a>
   <div style="min-width:0">
     <a href="{{ route('shop.show',$product->slug) }}" class="prow-name">{{ $product->name }}</a>

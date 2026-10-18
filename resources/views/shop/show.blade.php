@@ -16,15 +16,14 @@
 .gal-main{position:relative;aspect-ratio:1;border-radius:var(--r-lg);border:1px solid var(--line);background:radial-gradient(120% 90% at 50% 100%,#eef0fa,#fff 70%);overflow:hidden;perspective:1000px}
 .gal-main .stage{position:absolute;inset:0;display:grid;place-items:center;transform-style:preserve-3d;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .4s cubic-bezier(.2,.7,.2,1)}
 .gal-main.tilting .stage{transition:transform .08s linear}
-.gal-main img{width:84%;height:84%;object-fit:contain;transform:translateZ(60px);filter:drop-shadow(0 30px 40px rgba(39,30,92,.25));transition:transform .4s,opacity .2s}
-.gal-main img.cover{width:100%;height:100%;object-fit:cover;border-radius:var(--r-lg);filter:none;transform:translateZ(20px)}
+.gal-main img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-lg);transform:translateZ(20px);transition:transform .4s,opacity .2s;display:block}
 .gal-main .ph{font-size:120px;color:#c8cce3;transform:translateZ(40px)}
 .gal-main .orb{position:absolute;border-radius:50%;filter:blur(40px);opacity:.5;animation:orb 14s ease-in-out infinite}
 .gal-badge{position:absolute;top:16px;left:16px;z-index:3;background:var(--sale);color:#fff;font-weight:800;font-size:13px;padding:6px 12px;border-radius:10px;box-shadow:0 8px 20px -8px rgba(255,77,125,.9)}
 .gal-zoom{position:absolute;right:16px;bottom:16px;z-index:3;width:40px;height:40px;border-radius:12px;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;color:var(--ink-2);font-size:14px}
 .thumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .thumb{width:78px;height:78px;border-radius:14px;border:2px solid var(--line);overflow:hidden;cursor:pointer;background:#fff;transition:.2s;display:grid;place-items:center}
-.thumb img{width:100%;height:100%;object-fit:contain;padding:6px}
+.thumb img{width:100%;height:100%;object-fit:cover}
 .thumb.on,.thumb:hover{border-color:var(--p);transform:translateY(-3px);box-shadow:var(--shadow)}
 /* info */
 .pd-cat{display:inline-flex;align-items:center;gap:6px;background:var(--p-soft);color:var(--p);padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:12px}
@@ -182,9 +181,8 @@
         <div><i class="fa-solid fa-truck-fast"></i> Fast dispatch</div>
         <div><i class="fa-solid fa-money-bill-wave"></i> Cash on delivery</div>
       </div>
-      <div class="pay-strip"><i class="fa-solid fa-lock"></i> Guaranteed safe checkout:
-        <span class="pay visa">VISA</span><span class="pay mc">MC</span><span class="pay cod">COD</span><span class="pay bank">BANK</span>
-      </div>
+      <div class="pay-strip"><i class="fa-solid fa-lock"></i> Guaranteed safe checkout:</div>
+      <div style="margin-top:8px">@include('shop.partials.payment-icons', ['size' => 'sm'])</div>
     </div>
   </div>
 
@@ -257,7 +255,7 @@ async function buyNow(){
   g.addEventListener('mouseleave',()=>{g.style.setProperty('--rx','0deg');g.style.setProperty('--ry','0deg');g.classList.remove('tilting');});
 })();
 @if($related->count())
-new Swiper('#relSwiper',{slidesPerView:1.3,spaceBetween:16,speed:600,grabCursor:true,navigation:{prevEl:'#relPrev',nextEl:'#relNext'},breakpoints:{480:{slidesPerView:2.2},768:{slidesPerView:3},1024:{slidesPerView:4},1300:{slidesPerView:5}}});
+new Swiper('#relSwiper',{slidesPerView:1.3,spaceBetween:16,speed:600,grabCursor:true,navigation:{prevEl:'#relPrev',nextEl:'#relNext'},breakpoints:{480:{slidesPerView:2.2},768:{slidesPerView:3},1024:{slidesPerView:4},1300:{slidesPerView:5},1600:{slidesPerView:6}}});
 @endif
 </script>
 @endpush

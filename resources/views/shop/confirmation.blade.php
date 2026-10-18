@@ -29,7 +29,7 @@
 .oitem{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
 .oitem:last-child{border-bottom:0}
 .oitem .im{width:60px;height:60px;border-radius:12px;background:var(--surface);display:grid;place-items:center;overflow:hidden;flex-shrink:0}
-.oitem .im img{width:100%;height:100%;object-fit:contain;padding:4px}
+.oitem .im img{width:100%;height:100%;object-fit:cover;display:block}
 .oitem .im i{color:#c8cce3}
 .oitem b{font-size:14px;display:block}
 .oitem small{color:var(--muted)}
@@ -96,7 +96,7 @@
       @foreach($order->items as $it)
       @php $img = $it->product?->display_image ?? zcat_image(null,(int)$it->product_id,200); $realI = $it->product?->has_real_image; @endphp
       <div class="oitem">
-        <div class="im"><img src="{{ $img }}" alt="" style="{{ $realI ? '' : 'object-fit:cover;padding:0' }}"></div>
+        <div class="im"><img src="{{ $img }}" alt=""></div>
         <div><b>{{ $it->product_name }}</b><small>PKR {{ number_format($it->unit_price,0) }} × {{ $it->quantity }}@if($it->product_sku) · {{ $it->product_sku }}@endif</small></div>
         <div class="pr">PKR {{ number_format($it->subtotal,0) }}</div>
       </div>
