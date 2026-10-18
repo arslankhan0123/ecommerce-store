@@ -72,11 +72,16 @@
       <div class="kv">
         <div><small>Order number</small><b class="onum">#{{ $order->order_number }}</b></div>
         <div><small>Placed on</small><b>{{ $order->created_at->format('d M Y, g:i A') }}</b></div>
-        <div><small>Payment</small><b>@if($order->payment_method==='cash_on_delivery')<span class="pill g"><i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery</span>@elseif($order->payment_method==='bank_transfer')<span class="pill b"><i class="fa-solid fa-building-columns"></i> Bank Transfer</span>@else<span class="pill b">{{ ucwords(str_replace('_',' ',$order->payment_method)) }}</span>@endif</b></div>
+        <div><small>Payment</small><b>@if($order->payment_method==='cash_on_delivery')<span class="pill g"><i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery</span>@elseif($order->payment_method==='card')<span class="pill {{ $order->payment_status==='paid' ? 'g' : 'b' }}"><i class="fa-solid fa-credit-card"></i> Card{{ $order->payment_status==='paid' ? ' · Paid' : '' }}</span>@elseif($order->payment_method==='bank_transfer')<span class="pill b"><i class="fa-solid fa-building-columns"></i> Bank Transfer</span>@else<span class="pill b">{{ ucwords(str_replace('_',' ',$order->payment_method)) }}</span>@endif</b></div>
         <div><small>Status</small><b><span class="pill y"><i class="fa-regular fa-clock"></i> {{ ucfirst($order->status) }}</span> <span class="pill {{ $order->payment_status==='paid'?'g':'y' }}">{{ ucfirst($order->payment_status) }}</span></b></div>
       </div>
     </div>
 
+    @if($order->payment_method==='card' && $order->payment_status==='paid')
+    <div class="bank reveal" style="background:#e6f9f2;border-color:#bdeedb;color:#0d6a4f"><i class="fa-solid fa-circle-check" style="font-size:18px;margin-top:2px"></i><div><b>Payment received — {{ zorder_price($order, $order->total) }}</b><br>Your card was charged successfully{{ $order->paid_at ? " on ".$order->paid_at->format("d M Y, g:i A") : "" }}. A receipt from Stripe is on its way to {{ $order->customer_email }}.</div></div>
+    @elseif($order->payment_method==='card')
+    <div class="bank reveal"><i class="fa-solid fa-hourglass-half" style="font-size:18px;margin-top:2px"></i><div><b>Payment is being processed</b><br>Your bank is still confirming the payment. We'll email you as soon as it clears — no need to pay again.</div></div>
+    @endif
     @if($order->payment_method==='bank_transfer')
     <div class="bank reveal"><i class="fa-solid fa-circle-info" style="font-size:18px;margin-top:2px"></i><div><b>Bank transfer instructions</b><br>We'll email our account details within 1 business hour. Please transfer <b>{{ zorder_price($order, $order->total) }}</b> within 24 hours and reply with the receipt to confirm your order.</div></div>
     @endif

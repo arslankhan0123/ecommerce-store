@@ -9,7 +9,7 @@ class Order extends Model {
         'order_number','customer_id','customer_email','status','payment_status','payment_method',
         'subtotal','discount','shipping_fee','total',
         'shipping_name','shipping_phone','shipping_address','shipping_city','notes',
-        'currency_code','currency_symbol','exchange_rate',
+        'currency_code','currency_symbol','exchange_rate','payment_intent_id','paid_at',
         'ip_address','ip_country_code','ip_country','ip_region','ip_city',
     ];
 
@@ -19,7 +19,14 @@ class Order extends Model {
         'shipping_fee'  => 'decimal:2',
         'total'         => 'decimal:2',
         'exchange_rate' => 'float',
+        'paid_at'       => 'datetime',
     ];
+
+    /** Human label for the payment method. */
+    public function getPaymentLabelAttribute(): string
+    {
+        return ['cash_on_delivery' => 'Cash on Delivery', 'card' => 'Card (Stripe)', 'bank_transfer' => 'Bank Transfer'][$this->payment_method] ?? ucwords(str_replace('_', ' ', (string) $this->payment_method));
+    }
 
     /** Format a base-currency amount in the currency this order was placed in. */
     public function money($amount): string
@@ -54,6 +61,16 @@ class Order extends Model {
 
     public function items(): HasMany {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function payments(): HasMany {
+        return $this->hasMany(Payment::class)->latest();
+    }
+
+    /** The successful (or latest) payment attempt. */
+    public function getPaymentAttribute(): ?Payment {
+        $list = $this->relationLoaded('payments') ? $this->payments : $this->payments()->get();
+        return $list->firstWhere('status', 'paid') ?: $list->first();
     }
 
     public function getStatusColorAttribute(): string {

@@ -12,7 +12,7 @@ class Setting extends Model
     protected $fillable = ['key', 'value'];
 
     /** Keys stored encrypted at rest. */
-    protected const SECRET_KEYS = ['mail_password'];
+    protected const SECRET_KEYS = ['mail_password', 'stripe_secret_key', 'stripe_webhook_secret'];
 
     public static function defaults(): array
     {
@@ -39,6 +39,12 @@ class Setting extends Model
             'store_instagram'    => '',
             'store_twitter'      => '',
             'store_pinterest'    => '',
+            // Payments
+            'pay_cod_enabled'        => '1',
+            'pay_stripe_enabled'     => '0',
+            'stripe_publishable_key' => '',
+            'stripe_secret_key'      => '',
+            'stripe_webhook_secret'  => '',
         ];
     }
 

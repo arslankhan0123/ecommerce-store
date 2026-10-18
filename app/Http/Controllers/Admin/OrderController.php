@@ -109,11 +109,16 @@ class OrderController extends Controller {
         ]);
 
         $order->items()->createMany($lineItems);
+        $pay = \App\Support\Payments::openAttempt($order);
+        if ($order->payment_status === 'paid') {
+            $order->forceFill(['paid_at' => now()])->save();
+            $pay->forceFill(['status' => 'paid', 'paid_at' => now()])->save();
+        }
         return redirect()->route('admin.orders.show', $order)->with('success', 'Order created successfully.');
     }
 
     public function show(Order $order) {
-        $order->load('customer','items');
+        $order->load('customer','items','payments');
         return view('admin.orders.show', compact('order'));
     }
 
@@ -128,7 +133,20 @@ class OrderController extends Controller {
             'payment_method' => 'required|in:cash_on_delivery,bank_transfer,card,other',
             'notes'          => 'nullable|string',
         ]);
+        $wasPaid = $order->payment_status === 'paid';
         $order->update($request->only('status','payment_status','payment_method','notes'));
+
+        // Keep the payments ledger in step with manual changes (e.g. COD collected, refund issued)
+        $pay = \App\Support\Payments::attemptFor($order);
+        if ($order->payment_status === 'paid' && !$wasPaid) {
+            $order->forceFill(['paid_at' => now()])->save();
+            $pay->forceFill(['status' => 'paid', 'paid_at' => now()])->save();
+        } elseif ($order->payment_status === 'refunded') {
+            $pay->forceFill(['status' => 'refunded'])->save();
+        } elseif ($order->payment_status === 'unpaid' && $wasPaid) {
+            $order->forceFill(['paid_at' => null])->save();
+            $pay->forceFill(['status' => 'pending', 'paid_at' => null])->save();
+        }
         return redirect()->route('admin.orders.show', $order)->with('success', 'Order updated.');
     }
 

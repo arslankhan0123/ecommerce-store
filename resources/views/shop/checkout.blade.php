@@ -44,6 +44,18 @@
 .sum .tot b{font-size:28px;font-weight:800;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .place{width:100%;height:54px;font-size:16px;border-radius:14px;margin-top:16px}
 .secure{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:12px;color:var(--faint)}
+/* Stripe card form */
+.paybox{display:none;margin:-2px 0 14px;padding:18px;border:1.5px solid var(--line-2);border-top:0;border-radius:0 0 14px 14px;background:#fff}
+.payopt.has-form:has(input:checked){border-radius:14px 14px 0 0;margin-bottom:0}
+.payopt.has-form:has(input:checked)+.paybox{display:block;border-color:var(--p);animation:popIn .25s ease}
+.paybox .pe-wrap{min-height:120px;position:relative}
+.paybox .pe-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:13.5px}
+.paybox .pe-err{display:none;margin-top:12px;background:#fdecef;border:1px solid #ffc7d4;color:#b4124b;border-radius:12px;padding:10px 14px;font-size:13px}
+.paybox .pe-note{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--faint)}
+.paybox .pe-note b{color:var(--ink-2)}
+.testmode{display:inline-flex;align-items:center;gap:6px;background:#fff5e0;color:#b36b00;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.payopt .brands{display:flex;gap:4px;margin-top:6px}
+.payopt .brands span{font-size:10px;font-weight:800;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink-2);background:#fff}
 </style>
 @endpush
 
@@ -77,17 +89,29 @@
 
           <div class="card-z reveal" data-delay="1">
             <h3><i class="fa-solid fa-wallet"></i> Payment Method</h3>
-            <label class="payopt">
-              <input type="radio" name="payment_method" value="cash_on_delivery" {{ old('payment_method','cash_on_delivery')==='cash_on_delivery'?'checked':'' }} required>
-              <span class="ic"><i class="fa-solid fa-money-bill-wave"></i></span>
-              <span><b>Cash on Delivery</b><small>Pay in cash when your order arrives at your door.</small></span>
-              <span class="tag">Popular</span>
-            </label>
-            <label class="payopt">
-              <input type="radio" name="payment_method" value="bank_transfer" {{ old('payment_method')==='bank_transfer'?'checked':'' }}>
-              <span class="ic"><i class="fa-solid fa-building-columns"></i></span>
-              <span><b>Bank Transfer</b><small>We'll email bank details after you place the order. Ships once payment clears.</small></span>
-            </label>
+            @php $selected = old('payment_method', array_key_first($methods)); @endphp
+            @forelse($methods as $code => $m)
+              <label class="payopt {{ $code === 'card' ? 'has-form' : '' }}">
+                <input type="radio" name="payment_method" value="{{ $code }}" {{ $selected === $code ? 'checked' : '' }} required>
+                <span class="ic"><i class="fa-solid {{ $m['icon'] }}"></i></span>
+                <span><b>{{ $m['label'] }}@if($code === 'card' && str_starts_with($stripeKey ?? '', 'pk_test_'))<span class="testmode"><i class="fa-solid fa-flask"></i> Test mode</span>@endif</b><small>{{ $m['desc'] }}</small>
+                  @if($code === 'card')<span class="brands"><span>VISA</span><span>Mastercard</span><span>AMEX</span><span>Apple Pay</span><span>G Pay</span></span>@endif
+                </span>
+                @if(!empty($m['tag']))<span class="tag">{{ $m['tag'] }}</span>@endif
+              </label>
+              @if($code === 'card')
+                <div class="paybox" id="stripeBox">
+                  <div class="pe-wrap">
+                    <div class="pe-load" id="peLoad"><i class="fa-solid fa-spinner fa-spin"></i> Loading secure card form…</div>
+                    <div id="paymentElement"></div>
+                  </div>
+                  <div class="pe-err" id="peErr"></div>
+                  <div class="pe-note"><i class="fa-solid fa-lock" style="color:var(--ok)"></i> Encrypted by <b>Stripe</b> — your card number never reaches our servers. You'll be charged <b id="peAmount">{{ zprice(array_sum(array_map(fn($i)=>$i['price']*$i['quantity'],$cart))) }}</b>.</div>
+                </div>
+              @endif
+            @empty
+              <div class="alert-z"><i class="fa-solid fa-circle-exclamation"></i><div>No payment methods are available right now. Please contact us to complete your order.</div></div>
+            @endforelse
           </div>
         </div>
 
@@ -109,7 +133,7 @@
           <div class="row2"><span>Shipping</span><b style="color:var(--ok)">{{ $shipping>0 ? zprice($shipping) : 'Free' }}</b></div>
           <hr>
           <div class="tot"><span>Total</span><b>{{ zprice($subtotal+$shipping) }}</b></div>
-          <button type="submit" class="btn-g place" id="placeBtn"><i class="fa-solid fa-lock"></i> Place Order</button>
+          <button type="submit" class="btn-g place" id="placeBtn" {{ empty($methods) ? 'disabled' : '' }}><i class="fa-solid fa-lock"></i> <span id="placeTxt">Place Order</span></button>
           <div class="secure"><i class="fa-solid fa-shield-halved"></i> Prices & stock are re-verified on our server</div>
           <div style="display:flex;justify-content:center;margin-top:12px">@include('shop.partials.payment-icons', ['size' => 'sm'])</div>
           <a href="{{ route('cart.index') }}" style="display:block;text-align:center;margin-top:14px;font-size:13px;font-weight:700;color:var(--muted)"><i class="fa-solid fa-arrow-left"></i> Back to cart</a>
@@ -121,7 +145,62 @@
 @endsection
 
 @push('scripts')
+@if($stripeKey)<script src="https://js.stripe.com/v3/"></script>@endif
 <script>
-document.getElementById('coForm').addEventListener('submit',function(){const b=document.getElementById('placeBtn');b.disabled=true;b.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Placing order…';});
+(function(){
+  const form=document.getElementById('coForm'), btn=document.getElementById('placeBtn'), txt=document.getElementById('placeTxt');
+  const token=document.querySelector('meta[name=csrf-token]').content;
+  const STRIPE_KEY=@json($stripeKey);
+  const INTENT_URL=@json(route('checkout.stripe.intent'));
+  let stripe=null, elements=null, mounted=false, mounting=false, busy=false;
+
+  const method=()=> (form.querySelector('input[name=payment_method]:checked')||{}).value;
+  const setBusy=(on,label)=>{ busy=on; btn.disabled=on; btn.innerHTML=on?'<i class="fa-solid fa-spinner fa-spin"></i> '+label:'<i class="fa-solid fa-lock"></i> <span id="placeTxt">'+(method()==='card'?'Pay now':'Place Order')+'</span>'; };
+  const showErr=m=>{ const e=document.getElementById('peErr'); if(!e) return; e.textContent=m||''; e.style.display=m?'block':'none'; };
+  const relabel=()=>{ const t=document.getElementById('placeTxt'); if(t) t.textContent=method()==='card'?'Pay now':'Place Order'; };
+
+  async function mountStripe(){
+    if(mounted||mounting||!STRIPE_KEY) return; mounting=true; showErr('');
+    try{
+      const r=await fetch(INTENT_URL,{method:'POST',headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok){ throw new Error(j.message||'Could not start card payment.'); }
+      stripe=Stripe(STRIPE_KEY);
+      const cs=getComputedStyle(document.documentElement);
+      elements=stripe.elements({clientSecret:j.clientSecret,appearance:{theme:'stripe',variables:{colorPrimary:cs.getPropertyValue('--p').trim()||'#6a3df5',borderRadius:'12px',fontFamily:'inherit',fontSizeBase:'14px'}}});
+      const pe=elements.create('payment',{layout:'tabs'});
+      pe.on('ready',()=>{ document.getElementById('peLoad').style.display='none'; mounted=true; });
+      pe.on('loaderror',ev=>{ showErr(ev.error?.message||'Card form failed to load.'); document.getElementById('peLoad').style.display='none'; });
+      pe.mount('#paymentElement');
+    }catch(e){ document.getElementById('peLoad').innerHTML='<i class="fa-solid fa-triangle-exclamation" style="color:#b4124b"></i> '+e.message; }
+    finally{ mounting=false; }
+  }
+
+  form.querySelectorAll('input[name=payment_method]').forEach(r=>r.addEventListener('change',()=>{ relabel(); if(method()==='card') mountStripe(); }));
+  if(method()==='card') mountStripe(); relabel();
+
+  form.addEventListener('submit',async function(ev){
+    if(method()!=='card'){ setBusy(true,'Placing order…'); return; } // normal COD post
+    ev.preventDefault(); if(busy) return;
+    if(!mounted||!stripe||!elements){ showErr('The card form is still loading — one moment.'); return; }
+    showErr(''); setBusy(true,'Checking details…');
+    try{
+      // 1) validate the card form client-side first (cheap, no order yet)
+      const v=await elements.submit(); if(v.error){ throw new Error(v.error.message); }
+      // 2) create the order on our server (re-verifies stock/prices, syncs the amount)
+      const fd=new FormData(form);
+      const r=await fetch(form.action,{method:'POST',headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:fd});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.ok){ throw new Error(j.message||Object.values(j.errors||{}).flat()[0]||'Could not place the order.'); }
+      if(j.redirect){ location.href=j.redirect; return; }
+      // 3) hand off to Stripe — redirects to return_url when the bank needs 3-D Secure
+      setBusy(true,'Confirming payment…');
+      const {error}=await stripe.confirmPayment({elements,confirmParams:{return_url:j.return_url,payment_method_data:{billing_details:{name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),address:{city:fd.get('city'),line1:(fd.get('address')||'').slice(0,200)}}}}});
+      if(error){ // declined / invalid — the same order & payment attempt are reused when they try again
+        showErr(error.message||'Payment failed.'); setBusy(false); return;
+      }
+    }catch(e){ showErr(e.message); setBusy(false); }
+  });
+})();
 </script>
 @endpush

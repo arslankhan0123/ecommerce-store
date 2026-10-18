@@ -55,6 +55,57 @@ class SettingController extends Controller
         return back()->with('success', 'Settings saved successfully.');
     }
 
+    /** PUT /admin/settings/payments */
+    public function updatePayments(Request $request)
+    {
+        $data = $request->validate([
+            'pay_cod_enabled'        => 'nullable|boolean',
+            'pay_stripe_enabled'     => 'nullable|boolean',
+            'stripe_publishable_key' => ['nullable', 'string', 'max:255', 'regex:/^pk_(test|live)_[A-Za-z0-9]+$/'],
+            'stripe_secret_key'      => ['nullable', 'string', 'max:255', 'regex:/^(sk|rk)_(test|live)_[A-Za-z0-9]+$/'],
+            'stripe_webhook_secret'  => ['nullable', 'string', 'max:255', 'regex:/^whsec_[A-Za-z0-9]+$/'],
+        ], [
+            'stripe_publishable_key.regex' => 'The publishable key should start with pk_test_ or pk_live_.',
+            'stripe_secret_key.regex'      => 'The secret key should start with sk_test_ or sk_live_.',
+            'stripe_webhook_secret.regex'  => 'The webhook signing secret should start with whsec_.',
+        ]);
+
+        $data['pay_cod_enabled']    = $request->boolean('pay_cod_enabled') ? '1' : '0';
+        $data['pay_stripe_enabled'] = $request->boolean('pay_stripe_enabled') ? '1' : '0';
+
+        // Blank secret fields keep what is already stored (they are never echoed back to the form)
+        foreach (['stripe_secret_key', 'stripe_webhook_secret'] as $k) {
+            if (($data[$k] ?? '') === '') unset($data[$k]);
+        }
+        $data['stripe_publishable_key'] = trim((string) ($data['stripe_publishable_key'] ?? ''));
+
+        // Clearing the publishable key clears the mode mismatch risk: warn if test/live keys are mixed
+        $pub = $data['stripe_publishable_key'];
+        $sec = $data['stripe_secret_key'] ?? Setting::get('stripe_secret_key', '');
+        if ($pub && $sec && (str_contains($pub, '_test_') !== str_contains($sec, '_test_'))) {
+            return back()->withInput()->with('error', 'Your Stripe publishable key and secret key are from different modes (test vs live). Use a matching pair.');
+        }
+
+        if ($data['pay_cod_enabled'] === '0' && ($data['pay_stripe_enabled'] === '0' || !$pub || !$sec)) {
+            return back()->withInput()->with('error', 'At least one payment method must stay enabled. Turn Cash on Delivery back on or finish the Stripe setup.');
+        }
+
+        Setting::setMany($data);
+
+        // Verify the secret key actually works so a typo is caught here, not at checkout
+        if ($data['pay_stripe_enabled'] === '1') {
+            try {
+                $acct = \App\Support\Payments::stripe('GET', '/v1/balance');
+                $mode = str_contains($pub, '_test_') ? 'test' : 'live';
+                return back()->with('success', "Payment settings saved. Stripe connected in {$mode} mode.");
+            } catch (\Throwable $e) {
+                return back()->with('error', 'Settings saved, but Stripe rejected the secret key: ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', 'Payment settings saved.');
+    }
+
     public function test(Request $request)
     {
         $request->validate(['test_email' => 'required|email']);

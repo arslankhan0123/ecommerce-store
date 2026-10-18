@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\DetectCurrency::class,
         ]);
+        $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
+        // Behind ngrok / a load balancer / Cloudflare: honour X-Forwarded-Proto so URLs are https
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

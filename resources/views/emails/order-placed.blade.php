@@ -23,7 +23,7 @@
     @if($forAdmin)
       <div style="display:inline-block;background:#fff1f5;color:#c2185b;font-weight:700;font-size:12px;padding:5px 12px;border-radius:999px;margin-bottom:12px;">NEW ORDER RECEIVED</div>
       <h1 style="margin:0 0 8px;font-size:26px;letter-spacing:-.5px;">{{ $order->shipping_name }} just placed an order</h1>
-      <p style="margin:0;color:#6b7191;font-size:15px;line-height:1.6;">Total <b style="color:#0f1230;">{{ zorder_price($order, $order->total) }}</b> · {{ $order->payment_method === 'cash_on_delivery' ? 'Cash on Delivery' : ucwords(str_replace('_',' ',$order->payment_method)) }} · {{ $order->created_at->format('d M Y, g:i A') }}</p>
+      <p style="margin:0;color:#6b7191;font-size:15px;line-height:1.6;">Total <b style="color:#0f1230;">{{ zorder_price($order, $order->total) }}</b> · {{ $order->payment_label }}{{ $order->payment_status === 'paid' ? ' (paid)' : '' }} · {{ $order->created_at->format('d M Y, g:i A') }}</p>
     @else
       <div style="display:inline-block;background:#eafaf3;color:#0d8f6a;font-weight:700;font-size:12px;padding:5px 12px;border-radius:999px;margin-bottom:12px;">✓ ORDER CONFIRMED</div>
       <h1 style="margin:0 0 8px;font-size:26px;letter-spacing:-.5px;">Thanks, {{ explode(' ', trim($order->shipping_name))[0] ?? 'there' }}! We've got your order.</h1>
@@ -34,7 +34,7 @@
   {{-- Summary tiles --}}
   <tr><td style="background:#fff;padding:18px 32px;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
-      @foreach([['Order number','#'.$order->order_number],['Placed on',$order->created_at->format('d M Y')],['Payment',$order->payment_method==='cash_on_delivery'?'Cash on Delivery':ucwords(str_replace('_',' ',$order->payment_method))],['Status',ucfirst($order->status)]] as [$l,$v])
+      @foreach([['Order number','#'.$order->order_number],['Placed on',$order->created_at->format('d M Y')],['Payment',$order->payment_label.($order->payment_status==='paid'?' — paid':'')],['Status',ucfirst($order->status)]] as [$l,$v])
       <td width="25%" style="padding:4px;"><div style="background:#f6f7fc;border-radius:12px;padding:12px 10px;"><div style="font-size:10px;color:#9aa0bd;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">{{ $l }}</div><div style="font-size:13px;font-weight:700;margin-top:3px;">{{ $v }}</div></div></td>
       @endforeach
     </tr></table>
@@ -79,6 +79,7 @@
             ○ Delivered in 2–5 business days<br>
             @if($order->payment_method==='cash_on_delivery')○ Pay <b style="color:#0f1230;">{{ zorder_price($order, $order->total) }}</b> in cash on delivery @endif
             @if($order->payment_method==='bank_transfer')○ Bank details will follow by email @endif
+            @if($order->payment_method==='card')○ Paid by card — nothing more to do @endif
           </div>
         </div>
       </td>

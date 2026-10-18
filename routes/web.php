@@ -7,10 +7,12 @@ use App\Http\Controllers\Admin\ImportExportController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Shop\ShopController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
 use App\Http\Controllers\Shop\LocationController;
+use App\Http\Controllers\Shop\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // ── Storefront ──────────────────────────────────────────────────────────────
@@ -31,6 +33,9 @@ Route::get('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 // ── Checkout ────────────────────────────────────────────────────────────────
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::post('/checkout/stripe/intent', [CheckoutController::class, 'stripeIntent'])->name('checkout.stripe.intent');
+Route::get('/checkout/stripe/return/{orderNumber}', [CheckoutController::class, 'stripeReturn'])->name('checkout.stripe.return');
+Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
 Route::get('/order-confirmation/{orderNumber}', [CheckoutController::class, 'confirmation'])->name('order.confirmation');
 Route::get('/order/{orderNumber}/invoice', [CheckoutController::class, 'invoice'])->name('order.invoice');
 
@@ -87,6 +92,13 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-email', [SettingController::class, 'test'])->name('settings.test');
+    Route::put('/settings/payments', [SettingController::class, 'updatePayments'])->name('settings.payments');
+
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
+        Route::post('/{payment}/sync', [PaymentController::class, 'sync'])->name('sync');
+    });
 
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');

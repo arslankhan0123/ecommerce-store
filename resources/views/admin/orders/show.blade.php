@@ -139,12 +139,33 @@
                 @php $sc = $order->status_color; $pc = $order->payment_status_color; @endphp
                 <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Status</span><span class="badge-{{ $sc }}">{{ ucfirst($order->status) }}</span></div>
                 <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Payment</span><span class="badge-{{ $pc }}">{{ ucfirst($order->payment_status) }}</span></div>
-                <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Method</span><span class="text-gray-700 font-medium">{{ ucwords(str_replace('_',' ',$order->payment_method)) }}</span></div>
+                <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Method</span><span class="text-gray-700 font-medium">{{ $order->payment_label }}</span></div>
+                @if($order->paid_at)<div class="flex justify-between items-center text-sm"><span class="text-gray-500">Paid at</span><span class="text-gray-700 font-medium">{{ $order->paid_at->format('M d, Y · h:i A') }}</span></div>@endif
+                @if($order->payment_intent_id)<div class="flex justify-between items-center text-sm gap-2"><span class="text-gray-500 shrink-0">Stripe ref</span><a href="https://dashboard.stripe.com/{{ str_starts_with((string) \App\Support\Payments::stripePublishableKey(), 'pk_test_') ? 'test/' : '' }}payments/{{ $order->payment_intent_id }}" target="_blank" rel="noopener" class="font-mono text-xs text-indigo-600 hover:underline truncate">{{ $order->payment_intent_id }}</a></div>@endif
                 <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Currency</span><span class="text-gray-700 font-medium">{{ $order->currency_code ?? '—' }} <span class="text-gray-400">({{ $order->currency_symbol }})</span></span></div>
                 @if($order->currency_code && $order->currency_code !== config('currencies.base'))
                 <p class="text-[11px] text-gray-400 leading-snug">Charged as shown to the customer at checkout. Rate used: 1 {{ config('currencies.base') }} = {{ rtrim(rtrim(number_format((float) $order->exchange_rate, 6), '0'), '.') }} {{ $order->currency_code }}.</p>
                 @endif
             </div>
+
+            @php $pay = $order->payment; @endphp
+            @if($pay && ($pay->card_last4 || $pay->provider === 'stripe'))
+            <div class="bg-white rounded-2xl p-5" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+                <div class="flex items-center justify-between mb-3"><p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Card used</p><a href="{{ route('admin.payments.show', $pay) }}" class="text-xs text-indigo-600 hover:underline">Details →</a></div>
+                @if($pay->card_last4)
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center h-7 px-2 rounded-md text-[10px] font-extrabold uppercase tracking-wide {{ ['visa'=>'bg-blue-50 text-blue-700','mastercard'=>'bg-orange-50 text-orange-700','amex'=>'bg-sky-50 text-sky-700'][$pay->card_brand] ?? 'bg-gray-100 text-gray-600' }}">{{ $pay->card_brand }}</span>
+                    <div><p class="font-mono font-semibold text-gray-800">•••• •••• •••• {{ $pay->card_last4 }}</p><p class="text-xs text-gray-400">Exp {{ $pay->card_expiry }}@if($pay->card_funding) · {{ ucfirst($pay->card_funding) }}@endif @if($pay->card_country) · {{ $pay->card_country }}@endif @if($pay->card_wallet) · {{ ucwords(str_replace('_',' ',$pay->card_wallet)) }}@endif</p></div>
+                </div>
+                @if($pay->card_id)<p class="text-xs text-gray-500 mt-2">Card ID: <span class="font-mono font-bold text-indigo-700">{{ $pay->card_id }}</span></p>@endif
+                @if($pay->cardholder_name)<p class="text-xs text-gray-500 mt-1">Name on card: <b class="text-gray-700">{{ $pay->cardholder_name }}</b></p>@endif
+                @if($pay->risk_level)<p class="text-xs text-gray-500 mt-1">Radar risk: <span class="badge-{{ ['normal'=>'green','elevated'=>'yellow','highest'=>'red'][$pay->risk_level] ?? 'gray' }}">{{ ucfirst($pay->risk_level) }}</span></p>@endif
+                @else
+                <p class="text-xs text-gray-400">No card captured yet.</p>
+                @endif
+                @if($pay->failure_message)<p class="text-xs text-red-500 mt-2">{{ $pay->failure_message }}</p>@endif
+            </div>
+            @endif
 
             @if($order->customer)
             <div class="bg-white rounded-2xl p-5" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">

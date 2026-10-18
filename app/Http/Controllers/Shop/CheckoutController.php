@@ -7,6 +7,8 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Support\Currency;
+use App\Support\Payments;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +23,48 @@ class CheckoutController extends Controller
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('cart_error', 'Your cart is empty.');
         }
-        return view('shop.checkout', compact('cart'));
+        return view('shop.checkout', [
+            'cart'          => $cart,
+            'methods'       => Payments::enabledMethods(),
+            'stripeKey'     => Payments::stripeReady() ? Payments::stripePublishableKey() : null,
+        ]);
+    }
+
+    /**
+     * POST /checkout/stripe/intent — create (or refresh) a PaymentIntent for the current cart
+     * so the card form can be shown before the order exists. Returns only the client_secret.
+     */
+    public function stripeIntent(Request $request)
+    {
+        if (!Payments::stripeReady()) {
+            return response()->json(['message' => 'Card payments are not available.'], 422);
+        }
+        $cart = session('cart', []);
+        if (empty($cart)) {
+            return response()->json(['message' => 'Your cart is empty.'], 422);
+        }
+
+        $total    = array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $cart));
+        $currency = Currency::current();
+        $amount   = Payments::minorUnits((float) $total, $currency['code'], (float) $currency['rate']);
+        if ($amount < 50) { // Stripe minimum is ~0.50 USD
+            return response()->json(['message' => 'Order total is below the card payment minimum.'], 422);
+        }
+
+        try {
+            $existing = session('stripe_intent');
+            if ($existing && ($existing['currency'] ?? '') === $currency['code']) {
+                $pi = Payments::updateIntent($existing['id'], ['amount' => $amount]);
+            } else {
+                $pi = Payments::createIntent($amount, $currency['code'], ['session' => substr(session()->getId(), 0, 40)]);
+            }
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        session(['stripe_intent' => ['id' => $pi['id'], 'currency' => $currency['code'], 'amount' => $amount]]);
+
+        return response()->json(['clientSecret' => $pi['client_secret'], 'amount' => $amount, 'currency' => $currency['code']]);
     }
 
     /** POST /checkout */
@@ -33,21 +76,53 @@ class CheckoutController extends Controller
             'phone'   => 'required|string|max:30',
             'address' => 'required|string|max:400',
             'city'    => 'required|string|max:100',
-            'payment_method' => 'required|in:cash_on_delivery,bank_transfer',
+            'payment_method' => 'required|in:' . implode(',', array_keys(Payments::enabledMethods())),
         ]);
+        $wantsJson = $request->expectsJson();
+        $isCard    = $request->payment_method === Payments::STRIPE;
 
         $cart = session('cart', []);
         if (empty($cart)) {
-            return redirect()->route('cart.index')->with('cart_error', 'Your cart is empty.');
+            return $wantsJson
+                ? response()->json(['message' => 'Your cart is empty.'], 422)
+                : redirect()->route('cart.index')->with('cart_error', 'Your cart is empty.');
         }
 
         // ── Prevent duplicate order on refresh ──────────────────────────
-        $fingerprint = md5(json_encode($cart) . $request->email . $request->address);
+        $fingerprint = md5(json_encode($cart) . $request->email . $request->address . $request->payment_method);
         if (session('last_order_fingerprint') === $fingerprint) {
             $orderId = session('last_order_id');
             if ($orderId && ($existing = Order::find($orderId))) {
-                return redirect()->route('order.confirmation', $existing->order_number);
+                if ($existing->payment_method === Payments::STRIPE && $existing->payment_status !== 'paid' && $existing->status !== 'cancelled') {
+                    $intent = session('stripe_intent');
+                    if (!empty($intent['id']) && $intent['id'] === $existing->payment_intent_id) {
+                        // Same card attempt being retried (e.g. first card declined) — reuse the order
+                        $return = route('checkout.stripe.return', $existing->order_number);
+                        return $wantsJson
+                            ? response()->json(['ok' => true, 'confirm' => true, 'return_url' => $return, 'order' => $existing->order_number])
+                            : redirect()->to($return);
+                    }
+                    // Different attempt — release the old one and start fresh below
+                    Payments::cancelAndRestock($existing);
+                } elseif ($existing->status !== 'cancelled') {
+                    return $wantsJson
+                        ? response()->json(['ok' => true, 'redirect' => route('order.confirmation', $existing->order_number)])
+                        : redirect()->route('order.confirmation', $existing->order_number);
+                }
             }
+        }
+
+        // Any earlier card attempt that was never paid is stale by now — release its stock
+        if (($prevId = session('last_order_id')) && ($prev = Order::find($prevId))
+            && $prev->payment_method === Payments::STRIPE && $prev->payment_status !== 'paid' && $prev->status !== 'cancelled') {
+            Payments::cancelAndRestock($prev);
+        }
+
+        // Card payments need a PaymentIntent prepared by the checkout page
+        $intent = session('stripe_intent');
+        if ($isCard && (!Payments::stripeReady() || empty($intent['id']))) {
+            $msg = 'Card payment could not be started. Please reload the page and try again.';
+            return $wantsJson ? response()->json(['message' => $msg], 422) : back()->withInput()->with('checkout_error', $msg);
         }
 
         // Currency the customer is looking at + where their IP says they are (for fraud checks)
@@ -60,7 +135,7 @@ class CheckoutController extends Controller
         }
 
         try {
-            $order = DB::transaction(function () use ($request, $cart, $currency, $ip, $geo) {
+            $order = DB::transaction(function () use ($request, $cart, $currency, $ip, $geo, $isCard, $intent) {
 
                 $subtotal    = 0;
                 $lineItems   = [];
@@ -116,6 +191,7 @@ class CheckoutController extends Controller
                     'status'           => 'pending',
                     'payment_status'   => 'unpaid',
                     'payment_method'   => $request->payment_method,
+                    'payment_intent_id'=> $isCard ? $intent['id'] : null,
                     'subtotal'         => $subtotal,
                     'discount'         => 0,
                     'shipping_fee'     => $shippingFee,
@@ -138,27 +214,108 @@ class CheckoutController extends Controller
                 ]);
 
                 $order->items()->createMany($lineItems);
+                Payments::openAttempt($order);
 
                 return $order;
             });
 
-            // ── Success ──────────────────────────────────────────────────
-            session()->forget('cart');
             session(['last_order_fingerprint' => $fingerprint, 'last_order_id' => $order->id]);
 
+            if ($isCard) {
+                // Sync the final server-side total onto the intent, then let the browser confirm the card.
+                $amount = Payments::minorUnits((float) $order->total, $order->currency_code, (float) $order->exchange_rate);
+                try {
+                    Payments::updateIntent($intent['id'], [
+                        'amount'                 => $amount,
+                        'receipt_email'          => $order->customer_email,
+                        'metadata[order_number]' => $order->order_number,
+                        'metadata[order_id]'     => $order->id,
+                        'description'            => Setting::get('store_name', 'Zelari') . ' order ' . $order->order_number,
+                    ]);
+                } catch (\RuntimeException $e) {
+                    Payments::cancelAndRestock($order);
+                    throw $e;
+                }
+                $return = route('checkout.stripe.return', $order->order_number);
+                return $wantsJson
+                    ? response()->json(['ok' => true, 'confirm' => true, 'return_url' => $return, 'order' => $order->order_number])
+                    : redirect()->to($return);
+            }
+
+            // ── COD: done ───────────────────────────────────────────────
+            session()->forget(['cart', 'stripe_intent']);
             $this->sendOrderEmails($order);
 
-            return redirect()->route('order.confirmation', $order->order_number);
+            return $wantsJson
+                ? response()->json(['ok' => true, 'redirect' => route('order.confirmation', $order->order_number)])
+                : redirect()->route('order.confirmation', $order->order_number);
 
         } catch (\Exception $e) {
-            return back()->withInput()->with('checkout_error', $e->getMessage());
+            return $wantsJson
+                ? response()->json(['message' => $e->getMessage()], 422)
+                : back()->withInput()->with('checkout_error', $e->getMessage());
         }
+    }
+
+    /**
+     * GET /checkout/stripe/return/{orderNumber} — Stripe sends the customer back here after
+     * the card step. We never trust the query string: the intent is re-read from Stripe.
+     */
+    public function stripeReturn(string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+        if ((int) session('last_order_id') !== (int) $order->id) {
+            abort(403);
+        }
+        if ($order->payment_status === 'paid') {
+            session()->forget(['cart', 'stripe_intent']);
+            return redirect()->route('order.confirmation', $order->order_number);
+        }
+        if (!$order->payment_intent_id) {
+            return redirect()->route('checkout.index')->with('checkout_error', 'No card payment was started for this order.');
+        }
+
+        try {
+            $pi = Payments::retrieveIntent($order->payment_intent_id);
+        } catch (\RuntimeException $e) {
+            return redirect()->route('checkout.index')->with('checkout_error', 'We could not verify your payment yet. If your card was charged, we will confirm the order by email shortly.');
+        }
+
+        $status = $pi['status'] ?? 'unknown';
+
+        if ($status === 'succeeded') {
+            if (Payments::markPaid($order, $pi['id'])) {
+                $this->sendOrderEmails($order);
+            }
+            session()->forget(['cart', 'stripe_intent']);
+            return redirect()->route('order.confirmation', $order->order_number);
+        }
+
+        if ($status === 'processing') {
+            // e.g. some bank debits — order stays unpaid until the webhook confirms
+            session()->forget(['cart', 'stripe_intent']);
+            return redirect()->route('order.confirmation', $order->order_number)->with('payment_processing', true);
+        }
+
+        // requires_payment_method / canceled / requires_action abandoned → free the stock, let them retry
+        Payments::markFailed($order, 'failed', $pi['last_payment_error']['message'] ?? 'Payment not completed', $pi);
+        Payments::cancelAndRestock($order);
+        session()->forget('stripe_intent');
+        $reason = $pi['last_payment_error']['message'] ?? 'Your card was not charged.';
+        return redirect()->route('checkout.index')->with('checkout_error', 'Payment was not completed — ' . $reason . ' Please try again or choose another method.');
     }
 
     /** GET /order-confirmation/{orderNumber} */
     public function confirmation(string $orderNumber)
     {
         $order = $this->findSessionOrder($orderNumber);
+        // A card order that hasn't been paid yet is not confirmed: re-check with Stripe first
+        if ($order->payment_method === Payments::STRIPE && $order->payment_status !== 'paid' && !session('payment_processing')) {
+            if ($order->status === 'cancelled') {
+                return redirect()->route('checkout.index')->with('checkout_error', 'That card payment was not completed. Please place the order again.');
+            }
+            return redirect()->route('checkout.stripe.return', $order->order_number);
+        }
         return view('shop.confirmation', compact('order'));
     }
 
@@ -188,6 +345,12 @@ class CheckoutController extends Controller
             abort(403);
         }
         return $order;
+    }
+
+    /** Called by the webhook: emails after an out-of-band success. */
+    public function notifyPaid(Order $order): void
+    {
+        $this->sendOrderEmails($order);
     }
 
     private function storeDetails(): array
