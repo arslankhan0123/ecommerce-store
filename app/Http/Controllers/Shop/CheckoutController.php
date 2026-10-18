@@ -196,8 +196,10 @@ class CheckoutController extends Controller
             if ($admin = Setting::get('mail_admin_address')) {
                 Mail::to($admin)->send(new OrderPlaced($order, true));
             }
+            Setting::recordMailResult(null);
         } catch (\Throwable $e) {
             report($e);
+            Setting::recordMailResult('Order #' . $order->order_number . ': ' . $e->getMessage());
         }
     }
 }

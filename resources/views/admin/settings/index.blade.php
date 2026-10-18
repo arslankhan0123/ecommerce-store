@@ -29,6 +29,24 @@
                 </span>
             </div>
 
+            @if(!empty($s['mail_last_error']))
+            <div class="mb-5 p-4 rounded-xl border border-red-200 bg-red-50">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                    <div class="text-sm">
+                        <div class="font-semibold text-red-700">Last email attempt failed @if(!empty($s['mail_last_at']))<span class="font-normal text-red-500">({{ $s['mail_last_at'] }})</span>@endif</div>
+                        <div class="text-red-600 mt-1 font-mono text-xs break-all">{{ $s['mail_last_error'] }}</div>
+                        <div class="text-red-500 text-xs mt-2">Common fixes: port <b>465</b> for SSL or <b>587</b> for TLS · username must be the full email · for Gmail use an App password · check the host spelling.</div>
+                    </div>
+                </div>
+            </div>
+            @elseif(!empty($s['mail_last_at']))
+            <div class="mb-5 p-3 rounded-xl border border-green-200 bg-green-50 text-sm text-green-700 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Last email sent successfully at {{ $s['mail_last_at'] }}.
+            </div>
+            @endif
+
             <form method="POST" action="{{ route('admin.settings.update') }}">
                 @csrf @method('PUT')
 
@@ -51,11 +69,12 @@
                     </div>
                     <div>
                         <label class="form-label">Encryption</label>
-                        <select name="mail_encryption" class="form-input">
+                        <select name="mail_encryption" class="form-input" x-data @change="const p=$el.closest('form').querySelector('[name=mail_port]'); if($el.value==='ssl') p.value=465; else if($el.value==='tls') p.value=587;">
                             <option value="tls"  {{ ($s['mail_encryption'] ?? 'tls') === 'tls' ? 'selected' : '' }}>TLS / STARTTLS (port 587)</option>
                             <option value="ssl"  {{ ($s['mail_encryption'] ?? '') === 'ssl' ? 'selected' : '' }}>SSL (port 465)</option>
                             <option value="none" {{ ($s['mail_encryption'] ?? '') === 'none' ? 'selected' : '' }}>None</option>
                         </select>
+                        <p class="text-gray-400 text-xs mt-1.5">The port decides the mode: 465 = SSL, anything else = TLS/STARTTLS.</p>
                     </div>
                     <div>
                         <label class="form-label">SMTP Host <span class="text-red-500">*</span></label>
@@ -80,6 +99,15 @@
                             </button>
                         </div>
                         <p class="text-gray-400 text-xs mt-1.5">Stored encrypted. For Gmail, create an <b>App password</b> (Google Account → Security → 2-Step Verification → App passwords).</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+                            <input type="checkbox" name="mail_verify_peer" value="1" class="w-5 h-5 mt-0.5 rounded text-indigo-600" {{ ($s['mail_verify_peer'] ?? '1') === '1' ? 'checked' : '' }}>
+                            <div>
+                                <div class="font-semibold text-gray-800 text-sm">Verify TLS certificate</div>
+                                <div class="text-gray-500 text-xs">Keep on for production. Turn off only on a local/dev machine if you get "handshake" or "certificate verify failed" errors (antivirus SSL scanning, missing CA bundle).</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
 

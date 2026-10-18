@@ -22,6 +22,7 @@ class Setting extends Model
             'mail_host'          => '',
             'mail_port'          => '587',
             'mail_encryption'    => 'tls',
+            'mail_verify_peer'   => '1',
             'mail_username'      => '',
             'mail_password'      => '',
             'mail_from_address'  => '',
@@ -80,6 +81,15 @@ class Setting extends Model
         }
     }
 
+    /** Remember the outcome of the last send attempt (shown on the settings page). */
+    public static function recordMailResult(?string $error): void
+    {
+        try {
+            static::set('mail_last_error', $error ? mb_substr($error, 0, 500) : '');
+            static::set('mail_last_at', now()->toDateTimeString());
+        } catch (\Throwable) {}
+    }
+
     /** Push the saved SMTP settings into the runtime mail config. Returns true when mail is configured. */
     public static function applyMailConfig(): bool
     {
@@ -91,16 +101,24 @@ class Setting extends Model
         if ($mailer === 'smtp' && empty($s['mail_host'])) {
             return false; // nothing configured yet
         }
-        $scheme = ($s['mail_encryption'] ?? 'tls') === 'ssl' ? 'smtps' : 'smtp';
+        $port = (int) ($s['mail_port'] ?: 587);
+        // Implicit TLS ("SSL") only works on 465; every other port uses STARTTLS/plain, which
+        // Symfony negotiates automatically. Picking by port avoids a mismatched dropdown breaking mail.
+        $scheme = $port === 465 ? 'smtps' : 'smtp';
         config([
             'mail.default'                   => $mailer,
+            'mail.mailers.smtp.transport'    => 'smtp',
             'mail.mailers.smtp.scheme'       => $scheme,
-            'mail.mailers.smtp.host'         => $s['mail_host'],
-            'mail.mailers.smtp.port'         => (int) ($s['mail_port'] ?: 587),
-            'mail.mailers.smtp.username'     => $s['mail_username'] ?: null,
-            'mail.mailers.smtp.password'     => $s['mail_password'] ?: null,
+            'mail.mailers.smtp.url'          => null,
+            'mail.mailers.smtp.host'         => trim($s['mail_host']),
+            'mail.mailers.smtp.port'         => $port,
+            'mail.mailers.smtp.username'     => $s['mail_username'] !== '' ? trim($s['mail_username']) : null,
+            'mail.mailers.smtp.password'     => $s['mail_password'] !== '' ? $s['mail_password'] : null,
+            'mail.mailers.smtp.timeout'      => 60,
+            'mail.mailers.smtp.verify_peer'  => (($s['mail_verify_peer'] ?? '1') === '1'),
+            'mail.mailers.smtp.auto_tls'     => true,
             'mail.from.address'              => $s['mail_from_address'] ?: ($s['mail_username'] ?: 'no-reply@zelari.com'),
-            'mail.from.name'                 => $s['mail_from_name'] ?: 'Zelari',
+            'mail.from.name'                 => $s['mail_from_name'] ?: ($s['store_name'] ?? 'Zelari'),
         ]);
         // Forget any resolved mailer so the new config is used
         app('mail.manager')->forgetMailers();
