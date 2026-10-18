@@ -382,8 +382,8 @@ body.drawer-open .drawer{transform:none}
     <div class="topbar-loc"><i class="fa-solid fa-location-dot"></i><span>Gulberg III, Lahore, Pakistan</span></div>
     <div class="topbar-marquee">
       <span>
-        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i>Use code <em>ZELARI10</em> for 10% off your first order<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>
-        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i>Use code <em>ZELARI10</em> for 10% off your first order<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>
+        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
+        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
       </span>
     </div>
   </div>

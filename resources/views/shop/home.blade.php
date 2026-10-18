@@ -101,31 +101,53 @@
 .ctile:hover small i{transform:translateX(4px)}
 .ctile:hover{color:#fff}
 
-/* ═══════════ CASHBACK STRIP ═══════════ */
-.cash{position:relative;overflow:hidden;border-radius:var(--r-lg);background:linear-gradient(90deg,#1e9a7a,#0f766e 50%,#115e59);color:#fff;padding:30px 24px;text-align:center}
-.cash.ai{background:#4c2fd9}
-.cash .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.cash .shade{position:absolute;inset:0;z-index:0;background:linear-gradient(100deg,rgba(106,61,245,.92) 0%,rgba(124,77,255,.8) 45%,rgba(14,165,233,.85) 100%)}
-.cash>*:not(.bg):not(.shade){position:relative;z-index:1}
-.cash h3{font-size:clamp(20px,3vw,30px);font-weight:800;margin:0 0 10px;letter-spacing:-.5px;position:relative}
-.cash .code{display:inline-flex;align-items:center;gap:10px;border:1.5px dashed rgba(255,255,255,.7);border-radius:999px;padding:7px 18px;font-size:13px;font-weight:700;position:relative;cursor:pointer;background:rgba(255,255,255,.1)}
-.cash .code:hover{background:rgba(255,255,255,.2)}
-.cash .fl{position:absolute;font-size:34px;opacity:.9;animation:floatY 5s ease-in-out infinite;filter:drop-shadow(0 10px 14px rgba(0,0,0,.25))}
+/* ═══════════ PROMO BANNER ═══════════ */
+.promo-wide{position:relative;overflow:hidden;border-radius:var(--r-lg);min-height:300px;display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center;padding:40px 44px;color:#fff;box-shadow:var(--shadow-lg)}
+@media(max-width:992px){.promo-wide{grid-template-columns:1fr;padding:30px 24px}}
+.promo-wide .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transform:scale(1.03);transition:transform 8s ease-out}
+.promo-wide:hover .bg{transform:scale(1.1)}
+.promo-wide .shade{position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(14,12,40,.94) 0%,rgba(76,47,217,.82) 45%,rgba(14,165,233,.55) 100%)}
+.promo-wide>*:not(.bg):not(.shade){position:relative;z-index:1}
+.pw-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;backdrop-filter:blur(6px);margin-bottom:14px}
+.pw-eyebrow i{color:#67e8f9}
+.promo-wide h3{font-size:clamp(24px,3.2vw,40px);font-weight:800;letter-spacing:-1px;line-height:1.1;margin:0 0 12px;text-shadow:0 6px 30px rgba(0,0,0,.35)}
+.promo-wide h3 span{background:linear-gradient(90deg,#c4b5fd,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.promo-wide p{font-size:15px;color:rgba(255,255,255,.85);max-width:520px;margin:0 0 20px;line-height:1.65}
+.pw-ctas{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.pw-ghost{display:inline-flex;align-items:center;gap:8px;color:#fff;font-weight:700;font-size:14.5px;padding:12px 20px;border-radius:12px;border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.08);backdrop-filter:blur(8px);transition:.2s}
+.pw-ghost:hover{background:#fff;color:var(--ink)}
+.pw-perks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.pw-perks{grid-template-columns:1fr}}
+.pw-perks div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);border-radius:16px;padding:16px;transition:transform .3s,background .3s}
+.pw-perks div:hover{transform:translateY(-4px);background:rgba(255,255,255,.18)}
+.pw-perks i{width:38px;height:38px;border-radius:11px;background:var(--grad);display:grid;place-items:center;font-size:15px;margin-bottom:10px;box-shadow:0 8px 18px -8px rgba(106,61,245,.9)}
+.pw-perks b{display:block;font-size:14px}
+.pw-perks small{font-size:12px;color:rgba(255,255,255,.75)}
 
 /* ═══════════ COUNTDOWN ═══════════ */
-.cd{position:relative;overflow:hidden;border-radius:var(--r-lg);background:#fff1f5;padding:32px 36px;display:flex;align-items:center;justify-content:center;gap:34px;flex-wrap:wrap;border:1px solid #ffd6e2}
-.cd .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.cd .shade{position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(255,241,245,.97) 0%,rgba(255,241,245,.9) 50%,rgba(255,241,245,.7) 100%)}
+.cd{position:relative;overflow:hidden;border-radius:var(--r-lg);background:#12102e;color:#fff;display:grid;grid-template-columns:1.1fr auto 1fr;gap:28px;align-items:center;padding:34px 44px;min-height:220px;box-shadow:var(--shadow-lg)}
+@media(max-width:1100px){.cd{grid-template-columns:1fr auto;}.cd .cd-art{display:none}}
+@media(max-width:768px){.cd{grid-template-columns:1fr;padding:26px 22px;text-align:center}.cd-timer{justify-content:center}}
+.cd .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.9}
+.cd .shade{position:absolute;inset:0;z-index:0;background:linear-gradient(90deg,rgba(14,12,40,.97) 0%,rgba(14,12,40,.92) 40%,rgba(76,47,217,.55) 75%,rgba(255,77,125,.25) 100%)}
 .cd>*:not(.bg):not(.shade){position:relative;z-index:1}
-.cd h3{font-size:clamp(22px,3vw,32px);font-weight:800;margin:0 0 4px;letter-spacing:-.5px}
-.cd h3 span{color:var(--sale)}
-.cd p{margin:0;color:var(--muted);font-size:14px}
+.cd-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,77,125,.18);border:1px solid rgba(255,77,125,.45);color:#ffb3c7;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px}
+.cd-eyebrow i{color:var(--sale);animation:pulseGlow 2.2s infinite;border-radius:50%}
+.cd h3{font-size:clamp(24px,3vw,38px);font-weight:800;margin:0 0 8px;letter-spacing:-1px;line-height:1.1}
+.cd h3 span{background:linear-gradient(90deg,#ff6b96,#ffb86b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cd p{margin:0 0 18px;color:rgba(255,255,255,.75);font-size:14.5px;max-width:420px}
 .cd-timer{display:flex;gap:10px;align-items:center}
-.cd-box{width:66px;height:66px;border-radius:14px;background:var(--sale);color:#fff;display:grid;place-items:center;font-size:26px;font-weight:800;position:relative;box-shadow:0 14px 30px -12px rgba(255,77,125,.9);transform-style:preserve-3d;animation:floatY2 4s ease-in-out infinite}
-.cd-box:nth-child(2){animation-delay:-1s}.cd-box:nth-child(3){animation-delay:-2s}.cd-box:nth-child(4){animation-delay:-3s}
-.cd-box small{position:absolute;bottom:-20px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em}
-.cd-sep{font-size:22px;font-weight:800;color:var(--sale)}
-.cd .fl{position:absolute;font-size:40px;opacity:.5;animation:floatY 6s ease-in-out infinite}
+.cd-box{width:74px;height:78px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;overflow:hidden}
+.cd-box::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,255,255,.12)}
+.cd-box span{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1;background:linear-gradient(180deg,#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.cd-box small{font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.6)}
+.cd-sep{font-size:26px;font-weight:800;color:rgba(255,255,255,.45);margin-top:-14px;animation:blink 1s steps(2) infinite}
+@keyframes blink{to{opacity:.2}}
+.cd-art{position:relative;height:190px;display:flex;align-items:center;justify-content:flex-end}
+.cd-art .tag{position:absolute;right:0;top:0;background:var(--sale);color:#fff;font-weight:800;font-size:13px;padding:8px 14px;border-radius:12px;box-shadow:0 12px 26px -10px rgba(255,77,125,.9);transform:rotate(6deg);animation:floatY2 4s ease-in-out infinite}
+.cd-art .card{width:210px;height:170px;border-radius:22px;overflow:hidden;border:4px solid rgba(255,255,255,.9);box-shadow:0 30px 60px -20px rgba(0,0,0,.6);transform:rotate(-6deg);animation:floatY 6s ease-in-out infinite;background:#fff}
+.cd-art .card img{width:100%;height:100%;object-fit:cover;display:block}
+.cd .btn-sale{margin-top:14px}
 
 /* ═══════════ PRODUCT SLIDER ═══════════ */
 .pslider{overflow:visible}
@@ -287,14 +309,25 @@
   </div>
 </section>
 
-{{-- ═══════════ CASHBACK ═══════════ --}}
+{{-- ═══════════ PROMO BANNER ═══════════ --}}
 <section class="wrap">
-  <div class="cash ai reveal">
-    <img class="bg" src="{{ zbg('cash') }}" alt="" loading="lazy"><span class="shade"></span>
-    <span class="fl" style="left:4%;top:18%">🎁</span><span class="fl" style="left:14%;bottom:10%;animation-delay:-2s">💜</span>
-    <span class="fl" style="right:5%;top:14%;animation-delay:-1s">⚡</span><span class="fl" style="right:15%;bottom:10%;animation-delay:-3s">🛒</span>
-    <h3>Get PKR 300 Cashback! Min Order of PKR 3,000</h3>
-    <span class="code" onclick="navigator.clipboard&&navigator.clipboard.writeText('ZELARI300');zToast('Code ZELARI300 copied')"><i class="fa-regular fa-copy"></i> Use Code : ZELARI300</span>
+  <div class="promo-wide reveal">
+    <img class="bg" src="{{ zbg('hero3', 1800) }}" alt="" loading="lazy"><span class="shade"></span>
+    <div class="pw-text">
+      <span class="pw-eyebrow"><i class="fa-solid fa-truck-fast"></i> Free delivery over PKR 3,000</span>
+      <h3>Everything you love,<br><span>delivered to your door</span></h3>
+      <p>Thousands of products, honest prices and cash on delivery across Pakistan. Pay when it arrives — no risk, no hassle.</p>
+      <div class="pw-ctas">
+        <a href="{{ route('shop.index') }}" class="btn-sale" style="padding:13px 24px;font-size:15px">Start shopping <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="{{ route('shop.index',['on_sale'=>1]) }}" class="pw-ghost"><i class="fa-solid fa-bolt"></i> Today's deals</a>
+      </div>
+    </div>
+    <div class="pw-perks">
+      <div><i class="fa-solid fa-money-bill-wave"></i><b>Cash on delivery</b><small>Pay at your doorstep</small></div>
+      <div><i class="fa-solid fa-rotate-left"></i><b>7-day returns</b><small>Changed your mind? No problem</small></div>
+      <div><i class="fa-solid fa-shield-halved"></i><b>Secure checkout</b><small>Prices verified on our server</small></div>
+      <div><i class="fa-solid fa-headset"></i><b>24/7 support</b><small>Real people, fast replies</small></div>
+    </div>
   </div>
 </section>
 
@@ -315,13 +348,15 @@
 @endif
 
 {{-- ═══════════ COUNTDOWN ═══════════ --}}
+@php $dealImg = $deals->first() ? $deals->first()->display_image : zbg('promo2', 800); @endphp
 <section class="wrap">
   <div class="cd reveal" data-countdown data-end="{{ now()->endOfWeek()->getTimestamp() * 1000 }}">
-    <img class="bg" src="{{ zbg('deal') }}" alt="" loading="lazy"><span class="shade"></span>
-    <span class="fl" style="left:3%;top:10%">🍓</span><span class="fl" style="right:4%;bottom:8%;animation-delay:-3s">🍋</span>
-    <div style="text-align:center">
-      <h3>Special Offers <span>of the week!</span></h3>
-      <p>Special offer on this discount, hurry up!</p>
+    <img class="bg" src="{{ zbg('hero2', 1800) }}" alt="" loading="lazy"><span class="shade"></span>
+    <div>
+      <span class="cd-eyebrow"><i class="fa-solid fa-bolt"></i> Deal of the week</span>
+      <h3>Special offers<br><span>ending soon</span></h3>
+      <p>Our biggest markdowns of the week — once the timer hits zero, prices go back up. Grab yours before they're gone.</p>
+      <a href="{{ route('shop.index',['on_sale'=>1]) }}" class="btn-sale" style="padding:13px 24px;font-size:15px">Shop the deals <i class="fa-solid fa-arrow-right"></i></a>
     </div>
     <div class="cd-timer">
       <div class="cd-box"><span data-u="d">00</span><small>DAYS</small></div><span class="cd-sep">:</span>
@@ -329,7 +364,10 @@
       <div class="cd-box"><span data-u="m">00</span><small>MIN</small></div><span class="cd-sep">:</span>
       <div class="cd-box"><span data-u="s">00</span><small>SEC</small></div>
     </div>
-    <a href="{{ route('shop.index',['on_sale'=>1]) }}" class="btn-sale" style="margin-left:10px">Shop deals</a>
+    <div class="cd-art">
+      <div class="card"><img src="{{ $dealImg }}" alt=""></div>
+      <span class="tag">Up to 50% OFF</span>
+    </div>
   </div>
 </section>
 
