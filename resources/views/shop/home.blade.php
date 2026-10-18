@@ -84,18 +84,22 @@
 .flash b{display:block;font-size:15px}
 
 /* ═══════════ CATEGORIES ═══════════ */
-.cat-tiles{display:grid;grid-template-columns:repeat(8,1fr);gap:14px}
-@media(max-width:1200px){.cat-tiles{grid-template-columns:repeat(6,1fr)}}
-@media(max-width:768px){.cat-tiles{grid-template-columns:repeat(4,1fr);gap:10px}}
-@media(max-width:480px){.cat-tiles{grid-template-columns:repeat(3,1fr)}}
-.ctile{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 10px 16px;text-align:center;display:block;color:var(--ink);transition:background .3s,border-color .3s}
-.ctile:hover{background:#fff;border-color:var(--p);color:var(--ink)}
-.ctile .ico{width:76px;height:76px;margin:0 auto 12px;border-radius:50%;position:relative;box-shadow:var(--shadow);transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1);overflow:visible}
-.ctile .ico img{width:100%;height:100%;object-fit:cover;border-radius:50%;border:3px solid #fff}
-.ctile .ico i{position:absolute;right:-4px;bottom:-4px;width:28px;height:28px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:11px;border:2px solid #fff}
-.ctile:hover .ico{transform:translateZ(30px) scale(1.08) rotateY(360deg)}
-.ctile b{display:block;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ctile small{color:var(--faint);font-size:11px}
+.cat-swiper{overflow:hidden;padding:4px 2px 10px}
+.cat-swiper .swiper-wrapper{transition-timing-function:linear!important}
+.cat-swiper .swiper-slide{height:auto}
+.ctile{position:relative;display:block;height:150px;border-radius:16px;overflow:hidden;color:#fff;box-shadow:0 10px 26px -14px rgba(39,30,92,.45);isolation:isolate}
+.ctile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.2,.7,.2,1);z-index:0}
+.ctile:hover img{transform:scale(1.1)}
+.ctile .sh{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(10,8,30,.08) 0%,rgba(10,8,30,.35) 45%,rgba(10,8,30,.88) 100%)}
+.ctile .ic{position:absolute;top:12px;left:12px;z-index:2;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.92);color:var(--p);display:grid;place-items:center;font-size:14px;box-shadow:var(--shadow);transition:.3s}
+.ctile:hover .ic{background:var(--grad);color:#fff;transform:rotate(-8deg) scale(1.08)}
+.ctile .cnt{position:absolute;top:12px;right:12px;z-index:2;background:var(--sale);color:#fff;font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;box-shadow:0 6px 14px -6px rgba(255,77,125,.9)}
+.ctile .txt{position:absolute;left:14px;right:14px;bottom:12px;z-index:2}
+.ctile b{display:block;font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.2;text-shadow:0 2px 12px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctile small{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:rgba(255,255,255,.9);margin-top:3px;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.ctile small i{font-size:10px;transition:transform .2s}
+.ctile:hover small i{transform:translateX(4px)}
+.ctile:hover{color:#fff}
 
 /* ═══════════ CASHBACK STRIP ═══════════ */
 .cash{position:relative;overflow:hidden;border-radius:var(--r-lg);background:linear-gradient(90deg,#1e9a7a,#0f766e 50%,#115e59);color:#fff;padding:30px 24px;text-align:center}
@@ -261,18 +265,25 @@
 <section class="sec wrap">
   <div class="sec-head reveal">
     <div><h2 class="sec-title tt-none">Browse By Categories</h2><div class="sec-deco"><i></i><b></b></div><p class="sec-sub">Top categories of the week</p></div>
-    <a href="{{ route('shop.index') }}" class="sec-link">All categories <i class="fa-solid fa-arrow-right"></i></a>
+    <div style="display:flex;align-items:center;gap:14px"><a href="{{ route('shop.index') }}" class="sec-link">All categories <i class="fa-solid fa-arrow-right"></i></a><div class="sl-nav"><button id="catPrev"><i class="fa-solid fa-chevron-left"></i></button><button id="catNext"><i class="fa-solid fa-chevron-right"></i></button></div></div>
   </div>
-  <div class="cat-tiles">
-    @forelse($parentCategories->take(16) as $i => $c)
-      <a href="{{ route('shop.index',['category'=>$c->slug]) }}" class="ctile reveal" data-delay="{{ ($i%4)+1 }}" data-tilt="10">
-        <span class="ico"><img src="{{ zcat_image($c->name, $i, 300) }}" alt="" loading="lazy"><i class="fa-solid {{ zcat_icon($c->name) }}"></i></span>
-        <b>{{ $c->name }}</b>
-        <small>{{ $c->total_count ?? 0 }} items</small>
-      </a>
-    @empty
-      <a href="{{ route('shop.index') }}" class="ctile"><span class="ico"><i class="fa-solid fa-box"></i></span><b>All products</b></a>
-    @endforelse
+  <div class="swiper cat-swiper reveal" id="catSwiper">
+    <div class="swiper-wrapper">
+      @php $catList = $parentCategories->values(); $reps = $catList->count() ? max(1, (int) ceil(14 / $catList->count())) : 0; @endphp
+      @forelse(collect(range(1, max($reps,1)))->flatMap(fn() => $catList) as $i => $c)
+        <div class="swiper-slide">
+          <a href="{{ route('shop.index',['category'=>$c->slug]) }}" class="ctile">
+            <img src="{{ zcat_image($c->name, $i, 600) }}" alt="" loading="lazy">
+            <span class="sh"></span>
+            <span class="ic"><i class="fa-solid {{ zcat_icon($c->name) }}"></i></span>
+            <span class="cnt">{{ $c->total_count ?? 0 }} items</span>
+            <span class="txt"><b>{{ $c->name }}</b><small>Shop now <i class="fa-solid fa-arrow-right"></i></small></span>
+          </a>
+        </div>
+      @empty
+        <div class="swiper-slide"><a href="{{ route('shop.index') }}" class="ctile"><img src="{{ zbg('shop',600) }}" alt=""><span class="sh"></span><span class="txt"><b>All products</b></span></a></div>
+      @endforelse
+    </div>
   </div>
 </section>
 
@@ -434,6 +445,7 @@
 new Swiper('#heroSwiper',{loop:true,speed:1000,parallax:true,grabCursor:true,autoplay:{delay:6000,disableOnInteraction:false,pauseOnMouseEnter:true},pagination:{el:'#heroSwiper .swiper-pagination',clickable:true},navigation:{prevEl:'#heroPrev',nextEl:'#heroNext'}});
 const pOpts = (prev,next)=>({slidesPerView:1.3,spaceBetween:16,speed:600,grabCursor:true,navigation:{prevEl:prev,nextEl:next},breakpoints:{480:{slidesPerView:2.2},768:{slidesPerView:3},1024:{slidesPerView:4},1300:{slidesPerView:5},1600:{slidesPerView:6}}});
 new Swiper('#dealsSwiper',pOpts('#dealsPrev','#dealsNext'));
+new Swiper('#catSwiper',{slidesPerView:1.6,spaceBetween:14,loop:true,speed:5000,autoplay:{delay:0,disableOnInteraction:false,pauseOnMouseEnter:true},freeMode:{enabled:true,momentum:false},grabCursor:true,navigation:{prevEl:'#catPrev',nextEl:'#catNext'},breakpoints:{480:{slidesPerView:2.4},768:{slidesPerView:3.4},1024:{slidesPerView:5},1300:{slidesPerView:6},1600:{slidesPerView:7}}});
 new Swiper('#newSwiper',pOpts('#newPrev','#newNext'));
 
 /* Hero 3D parallax: tilt the scene toward the cursor */
