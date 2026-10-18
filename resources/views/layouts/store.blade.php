@@ -151,7 +151,13 @@ button,input,select,textarea{font-family:inherit}
 .loc-pill strong em{font-style:normal;color:var(--p);font-weight:800;margin-left:4px}
 .loc-pill i.fa-chevron-down{font-size:10px;color:var(--faint);transition:transform .25s}
 .loc.open .loc-pill i.fa-chevron-down{transform:rotate(180deg)}
-.loc-dd{position:absolute;top:calc(100% + 10px);left:-1.5px;width:290px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px -18px rgba(39,30,92,.35);padding:8px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.98);transition:.22s cubic-bezier(.2,.7,.2,1);z-index:1200;max-height:380px;overflow-y:auto}
+.loc-dd{position:absolute;top:calc(100% + 10px);left:-1.5px;width:300px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px -18px rgba(39,30,92,.35);padding:8px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.98);transition:.22s cubic-bezier(.2,.7,.2,1);z-index:1200;display:flex;flex-direction:column}
+.loc-list{max-height:320px;overflow-y:auto;padding-right:2px}
+.loc-search{display:flex;align-items:center;gap:8px;margin:0 4px 8px;border:1.5px solid var(--line-2);border-radius:10px;padding:0 10px;background:var(--surface)}
+.loc-search i{font-size:12px;color:var(--faint)}
+.loc-search input{flex:1;border:0;background:none;height:36px;font:inherit;font-size:13px;outline:0;min-width:0}
+.loc-none{display:none;padding:14px 10px;font-size:12.5px;color:var(--muted);text-align:center}
+.loc-list.empty .loc-none{display:block}
 .loc.open .loc-dd{opacity:1;visibility:visible;transform:none}
 .loc-dd h6{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:8px 10px 6px}
 .loc-dd button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;padding:9px 10px;border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);transition:.15s}
@@ -438,11 +444,15 @@ body.drawer-open .drawer{transform:none}
         </button>
         <div class="loc-dd" role="listbox">
           <h6>Choose your location</h6>
+          <div class="loc-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" placeholder="Search country or currency…" autocomplete="off" aria-label="Search country"></div>
+          <div class="loc-list">
           @foreach($zcountries as $cc => $c)
             <button type="button" class="js-loc {{ $cc === $zcc ? 'on' : '' }}" data-cc="{{ $cc }}" role="option" aria-selected="{{ $cc === $zcc ? 'true' : 'false' }}">
               <span class="flag"><img src="https://flagcdn.com/w40/{{ strtolower($cc) }}.png" srcset="https://flagcdn.com/w80/{{ strtolower($cc) }}.png 2x" alt="" width="24" height="18" loading="lazy"></span><b>{{ $c['name'] }}</b><span>{{ $c['currency'] }}</span>@if($cc === $zcc)<i class="fa-solid fa-check"></i>@endif
             </button>
           @endforeach
+          <div class="loc-none">No match. Other countries are shown prices in USD ($).</div>
+          </div>
         </div>
       </div>
         <form action="{{ route('shop.index') }}" method="GET">
@@ -752,6 +762,12 @@ body.drawer-open .drawer{transform:none}
     pill.addEventListener('click',e=>{ e.stopPropagation(); const o=loc.classList.toggle('open'); pill.setAttribute('aria-expanded',o); });
     document.addEventListener('click',e=>{ if(!e.target.closest('#locPick')) loc.classList.remove('open'); });
     document.addEventListener('keydown',e=>{ if(e.key==='Escape') loc.classList.remove('open'); });
+    const q=loc.querySelector('.loc-search input'), list=loc.querySelector('.loc-list');
+    if(q){
+      q.addEventListener('click',e=>e.stopPropagation());
+      q.addEventListener('input',()=>{ const v=q.value.trim().toLowerCase(); let n=0; list.querySelectorAll('.js-loc').forEach(b=>{ const hit=!v||b.textContent.toLowerCase().includes(v)||b.dataset.cc.toLowerCase()===v; b.style.display=hit?'':'none'; if(hit) n++; }); list.classList.toggle('empty',n===0); });
+      pill.addEventListener('click',()=>{ if(loc.classList.contains('open')){ q.value=''; q.dispatchEvent(new Event('input')); setTimeout(()=>q.focus(),50); } });
+    }
   }
   async function setLocation(cc){
     try{

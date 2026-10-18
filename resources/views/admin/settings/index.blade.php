@@ -321,13 +321,17 @@
             </form>
         </div>
 
-        {{-- ───────────── Test email ───────────── --}}
-        <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
-            <h3 class="font-semibold text-gray-700 mb-1">Send a test email</h3>
+    </div>
+
+    {{-- ───────────── Side help ───────────── --}}
+    <div class="space-y-6">
+    {{-- ───────────── Test email ───────────── --}}
+        <div class="bg-white rounded-2xl p-6 border border-indigo-100" style="box-shadow:0 2px 16px rgba(99,102,241,.12)">
+            <h3 class="font-semibold text-gray-700 mb-1 flex items-center gap-2"><svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Send a test email</h3>
             <p class="text-gray-500 text-sm mb-4">Save your settings first, then send a test to make sure everything works.</p>
-            <form method="POST" action="{{ route('admin.settings.test') }}" class="flex flex-col sm:flex-row gap-3">
+            <form method="POST" action="{{ route('admin.settings.test') }}" class="flex flex-col gap-3">
                 @csrf
-                <input type="email" name="test_email" value="{{ old('test_email', Auth::user()->email) }}" required placeholder="you@example.com" class="form-input flex-1 @error('test_email') border-red-400 @enderror">
+                <input type="email" name="test_email" value="{{ old('test_email', Auth::user()->email) }}" required placeholder="you@example.com" class="form-input @error('test_email') border-red-400 @enderror">
                 <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm text-indigo-700 bg-indigo-50 hover:bg-indigo-100">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     Send test
@@ -335,10 +339,6 @@
             </form>
             @error('test_email') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
         </div>
-    </div>
-
-    {{-- ───────────── Side help ───────────── --}}
-    <div class="space-y-6">
         <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
             <h3 class="font-semibold text-gray-700 mb-3">Common providers</h3>
             <div class="space-y-3 text-sm">

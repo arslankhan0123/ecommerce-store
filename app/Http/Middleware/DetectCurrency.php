@@ -15,7 +15,7 @@ class DetectCurrency
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->is('admin*') && !$request->is('up') && !session()->has('geo.currency')) {
+        if (!$request->is('admin*') && !$request->is('up') && !$request->is('webhooks/*')) {
             try {
                 Currency::detect((string) $request->ip());
             } catch (\Throwable $e) {

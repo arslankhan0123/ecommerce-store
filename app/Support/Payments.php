@@ -75,12 +75,17 @@ class Payments
     /** Currencies Stripe charges in whole units (no cents). */
     protected const ZERO_DECIMAL = ['bif','clp','djf','gnf','jpy','kmf','krw','mga','pyg','rwf','ugx','vnd','vuv','xaf','xof','xpf'];
 
+    /** Currencies Stripe charges in thousandths (fils/baisa). */
+    protected const THREE_DECIMAL = ['bhd','jod','kwd','omr','tnd'];
+
     /** Convert a base-currency amount to Stripe minor units in the given currency. */
     public static function minorUnits(float $baseAmount, string $currency, float $rate): int
     {
         $value = $baseAmount * $rate;
         $cur   = strtolower($currency);
-        return (int) round(in_array($cur, self::ZERO_DECIMAL, true) ? $value : $value * 100);
+        if (in_array($cur, self::ZERO_DECIMAL, true))  return (int) round($value);
+        if (in_array($cur, self::THREE_DECIMAL, true)) return (int) round($value * 1000);
+        return (int) round($value * 100);
     }
 
     // ── Stripe REST ─────────────────────────────────────────────────────
@@ -242,7 +247,7 @@ class Payments
         ];
         if (isset($pi['amount_received']) && $pi['amount_received'] > 0) {
             $cur = strtolower((string) ($pi['currency'] ?? $pay->currency));
-            $div = in_array($cur, self::ZERO_DECIMAL, true) ? 1 : 100;
+            $div = in_array($cur, self::ZERO_DECIMAL, true) ? 1 : (in_array($cur, self::THREE_DECIMAL, true) ? 1000 : 100);
             $data['amount']   = $pi['amount_received'] / $div;
             $data['currency'] = strtoupper($cur);
         }

@@ -85,10 +85,18 @@ class Currency
         ]);
     }
 
-    /** Called by the middleware once per session: detect and store. */
+    /**
+     * Called by the middleware: detect on the first request, and again whenever the visitor's
+     * IP changes (e.g. localhost → ngrok/VPN) unless they chose a location themselves.
+     */
     public static function detect(string $ip): void
     {
-        if (session()->has('geo.currency')) return;
+        if (session()->has('geo.currency')) {
+            if (session('geo.manual')) return;
+            if (session('geo.detected_ip') === $ip) return;
+            // IP changed: only re-detect when the new IP is public (don't downgrade to the dev default)
+            if (self::isPrivate($ip)) return;
+        }
 
         $geo = self::lookup($ip);
         $cc  = $geo['country_code'] ?? null;
@@ -107,10 +115,11 @@ class Currency
         }
 
         session([
-            'geo.country'  => $cc,
-            'geo.currency' => $currency,
-            'geo.manual'   => false,
-            'geo.ip'       => $geo,
+            'geo.country'     => $cc,
+            'geo.currency'    => $currency,
+            'geo.manual'      => false,
+            'geo.ip'          => $geo,
+            'geo.detected_ip' => $ip,
         ]);
     }
 
