@@ -31,7 +31,11 @@
 .qty{display:inline-flex;align-items:center;border:1.5px solid var(--line-2);border-radius:10px;overflow:hidden;background:#fff}
 .qty button{width:36px;height:40px;border:0;background:var(--surface);font-size:16px;cursor:pointer;color:var(--ink)}
 .qty button:hover{background:var(--p-soft);color:var(--p)}
-.qty input{width:46px;height:40px;border:0;text-align:center;font-weight:800;outline:0;font-size:14px}
+.qty input{width:46px;height:40px;border:0;text-align:center;font-weight:800;outline:0;font-size:14px;-moz-appearance:textfield}
+.qty input::-webkit-outer-spin-button,.qty input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.qty.loading{opacity:.55;pointer-events:none}
+@keyframes bumpNum{0%{transform:scale(1)}40%{transform:scale(1.12);color:var(--p)}100%{transform:scale(1)}}
+.bump-num{display:inline-block;animation:bumpNum .45s ease}
 .csub{font-weight:800;font-size:16px;color:var(--ink)}
 .crem{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:var(--faint);transition:.2s}
 .crem:hover{background:#fdecef;color:var(--sale);transform:rotate(12deg)}
@@ -83,7 +87,7 @@
         <div class="head"><span>Product</span><span>Price</span><span>Quantity</span><span>Subtotal</span><span></span></div>
         @foreach($items as $pid => $it)
         @php $img = zimg($it['image'] ?? null) ?? zcat_image(null,(int)$pid,300); $line = $it['price']*$it['quantity']; @endphp
-        <div class="citem">
+        <div class="citem" data-pid="{{ $pid }}" data-price="{{ $it['price'] }}">
           <div class="cprod">
             <a href="{{ route('shop.show',$it['slug']) }}" class="cimg"><img src="{{ $img }}" alt=""></a>
             <div style="min-width:0">
@@ -93,14 +97,14 @@
           </div>
           <div><span class="mob-lbl">Price</span><span class="cprice">PKR {{ number_format($it['price'],0) }}</span></div>
           <div><span class="mob-lbl">Quantity</span>
-            <form action="{{ route('cart.update') }}" method="POST" class="qty">
+            <form action="{{ route('cart.update') }}" method="POST" class="qty js-qty">
               @csrf<input type="hidden" name="product_id" value="{{ $pid }}">
-              <button type="button" onclick="const i=this.nextElementSibling;i.value=Math.max(0,+i.value-1);this.form.submit()">−</button>
-              <input type="number" name="quantity" value="{{ $it['quantity'] }}" min="0" max="{{ min($it['max_quantity'] ?? 100,100) }}" onchange="this.form.submit()">
-              <button type="button" onclick="const i=this.previousElementSibling;i.value=Math.min(+i.max,+i.value+1);this.form.submit()">+</button>
+              <button type="button" class="dec" aria-label="Decrease">−</button>
+              <input type="number" name="quantity" value="{{ $it['quantity'] }}" min="0" max="100" inputmode="numeric">
+              <button type="button" class="inc" aria-label="Increase">+</button>
             </form>
           </div>
-          <div><span class="mob-lbl">Subtotal</span><span class="csub">PKR {{ number_format($line,0) }}</span></div>
+          <div><span class="mob-lbl">Subtotal</span><span class="csub js-line">PKR {{ number_format($line,0) }}</span></div>
           <a href="{{ route('cart.remove',$pid) }}" class="crem" title="Remove" onclick="return confirm('Remove this item from your cart?')"><i class="fa-regular fa-trash-can"></i></a>
         </div>
         @endforeach
@@ -116,14 +120,14 @@
 
     <aside class="sum reveal" data-delay="1">
       <h3>Order Summary</h3>
-      <div class="row2"><span>Items ({{ $count }})</span><b>PKR {{ number_format($total,0) }}</b></div>
-      <div class="row2"><span>Shipping</span><b style="color:{{ $total>=$free?'var(--ok)':'var(--ink)' }}">{{ $total>=$free ? 'Free' : 'Calculated at checkout' }}</b></div>
+      <div class="row2"><span>Items (<span id="sumCount">{{ $count }}</span>)</span><b id="sumSub">PKR {{ number_format($total,0) }}</b></div>
+      <div class="row2"><span>Shipping</span><b id="sumShip" style="color:{{ $total>=$free?'var(--ok)':'var(--ink)' }}">{{ $total>=$free ? 'Free' : 'Calculated at checkout' }}</b></div>
       <div class="row2"><span>Discount</span><b>— PKR 0</b></div>
       <hr>
-      <div class="tot"><span>Total</span><b>PKR {{ number_format($total,0) }}</b></div>
-      <div class="ship-bar">
-        @if($total >= $free)<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You've unlocked <b>free delivery</b>!
-        @else<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>PKR {{ number_format($free-$total,0) }}</b> more for free delivery @endif
+      <div class="tot"><span>Total</span><b id="sumTotal">PKR {{ number_format($total,0) }}</b></div>
+      <div class="ship-bar" id="shipBar" data-free="{{ $free }}">
+        <span class="ship-msg">@if($total >= $free)<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You've unlocked <b>free delivery</b>!
+        @else<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>PKR {{ number_format($free-$total,0) }}</b> more for free delivery @endif</span>
         <div class="bar"><i style="width:{{ min(100,round($total/$free*100)) }}%"></i></div>
       </div>
       <a href="{{ route('checkout.index') }}" class="btn-g"><i class="fa-solid fa-lock"></i> Proceed to Checkout</a>
@@ -141,3 +145,47 @@
   @endif
 </section>
 @endsection
+
+@push('scripts')
+<script>
+(function(){
+  const token=document.querySelector('meta[name=csrf-token]').content;
+  const fmt=n=>'PKR '+Math.round(n).toLocaleString('en-PK');
+  const bump=el=>{ if(!el) return; el.classList.remove('bump-num'); void el.offsetWidth; el.classList.add('bump-num'); };
+  let busy=false;
+  async function update(form, qty){
+    if(busy) return; busy=true;
+    const row=form.closest('.citem'); const input=form.querySelector('input[name=quantity]');
+    form.classList.add('loading');
+    try{
+      const fd=new FormData(); fd.append('product_id', form.querySelector('input[name=product_id]').value); fd.append('quantity', qty);
+      const r=await fetch(form.action,{method:'POST',headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:fd});
+      if(!r.ok){ let m='Could not update quantity'; try{const j=await r.json(); m=Object.values(j.errors||{}).flat()[0]||j.message||m;}catch(_){ } zToast(m,'err'); input.value=input.dataset.prev||input.value; return; }
+      const j=await r.json();
+      if(j.notice) zToast(j.notice,'info');
+      if(j.removed){ row.style.transition='opacity .3s,transform .3s'; row.style.opacity='0'; row.style.transform='translateX(16px)'; setTimeout(()=>row.remove(),300); }
+      else { input.value=j.quantity; input.dataset.prev=j.quantity; const l=row.querySelector('.js-line'); l.textContent=fmt(j.line_total); bump(l); }
+      document.getElementById('sumCount').textContent=j.count;
+      document.getElementById('sumSub').textContent=fmt(j.total);
+      const t=document.getElementById('sumTotal'); t.textContent=fmt(j.total); bump(t);
+      document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count);
+      const ht=document.getElementById('cartTotalTxt'); if(ht) ht.textContent=Math.round(j.total).toLocaleString('en-PK');
+      const bar=document.getElementById('shipBar'); const free=+bar.dataset.free; const ship=document.getElementById('sumShip');
+      if(j.total>=free){ bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You\'ve unlocked <b>free delivery</b>!'; ship.textContent='Free'; ship.style.color='var(--ok)'; }
+      else { bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>'+fmt(free-j.total)+'</b> more for free delivery'; ship.textContent='Calculated at checkout'; ship.style.color='var(--ink)'; }
+      bar.querySelector('.bar i').style.width=Math.min(100,Math.round(j.total/free*100))+'%';
+      if(j.empty){ setTimeout(()=>location.reload(),350); }
+    }catch(e){ zToast('Network error — please try again','err'); }
+    finally{ form.classList.remove('loading'); busy=false; }
+  }
+  document.querySelectorAll('.js-qty').forEach(f=>{
+    const input=f.querySelector('input[name=quantity]'); input.dataset.prev=input.value;
+    f.querySelector('.dec').addEventListener('click',()=>update(f, Math.max(0,(+input.value||0)-1)));
+    f.querySelector('.inc').addEventListener('click',()=>update(f, (+input.value||0)+1));
+    let tmr; input.addEventListener('input',()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ const v=Math.max(0,parseInt(input.value)||0); update(f,v); },600); });
+    input.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); clearTimeout(tmr); update(f, Math.max(0,parseInt(input.value)||0)); } });
+    f.addEventListener('submit',e=>{ e.preventDefault(); update(f, Math.max(0,parseInt(input.value)||0)); });
+  });
+})();
+</script>
+@endpush

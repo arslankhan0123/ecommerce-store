@@ -655,6 +655,7 @@ body.drawer-open .drawer{transform:none}
         document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count);
         if(j.total!==undefined){ const t=document.getElementById('cartTotalTxt'); if(t) t.textContent=Number(j.total).toLocaleString('en-PK'); }
         fly(btn); zToast('<b>Added to cart!</b> '+(j.name?('“'+j.name+'” is in your cart. '):'')+'<a href="'+CART_URL+'">View cart</a>');
+        if(j.notice) setTimeout(()=>zToast(j.notice,'info'),250);
         if(btn){ btn.innerHTML=old; showGoToCart(btn); }
       } else {
         let msg='Could not add to cart';

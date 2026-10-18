@@ -28,24 +28,31 @@ class CartController extends Controller
 
         $qty = (int) $request->quantity;
 
-        if ($qty > $product->quantity) {
-            $msg = "Sorry, only {$product->quantity} unit(s) available.";
+        if ($product->quantity <= 0) {
+            $msg = "Sorry, \"{$product->name}\" is out of stock.";
             if ($request->wantsJson()) {
                 return response()->json(['message' => $msg], 422);
             }
             return back()->with('cart_error', $msg);
         }
 
-        $cart = session('cart', []);
-        $key  = (string) $product->id;
+        $cart   = session('cart', []);
+        $key    = (string) $product->id;
+        $notice = null;
 
         if (isset($cart[$key])) {
-            $newQty = $cart[$key]['quantity'] + $qty;
-            if ($newQty > $product->quantity) {
-                $newQty = $product->quantity;
+            $wanted = $cart[$key]['quantity'] + $qty;
+            $newQty = min($wanted, $product->quantity);
+            if ($wanted > $product->quantity) {
+                $notice = "You asked for {$wanted}, but only {$product->quantity} available — quantity set to {$product->quantity}.";
             }
-            $cart[$key]['quantity'] = $newQty;
+            $cart[$key]['quantity']     = $newQty;
+            $cart[$key]['max_quantity'] = $product->quantity;
         } else {
+            if ($qty > $product->quantity) {
+                $notice = "You asked for {$qty}, but only {$product->quantity} available — quantity set to {$product->quantity}.";
+                $qty = $product->quantity;
+            }
             $cart[$key] = [
                 'product_id'   => $product->id,
                 'name'         => $product->name,
@@ -61,14 +68,17 @@ class CartController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'count'   => $this->cartCount($cart),
-                'total'   => array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $cart)),
-                'name'    => $product->name,
-                'message' => 'Added to cart!',
+                'count'    => $this->cartCount($cart),
+                'total'    => array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $cart)),
+                'name'     => $product->name,
+                'quantity' => $cart[$key]['quantity'],
+                'notice'   => $notice,
+                'message'  => 'Added to cart!',
             ]);
         }
 
-        return back()->with('cart_success', "\"{$product->name}\" added to your cart.");
+        $flash = back()->with('cart_success', "\"{$product->name}\" added to your cart.");
+        return $notice ? $flash->with('info', $notice) : $flash;
     }
 
     /** POST /cart/update */
@@ -79,21 +89,50 @@ class CartController extends Controller
             'quantity'   => 'required|integer|min:0|max:100',
         ]);
 
-        $cart = session('cart', []);
-        $key  = (string) $request->product_id;
+        $cart      = session('cart', []);
+        $key       = (string) $request->product_id;
+        $requested = (int) $request->quantity;
+        $notice    = null;
+        $removed   = false;
+        $final     = 0;
+        $stock     = (int) (Product::where('id', $request->product_id)->value('quantity') ?? 0);
 
         if (isset($cart[$key])) {
-            if ((int) $request->quantity === 0) {
+            if ($requested === 0 || $stock <= 0) {
                 unset($cart[$key]);
+                $removed = true;
+                if ($stock <= 0 && $requested > 0) {
+                    $notice = 'This item just went out of stock and was removed from your cart.';
+                }
             } else {
-                // Re-check stock
-                $stock = Product::where('id', $request->product_id)->value('quantity');
-                $cart[$key]['quantity'] = min((int) $request->quantity, $stock ?? 1);
+                $final = min($requested, $stock);
+                if ($requested > $stock) {
+                    $notice = "You asked for {$requested}, but only {$stock} available — quantity set to {$stock}.";
+                }
+                $cart[$key]['quantity']     = $final;
+                $cart[$key]['max_quantity'] = $stock;
             }
             session(['cart' => $cart]);
         }
 
-        return redirect()->route('cart.index');
+        if ($request->wantsJson()) {
+            $item  = $cart[$key] ?? null;
+            $total = array_sum(array_map(fn ($i) => $i['price'] * $i['quantity'], $cart));
+            return response()->json([
+                'removed'    => $removed,
+                'quantity'   => $final,
+                'stock'      => $stock,
+                'line_total' => $item ? $item['price'] * $item['quantity'] : 0,
+                'count'      => $this->cartCount($cart),
+                'total'      => $total,
+                'empty'      => empty($cart),
+                'notice'     => $notice,
+            ]);
+        }
+
+        return $notice
+            ? redirect()->route('cart.index')->with('info', $notice)
+            : redirect()->route('cart.index');
     }
 
     /** DELETE /cart/remove/{productId} */
