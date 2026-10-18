@@ -1,0 +1,202 @@
+@extends('layouts.admin')
+@section('title', 'Settings')
+@section('breadcrumb', 'Store configuration — email delivery and contact details')
+
+@section('content')
+@php $s = $settings; @endphp
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+    <div class="xl:col-span-2 space-y-6">
+
+        {{-- ───────────── SMTP / Email card ───────────── --}}
+        <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+            <div class="flex items-start justify-between gap-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white"
+                         style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 8px 24px rgba(99,102,241,.4);">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Email (SMTP) Settings</h2>
+                        <p class="text-gray-500 text-sm">Used to send order confirmations to customers and new-order alerts to you.</p>
+                    </div>
+                </div>
+                @php $configured = !empty($s['mail_host']) && ($s['mail_enabled'] ?? '1') === '1'; @endphp
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full {{ $configured ? 'text-green-700 bg-green-50' : 'text-amber-700 bg-amber-50' }}">
+                    <span class="w-1.5 h-1.5 rounded-full inline-block {{ $configured ? 'bg-green-500' : 'bg-amber-500' }}"></span>
+                    {{ $configured ? 'Configured' : 'Not configured' }}
+                </span>
+            </div>
+
+            <form method="POST" action="{{ route('admin.settings.update') }}">
+                @csrf @method('PUT')
+
+                <label class="flex items-center gap-3 mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">
+                    <input type="checkbox" name="mail_enabled" value="1" class="w-5 h-5 rounded text-indigo-600" {{ ($s['mail_enabled'] ?? '1') === '1' ? 'checked' : '' }}>
+                    <div>
+                        <div class="font-semibold text-gray-800 text-sm">Send emails</div>
+                        <div class="text-gray-500 text-xs">Turn off to pause all outgoing store emails without losing these settings.</div>
+                    </div>
+                </label>
+
+                <h3 class="font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-100">Server</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                    <div>
+                        <label class="form-label">Mailer</label>
+                        <select name="mail_mailer" class="form-input">
+                            <option value="smtp" {{ ($s['mail_mailer'] ?? 'smtp') === 'smtp' ? 'selected' : '' }}>SMTP (recommended)</option>
+                            <option value="log"  {{ ($s['mail_mailer'] ?? '') === 'log' ? 'selected' : '' }}>Log only (writes to storage/logs — for testing)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Encryption</label>
+                        <select name="mail_encryption" class="form-input">
+                            <option value="tls"  {{ ($s['mail_encryption'] ?? 'tls') === 'tls' ? 'selected' : '' }}>TLS / STARTTLS (port 587)</option>
+                            <option value="ssl"  {{ ($s['mail_encryption'] ?? '') === 'ssl' ? 'selected' : '' }}>SSL (port 465)</option>
+                            <option value="none" {{ ($s['mail_encryption'] ?? '') === 'none' ? 'selected' : '' }}>None</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">SMTP Host <span class="text-red-500">*</span></label>
+                        <input type="text" name="mail_host" value="{{ old('mail_host', $s['mail_host'] ?? '') }}" placeholder="smtp.gmail.com" class="form-input @error('mail_host') border-red-400 @enderror">
+                        @error('mail_host') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="form-label">Port</label>
+                        <input type="number" name="mail_port" value="{{ old('mail_port', $s['mail_port'] ?? 587) }}" placeholder="587" class="form-input @error('mail_port') border-red-400 @enderror">
+                        @error('mail_port') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="form-label">Username</label>
+                        <input type="text" name="mail_username" value="{{ old('mail_username', $s['mail_username'] ?? '') }}" placeholder="you@gmail.com" autocomplete="off" class="form-input">
+                    </div>
+                    <div x-data="{show:false}">
+                        <label class="form-label">Password / App password</label>
+                        <div class="relative">
+                            <input :type="show ? 'text' : 'password'" name="mail_password" value="" placeholder="{{ !empty($s['mail_password']) ? '•••••••• (saved — leave blank to keep)' : 'App password' }}" autocomplete="new-password" class="form-input pr-11">
+                            <button type="button" @click="show=!show" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                        </div>
+                        <p class="text-gray-400 text-xs mt-1.5">Stored encrypted. For Gmail, create an <b>App password</b> (Google Account → Security → 2-Step Verification → App passwords).</p>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-100">Sender & notifications</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                    <div>
+                        <label class="form-label">From address</label>
+                        <input type="email" name="mail_from_address" value="{{ old('mail_from_address', $s['mail_from_address'] ?? '') }}" placeholder="orders@zelari.com" class="form-input @error('mail_from_address') border-red-400 @enderror">
+                        @error('mail_from_address') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                        <p class="text-gray-400 text-xs mt-1.5">Most providers require this to match the username.</p>
+                    </div>
+                    <div>
+                        <label class="form-label">From name</label>
+                        <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $s['mail_from_name'] ?? 'Zelari') }}" placeholder="Zelari" class="form-input">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="form-label">Admin notification email</label>
+                        <input type="email" name="mail_admin_address" value="{{ old('mail_admin_address', $s['mail_admin_address'] ?? '') }}" placeholder="owner@zelari.com" class="form-input @error('mail_admin_address') border-red-400 @enderror">
+                        <p class="text-gray-400 text-xs mt-1.5">Receives a copy of every new order. Leave blank to disable.</p>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-gray-700 mb-1 pb-2 border-b border-gray-100">Store details</h3>
+                <p class="text-gray-400 text-xs mb-4">Shown in the website header, footer, contact page, emails and invoices.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                    <div>
+                        <label class="form-label">Store name</label>
+                        <input type="text" name="store_name" value="{{ old('store_name', $s['store_name'] ?? 'Zelari') }}" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Tagline</label>
+                        <input type="text" name="store_tagline" value="{{ old('store_tagline', $s['store_tagline'] ?? '') }}" placeholder="Smart Shopping" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Hotline phone</label>
+                        <input type="text" name="store_phone" value="{{ old('store_phone', $s['store_phone'] ?? '') }}" placeholder="+92 300 0000000" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">WhatsApp number</label>
+                        <input type="text" name="store_whatsapp" value="{{ old('store_whatsapp', $s['store_whatsapp'] ?? '') }}" placeholder="+92 300 0000000 (blank = use hotline)" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Support email</label>
+                        <input type="email" name="store_email" value="{{ old('store_email', $s['store_email'] ?? '') }}" placeholder="support@zelari.com" class="form-input @error('store_email') border-red-400 @enderror">
+                        @error('store_email') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="form-label">Support hours</label>
+                        <input type="text" name="store_hours" value="{{ old('store_hours', $s['store_hours'] ?? '') }}" placeholder="Mon – Sat, 9 AM – 6 PM PKT" class="form-input">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="form-label">Address</label>
+                        <input type="text" name="store_address" value="{{ old('store_address', $s['store_address'] ?? '') }}" class="form-input">
+                    </div>
+                    @foreach([['store_facebook','Facebook URL','https://facebook.com/yourpage'],['store_instagram','Instagram URL','https://instagram.com/yourpage'],['store_twitter','X / Twitter URL','https://x.com/yourpage'],['store_pinterest','Pinterest URL','https://pinterest.com/yourpage']] as [$k,$l,$ph])
+                    <div>
+                        <label class="form-label">{{ $l }}</label>
+                        <input type="url" name="{{ $k }}" value="{{ old($k, $s[$k] ?? '') }}" placeholder="{{ $ph }}" class="form-input @error($k) border-red-400 @enderror">
+                        @error($k) <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                    </div>
+                    @endforeach
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit" class="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 8px 24px rgba(99,102,241,.35)">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Save settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- ───────────── Test email ───────────── --}}
+        <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+            <h3 class="font-semibold text-gray-700 mb-1">Send a test email</h3>
+            <p class="text-gray-500 text-sm mb-4">Save your settings first, then send a test to make sure everything works.</p>
+            <form method="POST" action="{{ route('admin.settings.test') }}" class="flex flex-col sm:flex-row gap-3">
+                @csrf
+                <input type="email" name="test_email" value="{{ old('test_email', Auth::user()->email) }}" required placeholder="you@example.com" class="form-input flex-1 @error('test_email') border-red-400 @enderror">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm text-indigo-700 bg-indigo-50 hover:bg-indigo-100">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    Send test
+                </button>
+            </form>
+            @error('test_email') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+        </div>
+    </div>
+
+    {{-- ───────────── Side help ───────────── --}}
+    <div class="space-y-6">
+        <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+            <h3 class="font-semibold text-gray-700 mb-3">Common providers</h3>
+            <div class="space-y-3 text-sm">
+                @foreach([
+                    ['Gmail / Google Workspace','smtp.gmail.com','587','TLS','Use an App password, not your login password.'],
+                    ['Outlook / Microsoft 365','smtp.office365.com','587','TLS','SMTP AUTH must be enabled for the mailbox.'],
+                    ['Zoho Mail','smtp.zoho.com','587','TLS','Use your full email as username.'],
+                    ['Mailtrap (testing)','sandbox.smtp.mailtrap.io','2525','TLS','Free inbox for safe testing.'],
+                    ['Brevo (Sendinblue)','smtp-relay.brevo.com','587','TLS','Free tier: 300 emails/day.'],
+                ] as [$n,$h,$p,$e,$note])
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="font-semibold text-gray-800">{{ $n }}</div>
+                    <div class="text-gray-600 text-xs mt-1 font-mono">{{ $h }} · {{ $p }} · {{ $e }}</div>
+                    <div class="text-gray-400 text-xs mt-1">{{ $note }}</div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+            <h3 class="font-semibold text-gray-700 mb-3">What gets emailed</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+                <li class="flex gap-2"><span class="text-indigo-500">✓</span> Customer: order confirmation with items, totals, delivery details and a PDF invoice</li>
+                <li class="flex gap-2"><span class="text-indigo-500">✓</span> Admin: a new-order alert (if an admin address is set)</li>
+                <li class="flex gap-2"><span class="text-indigo-500">✓</span> Sending never blocks checkout — failures are logged in <code class="text-xs bg-slate-100 px-1 rounded">storage/logs</code></li>
+            </ul>
+        </div>
+    </div>
+</div>
+@endsection

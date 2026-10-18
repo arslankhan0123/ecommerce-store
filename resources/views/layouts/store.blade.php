@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>@yield('title', 'Shop') · Zelari</title>
-<meta name="description" content="@yield('meta_description', 'Zelari — a smarter way to shop. Curated products, honest prices, fast delivery across Pakistan.')">
+<title>@yield('title', 'Shop') · {{ zstore('name','Zelari') }}</title>
+<meta name="description" content="@yield('meta_description', zstore('name','Zelari').' — '.zstore('tagline','a smarter way to shop').'. Curated products, honest prices, fast delivery across Pakistan.')">
 
 <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
@@ -380,11 +380,11 @@ body.drawer-open .drawer{transform:none}
 {{-- ═════════════ TOP BAR ═════════════ --}}
 <div class="topbar">
   <div class="wrap">
-    <div class="topbar-loc"><i class="fa-solid fa-location-dot"></i><span>Gulberg III, Lahore, Pakistan</span></div>
+    <div class="topbar-loc"><i class="fa-solid fa-location-dot"></i><span>{{ zstore('address') }}</span></div>
     <div class="topbar-marquee">
       <span>
-        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
-        <b>Welcome to Zelari!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
+        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
+        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
       </span>
     </div>
   </div>
@@ -396,7 +396,7 @@ body.drawer-open .drawer{transform:none}
     <div class="hdr-main">
       <button class="icon-btn burger" id="burger" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
 
-      <a href="{{ route('home') }}" class="logo" aria-label="Zelari home">{!! zlogo('logo.svg') !!}</a>
+      <a href="{{ route('home') }}" class="logo" aria-label="{{ zstore('name','Zelari') }} home">{!! zlogo('logo.svg') !!}</a>
 
 
       <div class="search">
@@ -407,7 +407,7 @@ body.drawer-open .drawer{transform:none}
       </div>
 
       <div class="hdr-actions">
-        <a href="tel:+923000000000" class="hdr-call"><i class="fa-solid fa-phone"></i><div><small>Hotline 24/7</small><strong>+92 300 0000000</strong></div></a>
+        @if(zstore('phone'))<a href="tel:{{ ztel(zstore('phone')) }}" class="hdr-call"><i class="fa-solid fa-phone"></i><div><small>Hotline 24/7</small><strong>{{ zstore('phone') }}</strong></div></a>@endif
         <a href="{{ route('shop.index') }}" class="icon-btn" title="Wishlist"><i class="fa-regular fa-heart"></i></a>
         <a href="{{ route('cart.index') }}" class="hdr-cart" id="hdrCart">
           <span class="icon-btn" id="cartIcon"><i class="fa-solid fa-cart-shopping"></i><b class="cnt" id="cartCount">{{ $cartCount ?? 0 }}</b></span>
@@ -525,9 +525,9 @@ body.drawer-open .drawer{transform:none}
     <div class="f-main">
       <div class="f-brand">
         <a href="{{ route('home') }}" class="logo lg">{!! zlogo('logo-tagline.svg') !!}</a>
-        <p>A smarter way to shop. We curate quality products, keep prices honest, and deliver fast across Pakistan — with cash on delivery everywhere.</p>
-        <div class="fl"><i class="fa-solid fa-location-dot"></i> Gulberg III, Lahore, Pakistan</div>
-        <div class="fl"><i class="fa-solid fa-envelope"></i> support@zelari.com</div>
+        <p>{{ zstore('tagline') ? zstore('tagline').'. ' : '' }}We curate quality products, keep prices honest, and deliver fast across Pakistan — with cash on delivery everywhere.</p>
+        @if(zstore('address'))<div class="fl"><i class="fa-solid fa-location-dot"></i> {{ zstore('address') }}</div>@endif
+        @if(zstore('email'))<div class="fl"><i class="fa-solid fa-envelope"></i> <a href="mailto:{{ zstore('email') }}">{{ zstore('email') }}</a></div>@endif
       </div>
       <div class="f-col">
         <h5>Categories</h5>
@@ -552,18 +552,19 @@ body.drawer-open .drawer{transform:none}
       </div>
       <div class="f-col f-contact">
         <h5>Contact Us</h5>
-        <div class="fc"><i class="fa-solid fa-phone"></i><div><small>Hotline 24/7</small><b>+92 300 0000000</b></div></div>
-        <div class="fc"><i class="fa-solid fa-envelope"></i><div><small>Email Address</small><b>support@zelari.com</b></div></div>
+        @if(zstore('phone'))<a href="tel:{{ ztel(zstore('phone')) }}" class="fc" style="display:flex;color:inherit"><i class="fa-solid fa-phone"></i><div><small>Hotline 24/7</small><b>{{ zstore('phone') }}</b></div></a>@endif
+        @if(zstore('email'))<a href="mailto:{{ zstore('email') }}" class="fc" style="display:flex;color:inherit"><i class="fa-solid fa-envelope"></i><div><small>Email Address</small><b>{{ zstore('email') }}</b></div></a>@endif
+        @if(zstore('hours'))<div class="fc"><i class="fa-regular fa-clock"></i><div><small>Support hours</small><b>{{ zstore('hours') }}</b></div></div>@endif
         <small style="color:var(--muted);font-size:12px;display:block;margin-bottom:8px">We accept :</small>
         @include('shop.partials.payment-icons', ['size' => 'sm'])
       </div>
     </div>
 
     <div class="f-bottom">
-      <div>©{{ date('Y') }} Zelari. All rights reserved.</div>
+      <div>©{{ date('Y') }} {{ zstore('name','Zelari') }}. All rights reserved.</div>
       @include('shop.partials.payment-icons')
       <div class="socials"><span style="font-size:12px;margin-right:4px">Stay connected :</span>
-        <a href="#"><i class="fa-brands fa-facebook-f"></i></a><a href="#"><i class="fa-brands fa-x-twitter"></i></a><a href="#"><i class="fa-brands fa-instagram"></i></a><a href="#"><i class="fa-brands fa-pinterest-p"></i></a>
+        <a href="{{ zstore('facebook','#') }}" target="_blank" rel="noopener"><i class="fa-brands fa-facebook-f"></i></a><a href="{{ zstore('twitter','#') }}" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i></a><a href="{{ zstore('instagram','#') }}" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a><a href="{{ zstore('pinterest','#') }}" target="_blank" rel="noopener"><i class="fa-brands fa-pinterest-p"></i></a>
       </div>
     </div>
   </div>

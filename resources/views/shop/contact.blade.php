@@ -69,23 +69,26 @@
     </div>
 
     <div class="info">
-      @foreach([['fa-envelope','var(--p-soft)','var(--p)','Email us','support@zelari.com','We reply within 24 hours'],['fa-phone','#e6f9f2','#0d8f6a','Call us','+92 300 0000000','Mon – Sat, 9 AM – 6 PM PKT'],['fa-location-dot','#fff5e0','#b36b00','Visit us','Gulberg III, Lahore, Pakistan','By appointment']] as $i => [$ic,$bg,$c,$t,$v,$s])
-        <div class="ibox reveal" data-delay="{{ $i+1 }}"><div class="ic" style="background:{{ $bg }};color:{{ $c }}"><i class="fa-solid {{ $ic }}"></i></div><div><b>{{ $t }}</b><span>{{ $v }}</span><small>{{ $s }}</small></div></div>
+      @foreach([['fa-envelope','var(--p-soft)','var(--p)','Email us',zstore('email'),'We reply within 24 hours','mailto:'.zstore('email')],['fa-phone','#e6f9f2','#0d8f6a','Call us',zstore('phone'),zstore('hours'),'tel:'.ztel(zstore('phone'))],['fa-location-dot','#fff5e0','#b36b00','Visit us',zstore('address'),'By appointment',null]] as $i => [$ic,$bg,$c,$t,$v,$s,$href])
+        @if($v)
+        @if($href)<a href="{{ $href }}" class="ibox reveal" data-delay="{{ $i+1 }}">@else<div class="ibox reveal" data-delay="{{ $i+1 }}">@endif<div class="ic" style="background:{{ $bg }};color:{{ $c }}"><i class="fa-solid {{ $ic }}"></i></div><div><b>{{ $t }}</b><span>{{ $v }}</span><small>{{ $s }}</small></div>@if($href)</a>@else</div>@endif
+        @endif
       @endforeach
       <div class="ibox reveal" data-delay="4" style="display:block">
         <b style="display:block;margin-bottom:10px"><i class="fa-regular fa-clock" style="color:var(--p);margin-right:8px"></i>Support hours</b>
-        <div class="hours"><span>Monday – Friday</span><b>9:00 AM – 6:00 PM</b><span>Saturday</span><b>10:00 AM – 4:00 PM</b><span>Sunday</span><b style="color:var(--sale)">Closed</b></div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink)">{{ zstore('hours','Mon – Sat, 9 AM – 6 PM PKT') }}</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:4px">Messages sent outside these hours are answered the next working day.</div>
       </div>
       <div class="wa reveal" data-delay="4">
         <b>Need quick help?</b>
         <p>Chat with us on WhatsApp for the fastest response.</p>
-        <a href="https://wa.me/923000000000" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp" style="font-size:18px"></i> Chat on WhatsApp</a>
+        <a href="https://wa.me/{{ ztel(zstore('whatsapp') ?: zstore('phone')) }}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp" style="font-size:18px"></i> Chat on WhatsApp</a>
         <span class="e">💬</span>
       </div>
     </div>
   </div>
 
-  <div class="map reveal"><div class="grid-bg"></div><span class="ring"></span><div class="pin"><i class="fa-solid fa-location-dot"></i><span>Zelari HQ · Gulberg III, Lahore</span></div></div>
+  <div class="map reveal"><div class="grid-bg"></div><span class="ring"></span><div class="pin"><i class="fa-solid fa-location-dot"></i><span>{{ zstore('name','Zelari') }} · {{ zstore('address') }}</span></div></div>
 
   <div class="faq">
     <div class="sec-head reveal"><div><h2 class="sec-title tt-none">Frequently asked</h2><div class="sec-deco"><i></i><b></b></div></div></div>

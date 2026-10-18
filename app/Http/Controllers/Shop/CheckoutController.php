@@ -2,9 +2,12 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderPlaced;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -42,8 +45,8 @@ class CheckoutController extends Controller
         $fingerprint = md5(json_encode($cart) . $request->email . $request->address);
         if (session('last_order_fingerprint') === $fingerprint) {
             $orderId = session('last_order_id');
-            if ($orderId && Order::find($orderId)) {
-                return redirect()->route('order.confirmation', $orderId);
+            if ($orderId && ($existing = Order::find($orderId))) {
+                return redirect()->route('order.confirmation', $existing->order_number);
             }
         }
 
@@ -124,23 +127,77 @@ class CheckoutController extends Controller
             session()->forget('cart');
             session(['last_order_fingerprint' => $fingerprint, 'last_order_id' => $order->id]);
 
-            return redirect()->route('order.confirmation', $order->id);
+            $this->sendOrderEmails($order);
+
+            return redirect()->route('order.confirmation', $order->order_number);
 
         } catch (\Exception $e) {
             return back()->withInput()->with('checkout_error', $e->getMessage());
         }
     }
 
-    /** GET /order-confirmation/{orderId} */
-    public function confirmation(int $orderId)
+    /** GET /order-confirmation/{orderNumber} */
+    public function confirmation(string $orderNumber)
     {
-        // Only allow viewing orders placed in this session
-        $sessionOrderId = session('last_order_id');
-        if ((int) $sessionOrderId !== $orderId) {
-            abort(403);
+        $order = $this->findSessionOrder($orderNumber);
+        return view('shop.confirmation', compact('order'));
+    }
+
+    /** GET /order/{orderNumber}/invoice — PDF when dompdf is installed, printable HTML otherwise */
+    public function invoice(string $orderNumber)
+    {
+        $order = $this->findSessionOrder($orderNumber);
+        $store = $this->storeDetails();
+
+        if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('shop.invoice', ['order' => $order, 'pdf' => true, 'store' => $store])
+                ->setPaper('a4');
+            return $pdf->download('Zelari-Invoice-' . $order->order_number . '.pdf');
         }
 
-        $order = Order::with(['items', 'customer'])->findOrFail($orderId);
-        return view('shop.confirmation', compact('order'));
+        return view('shop.invoice', ['order' => $order, 'pdf' => false, 'store' => $store]);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    /** Only the customer who placed the order (this session) or a logged-in admin may view it. */
+    private function findSessionOrder(string $orderNumber): Order
+    {
+        $order = Order::with(['items.product', 'customer'])->where('order_number', $orderNumber)->firstOrFail();
+        $isOwner = (int) session('last_order_id') === (int) $order->id;
+        if (!$isOwner && !auth()->check()) {
+            abort(403);
+        }
+        return $order;
+    }
+
+    private function storeDetails(): array
+    {
+        return [
+            'name'    => Setting::get('store_name', 'Zelari'),
+            'phone'   => Setting::get('store_phone', ''),
+            'address' => Setting::get('store_address', ''),
+            'email'   => Setting::get('store_email', Setting::get('mail_from_address', '')),
+        ];
+    }
+
+    /** Email the customer (and optionally the admin). Never breaks checkout. */
+    private function sendOrderEmails(Order $order): void
+    {
+        try {
+            if (!Setting::applyMailConfig()) {
+                return;
+            }
+            $order->loadMissing('items.product', 'customer');
+
+            if ($order->customer_email) {
+                Mail::to($order->customer_email, $order->shipping_name)->send(new OrderPlaced($order));
+            }
+            if ($admin = Setting::get('mail_admin_address')) {
+                Mail::to($admin)->send(new OrderPlaced($order, true));
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

@@ -168,3 +168,18 @@ if (!function_exists('zlogo')) {
         return $cache[$key];
     }
 }
+
+if (!function_exists('zstore')) {
+    /** Store setting shortcut: zstore('phone') => Setting store_phone. */
+    function zstore(string $key, $default = null)
+    {
+        return \App\Models\Setting::get('store_' . $key, $default);
+    }
+}
+if (!function_exists('ztel')) {
+    /** Digits-only phone for tel:/wa.me links. */
+    function ztel(?string $phone): string
+    {
+        return preg_replace('/\D+/', '', (string) $phone);
+    }
+}

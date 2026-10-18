@@ -58,7 +58,7 @@
       @for($i=0;$i<18;$i++)<span class="confetti" style="left:{{ 50 + (($i*37)%40 - 20) }}%;background:{{ ['#6a3df5','#22d3ee','#ff4d7d','#ffd36b','#14b88a'][$i%5] }};--dx:{{ (($i*53)%240)-120 }}px;--dy:{{ (($i*29)%160)-200 }}px;animation-delay:{{ ($i%6)*.08 }}s"></span>@endfor
       <div class="ok-ring"><i class="fa-solid fa-check"></i></div>
       <h1>Order confirmed 🎉</h1>
-      <p>Thanks, <b>{{ $order->shipping_name ?? $order->customer?->name ?? 'friend' }}</b>. We've received your order and sent a confirmation to <b>{{ $order->customer_email ?? $order->customer?->email }}</b>.</p>
+      <p>Thanks, <b>{{ $order->shipping_name ?? $order->customer?->name ?? 'friend' }}</b>. We've received your order and emailed a confirmation with your PDF invoice to <b>{{ $order->customer_email ?? $order->customer?->email }}</b>.</p>
     </div>
 
     <div class="steps">
@@ -121,7 +121,7 @@
     <div class="acts">
       <a href="{{ route('shop.index') }}" class="btn-g"><i class="fa-solid fa-bag-shopping"></i> Continue Shopping</a>
       <a href="{{ route('contact') }}" class="btn-o"><i class="fa-solid fa-headset"></i> Need help?</a>
-      <a href="#" onclick="event.preventDefault();window.print()" class="btn-o"><i class="fa-solid fa-print"></i> Print</a>
+      <a href="{{ route('order.invoice', $order->order_number) }}" class="btn-o" target="_blank" rel="noopener"><i class="fa-solid fa-file-pdf" style="color:var(--sale)"></i> Download PDF</a>
     </div>
   </div>
 </section>
