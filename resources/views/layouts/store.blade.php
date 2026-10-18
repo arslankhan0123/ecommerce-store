@@ -141,7 +141,8 @@ button,input,select,textarea{font-family:inherit}
 .search form{display:flex;width:100%;border:1.5px solid var(--line-2);border-radius:14px;overflow:hidden;background:#fff;transition:.2s}
 .search form:focus-within{border-color:var(--p);box-shadow:var(--glow)}
 .search select{border:0;border-right:1.5px solid var(--line);background:var(--surface);padding:0 12px;font-size:13px;font-weight:600;color:var(--ink-2);outline:0;max-width:160px}
-.search input{flex:1;border:0;padding:0 16px;height:46px;font-size:14px;outline:0;min-width:0}
+.search .s-ic{align-self:center;color:var(--faint);padding-left:16px;font-size:14px}
+.search input{flex:1;border:0;padding:0 14px;height:46px;font-size:14px;outline:0;min-width:0}
 .search button{border:0;background:var(--grad);color:#fff;width:54px;font-size:16px;cursor:pointer;transition:filter .2s}
 .search button:hover{filter:brightness(1.08)}
 @media(max-width:992px){.search{display:none}.search select{display:none}}
@@ -400,13 +401,7 @@ body.drawer-open .drawer{transform:none}
 
       <div class="search">
         <form action="{{ route('shop.index') }}" method="GET">
-          <select name="category" aria-label="Category">
-            <option value="">All Categories</option>
-            @foreach($navCategories ?? [] as $c)
-              <option value="{{ $c->slug }}" {{ request('category')===$c->slug?'selected':'' }}>{{ $c->name }}</option>
-            @endforeach
-          </select>
-          <input type="text" name="q" value="{{ request('q') }}" placeholder="I'm searching for…" autocomplete="off">
+          <i class="fa-solid fa-magnifying-glass s-ic"></i><input type="text" name="q" value="{{ request('q') }}" placeholder="Search for products, brands and more…" autocomplete="off">
           <button type="submit" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
         </form>
       </div>
