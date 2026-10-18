@@ -68,7 +68,7 @@
 @section('content')
 @include('shop.partials.page-hero', ['id'=>'cartHero','crumbs'=>[['Home',route('home')],['Cart',null]],'slides'=>[
   ['title'=>'Your <span>Shopping Cart</span>','text'=>'Review your picks, adjust quantities, and check out in under a minute.','icon'=>'fa-cart-shopping'],
-  ['title'=>'Free Delivery <span>Over PKR 3,000</span>','text'=>'Add a little more and shipping is on us.','icon'=>'fa-truck-fast'],
+  ['title'=>'Free Delivery <span>Over '.zprice(3000).'</span>','text'=>'Add a little more and shipping is on us.','icon'=>'fa-truck-fast'],
 ]])
 
 <section class="cartp wrap">
@@ -92,10 +92,10 @@
             <a href="{{ route('shop.show',$it['slug']) }}" class="cimg"><img src="{{ $img }}" alt=""></a>
             <div style="min-width:0">
               <a href="{{ route('shop.show',$it['slug']) }}" class="cname">{{ $it['name'] }}</a>
-              <div class="cunit">PKR {{ number_format($it['price'],0) }} each @if(($it['max_quantity'] ?? 0) <= 5)· <span style="color:var(--warn)">only {{ $it['max_quantity'] }} left</span>@endif</div>
+              <div class="cunit">{{ zprice($it['price']) }} each @if(($it['max_quantity'] ?? 0) <= 5)· <span style="color:var(--warn)">only {{ $it['max_quantity'] }} left</span>@endif</div>
             </div>
           </div>
-          <div><span class="mob-lbl">Price</span><span class="cprice">PKR {{ number_format($it['price'],0) }}</span></div>
+          <div><span class="mob-lbl">Price</span><span class="cprice">{{ zprice($it['price']) }}</span></div>
           <div><span class="mob-lbl">Quantity</span>
             <form action="{{ route('cart.update') }}" method="POST" class="qty js-qty">
               @csrf<input type="hidden" name="product_id" value="{{ $pid }}">
@@ -104,7 +104,7 @@
               <button type="button" class="inc" aria-label="Increase">+</button>
             </form>
           </div>
-          <div><span class="mob-lbl">Subtotal</span><span class="csub js-line">PKR {{ number_format($line,0) }}</span></div>
+          <div><span class="mob-lbl">Subtotal</span><span class="csub js-line">{{ zprice($line) }}</span></div>
           <a href="{{ route('cart.remove',$pid) }}" class="crem" title="Remove" onclick="return confirm('Remove this item from your cart?')"><i class="fa-regular fa-trash-can"></i></a>
         </div>
         @endforeach
@@ -120,14 +120,14 @@
 
     <aside class="sum reveal" data-delay="1">
       <h3>Order Summary</h3>
-      <div class="row2"><span>Items (<span id="sumCount">{{ $count }}</span>)</span><b id="sumSub">PKR {{ number_format($total,0) }}</b></div>
+      <div class="row2"><span>Items (<span id="sumCount">{{ $count }}</span>)</span><b id="sumSub">{{ zprice($total) }}</b></div>
       <div class="row2"><span>Shipping</span><b id="sumShip" style="color:{{ $total>=$free?'var(--ok)':'var(--ink)' }}">{{ $total>=$free ? 'Free' : 'Calculated at checkout' }}</b></div>
-      <div class="row2"><span>Discount</span><b>— PKR 0</b></div>
+      <div class="row2"><span>Discount</span><b>— {{ zprice(0) }}</b></div>
       <hr>
-      <div class="tot"><span>Total</span><b id="sumTotal">PKR {{ number_format($total,0) }}</b></div>
+      <div class="tot"><span>Total</span><b id="sumTotal">{{ zprice($total) }}</b></div>
       <div class="ship-bar" id="shipBar" data-free="{{ $free }}">
         <span class="ship-msg">@if($total >= $free)<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You've unlocked <b>free delivery</b>!
-        @else<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>PKR {{ number_format($free-$total,0) }}</b> more for free delivery @endif</span>
+        @else<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>{{ zprice($free-$total) }}</b> more for free delivery @endif</span>
         <div class="bar"><i style="width:{{ min(100,round($total/$free*100)) }}%"></i></div>
       </div>
       <a href="{{ route('checkout.index') }}" class="btn-g"><i class="fa-solid fa-lock"></i> Proceed to Checkout</a>
@@ -150,7 +150,7 @@
 <script>
 (function(){
   const token=document.querySelector('meta[name=csrf-token]').content;
-  const fmt=n=>'PKR '+Math.round(n).toLocaleString('en-PK');
+  const fmt=n=>window.zmoney(n);
   const bump=el=>{ if(!el) return; el.classList.remove('bump-num'); void el.offsetWidth; el.classList.add('bump-num'); };
   let busy=false;
   async function update(form, qty){
@@ -169,7 +169,7 @@
       document.getElementById('sumSub').textContent=fmt(j.total);
       const t=document.getElementById('sumTotal'); t.textContent=fmt(j.total); bump(t);
       document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count);
-      const ht=document.getElementById('cartTotalTxt'); if(ht) ht.textContent=Math.round(j.total).toLocaleString('en-PK');
+      const ht=document.getElementById('cartTotalTxt'); if(ht) ht.textContent=fmt(j.total);
       const bar=document.getElementById('shipBar'); const free=+bar.dataset.free; const ship=document.getElementById('sumShip');
       if(j.total>=free){ bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You\'ve unlocked <b>free delivery</b>!'; ship.textContent='Free'; ship.style.color='var(--ok)'; }
       else { bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>'+fmt(free-j.total)+'</b> more for free delivery'; ship.textContent='Calculated at checkout'; ship.style.color='var(--ink)'; }

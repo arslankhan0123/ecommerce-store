@@ -99,16 +99,16 @@
             @php $img = zimg($it['image'] ?? null) ?? zcat_image(null,(int)($it['product_id'] ?? 0),200); @endphp
             <div class="sitem">
               <div class="im"><img src="{{ $img }}" alt=""><span class="q">{{ $it['quantity'] }}</span></div>
-              <div style="flex:1;min-width:0"><div class="nm">{{ $it['name'] }}</div><small style="color:var(--muted)">PKR {{ number_format($it['price'],0) }} × {{ $it['quantity'] }}</small></div>
-              <div class="pr">PKR {{ number_format($it['price']*$it['quantity'],0) }}</div>
+              <div style="flex:1;min-width:0"><div class="nm">{{ $it['name'] }}</div><small style="color:var(--muted)">{{ zprice($it['price']) }} × {{ $it['quantity'] }}</small></div>
+              <div class="pr">{{ zprice($it['price']*$it['quantity']) }}</div>
             </div>
             @endforeach
           </div>
           <hr>
-          <div class="row2"><span>Subtotal</span><b>PKR {{ number_format($subtotal,0) }}</b></div>
-          <div class="row2"><span>Shipping</span><b style="color:var(--ok)">{{ $shipping>0 ? 'PKR '.number_format($shipping,0) : 'Free' }}</b></div>
+          <div class="row2"><span>Subtotal</span><b>{{ zprice($subtotal) }}</b></div>
+          <div class="row2"><span>Shipping</span><b style="color:var(--ok)">{{ $shipping>0 ? zprice($shipping) : 'Free' }}</b></div>
           <hr>
-          <div class="tot"><span>Total</span><b>PKR {{ number_format($subtotal+$shipping,0) }}</b></div>
+          <div class="tot"><span>Total</span><b>{{ zprice($subtotal+$shipping) }}</b></div>
           <button type="submit" class="btn-g place" id="placeBtn"><i class="fa-solid fa-lock"></i> Place Order</button>
           <div class="secure"><i class="fa-solid fa-shield-halved"></i> Prices & stock are re-verified on our server</div>
           <div style="display:flex;justify-content:center;margin-top:12px">@include('shop.partials.payment-icons', ['size' => 'sm'])</div>

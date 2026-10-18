@@ -141,10 +141,54 @@ if (!function_exists('zimg')) {
     }
 }
 
+if (!function_exists('zcur')) {
+    /** Active currency: ['code','symbol','name','rate','decimals']. */
+    function zcur(): array
+    {
+        return \App\Support\Currency::current();
+    }
+}
+if (!function_exists('zprice')) {
+    /** Format a base-currency (DB) amount in the visitor's currency, e.g. "$12.50". */
+    function zprice($amount): string
+    {
+        return \App\Support\Currency::format($amount, zcur());
+    }
+}
+if (!function_exists('zorder_price')) {
+    /** Format a base-currency amount in the currency an order was placed in (falls back to the active one). */
+    function zorder_price($order, $amount): string
+    {
+        if ($order && !empty($order->currency_code)) {
+            $cur = \App\Support\Currency::all()[$order->currency_code] ?? [];
+            return \App\Support\Currency::format($amount, [
+                'symbol'   => $order->currency_symbol ?: ($cur['symbol'] ?? $order->currency_code),
+                'rate'     => (float) ($order->exchange_rate ?: ($cur['rate'] ?? 1)),
+                'decimals' => $cur['decimals'] ?? 2,
+            ]);
+        }
+        return zprice($amount);
+    }
+}
+if (!function_exists('zcountries')) {
+    /** Countries for the header Location dropdown. */
+    function zcountries(): array
+    {
+        return \App\Support\Currency::countries();
+    }
+}
+if (!function_exists('zcountry')) {
+    /** Currently selected/detected country code (e.g. "US"). */
+    function zcountry(): string
+    {
+        return \App\Support\Currency::currentCountry() ?: 'US';
+    }
+}
 if (!function_exists('zpkr')) {
+    /** @deprecated use zprice() */
     function zpkr($amount): string
     {
-        return 'PKR ' . number_format((float) $amount, 0);
+        return zprice($amount);
     }
 }
 

@@ -65,7 +65,7 @@
 
                     {{-- Totals --}}
                     <div class="mt-5 pt-4 border-t border-gray-100 space-y-2 text-sm">
-                        <div class="flex justify-between text-gray-500"><span>Subtotal</span><span>Rs <span x-text="subtotal.toLocaleString()">0</span></span></div>
+                        <div class="flex justify-between text-gray-500"><span>Subtotal</span><span>{{ config('currencies.base') }} <span x-text="subtotal.toLocaleString()">0</span></span></div>
                         <div class="flex justify-between items-center text-gray-500">
                             <span>Discount</span>
                             <input type="number" name="discount" x-model.number="discount" min="0" step="0.01" class="w-28 text-right form-input py-1 text-sm">
@@ -75,7 +75,7 @@
                             <input type="number" name="shipping_fee" x-model.number="shipping" min="0" step="0.01" class="w-28 text-right form-input py-1 text-sm">
                         </div>
                         <div class="flex justify-between font-bold text-gray-800 text-base pt-2 border-t border-gray-100">
-                            <span>Total</span><span>Rs <span x-text="total.toLocaleString()">0</span></span>
+                            <span>Total</span><span>{{ config('currencies.base') }} <span x-text="total.toLocaleString()">0</span></span>
                         </div>
                     </div>
                 </div>

@@ -76,30 +76,59 @@
                                 @if($item->product_sku)<p class="text-xs text-gray-400 font-mono">{{ $item->product_sku }}</p>@endif
                             </td>
                             <td class="text-center font-medium text-gray-700">{{ $item->quantity }}</td>
-                            <td class="text-right text-gray-600 text-sm">Rs {{ number_format($item->unit_price, 0) }}</td>
-                            <td class="text-right font-semibold text-gray-800">Rs {{ number_format($item->subtotal, 0) }}</td>
+                            <td class="text-right text-gray-600 text-sm">{{ $order->money($item->unit_price) }}</td>
+                            <td class="text-right font-semibold text-gray-800">{{ $order->money($item->subtotal) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
                 <div class="px-6 py-4 space-y-2 border-t border-gray-100">
-                    <div class="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>Rs {{ number_format($order->subtotal, 0) }}</span></div>
-                    @if($order->discount > 0)<div class="flex justify-between text-sm text-emerald-600"><span>Discount</span><span>− Rs {{ number_format($order->discount, 0) }}</span></div>@endif
-                    @if($order->shipping_fee > 0)<div class="flex justify-between text-sm text-gray-500"><span>Shipping</span><span>Rs {{ number_format($order->shipping_fee, 0) }}</span></div>@endif
-                    <div class="flex justify-between text-base font-bold text-gray-800 pt-2 border-t border-gray-100"><span>Total</span><span>Rs {{ number_format($order->total, 0) }}</span></div>
+                    <div class="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>{{ $order->money($order->subtotal) }}</span></div>
+                    @if($order->discount > 0)<div class="flex justify-between text-sm text-emerald-600"><span>Discount</span><span>− {{ $order->money($order->discount) }}</span></div>@endif
+                    @if($order->shipping_fee > 0)<div class="flex justify-between text-sm text-gray-500"><span>Shipping</span><span>{{ $order->money($order->shipping_fee) }}</span></div>@endif
+                    <div class="flex justify-between text-base font-bold text-gray-800 pt-2 border-t border-gray-100"><span>Total</span><span>{{ $order->money($order->total) }}</span></div>
                 </div>
             </div>
 
-            {{-- Shipping info --}}
-            <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
-                <h3 class="font-semibold text-gray-700 mb-4">Shipping Details</h3>
-                <div class="grid grid-cols-2 gap-3 text-sm">
-                    <div><p class="text-gray-400 text-xs mb-0.5">Name</p><p class="font-medium text-gray-700">{{ $order->shipping_name ?? '—' }}</p></div>
-                    <div><p class="text-gray-400 text-xs mb-0.5">Phone</p><p class="font-medium text-gray-700">{{ $order->shipping_phone ?? '—' }}</p></div>
-                    <div><p class="text-gray-400 text-xs mb-0.5">City</p><p class="font-medium text-gray-700">{{ $order->shipping_city ?? '—' }}</p></div>
-                    <div><p class="text-gray-400 text-xs mb-0.5">Address</p><p class="font-medium text-gray-700">{{ $order->shipping_address ?? '—' }}</p></div>
+            {{-- Shipping info + IP location, side by side for verification --}}
+            @php $match = $order->location_matches; @endphp
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+                    <h3 class="font-semibold text-gray-700 mb-1">Shipping Details</h3>
+                    <p class="text-xs text-gray-400 mb-4">Entered by the customer</p>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><p class="text-gray-400 text-xs mb-0.5">Name</p><p class="font-medium text-gray-700">{{ $order->shipping_name ?? '—' }}</p></div>
+                        <div><p class="text-gray-400 text-xs mb-0.5">Phone</p><p class="font-medium text-gray-700">{{ $order->shipping_phone ?? '—' }}</p></div>
+                        <div><p class="text-gray-400 text-xs mb-0.5">City</p><p class="font-medium text-gray-700">{{ $order->shipping_city ?? '—' }}</p></div>
+                        <div class="col-span-2"><p class="text-gray-400 text-xs mb-0.5">Address</p><p class="font-medium text-gray-700">{{ $order->shipping_address ?? '—' }}</p></div>
+                    </div>
+                    @if($order->notes)<div class="mt-3 p-3 bg-gray-50 rounded-xl text-sm text-gray-600"><span class="font-semibold">Notes:</span> {{ $order->notes }}</div>@endif
                 </div>
-                @if($order->notes)<div class="mt-3 p-3 bg-gray-50 rounded-xl text-sm text-gray-600"><span class="font-semibold">Notes:</span> {{ $order->notes }}</div>@endif
+
+                <div class="bg-white rounded-2xl p-6 border {{ $match === false ? 'border-amber-300' : 'border-transparent' }}" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+                    <div class="flex items-start justify-between gap-2 mb-1">
+                        <h3 class="font-semibold text-gray-700">Detected Location</h3>
+                        @if($match === true)<span class="badge-green">Matches</span>
+                        @elseif($match === false)<span class="badge-yellow">Check</span>
+                        @endif
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4">Approximate, from the customer's IP at checkout</p>
+                    @if($order->ip_address)
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><p class="text-gray-400 text-xs mb-0.5">IP address</p><p class="font-mono font-medium text-gray-700">{{ $order->ip_address }}</p></div>
+                        <div><p class="text-gray-400 text-xs mb-0.5">Country</p><p class="font-medium text-gray-700">{{ $order->ip_country ?? '—' }}@if($order->ip_country_code) <span class="text-gray-400 font-mono text-xs">{{ $order->ip_country_code }}</span>@endif</p></div>
+                        <div><p class="text-gray-400 text-xs mb-0.5">Region</p><p class="font-medium text-gray-700">{{ $order->ip_region ?? '—' }}</p></div>
+                        <div><p class="text-gray-400 text-xs mb-0.5">City</p><p class="font-medium text-gray-700">{{ $order->ip_city ?? '—' }}</p></div>
+                    </div>
+                    @if($match === false)
+                    <div class="mt-3 p-3 bg-amber-50 rounded-xl text-xs text-amber-700">The IP location doesn't match the shipping details or the order's currency region. Worth a quick call before dispatch.</div>
+                    @elseif(!$order->ip_location)
+                    <div class="mt-3 p-3 bg-gray-50 rounded-xl text-xs text-gray-500">Location lookup didn't return a result for this IP (private network or lookup unavailable).</div>
+                    @endif
+                    @else
+                    <p class="text-sm text-gray-400">Not captured for this order.</p>
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -111,6 +140,10 @@
                 <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Status</span><span class="badge-{{ $sc }}">{{ ucfirst($order->status) }}</span></div>
                 <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Payment</span><span class="badge-{{ $pc }}">{{ ucfirst($order->payment_status) }}</span></div>
                 <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Method</span><span class="text-gray-700 font-medium">{{ ucwords(str_replace('_',' ',$order->payment_method)) }}</span></div>
+                <div class="flex justify-between items-center text-sm"><span class="text-gray-500">Currency</span><span class="text-gray-700 font-medium">{{ $order->currency_code ?? '—' }} <span class="text-gray-400">({{ $order->currency_symbol }})</span></span></div>
+                @if($order->currency_code && $order->currency_code !== config('currencies.base'))
+                <p class="text-[11px] text-gray-400 leading-snug">Charged as shown to the customer at checkout. Rate used: 1 {{ config('currencies.base') }} = {{ rtrim(rtrim(number_format((float) $order->exchange_rate, 6), '0'), '.') }} {{ $order->currency_code }}.</p>
+                @endif
             </div>
 
             @if($order->customer)

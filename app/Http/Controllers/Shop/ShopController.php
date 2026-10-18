@@ -78,12 +78,13 @@ class ShopController extends Controller
             $query->whereIn('category_id', $selectedCategory->descendantIds());
         }
 
-        // Price range
+        // Price range — typed in the visitor's currency, compared in the base currency
+        $rate = (float) (zcur()['rate'] ?: 1);
         if ($request->filled('min_price')) {
-            $query->whereRaw('COALESCE(sale_price, purchase_price) >= ?', [$request->min_price]);
+            $query->whereRaw('COALESCE(sale_price, purchase_price) >= ?', [(float) $request->min_price / $rate]);
         }
         if ($request->filled('max_price')) {
-            $query->whereRaw('COALESCE(sale_price, purchase_price) <= ?', [$request->max_price]);
+            $query->whereRaw('COALESCE(sale_price, purchase_price) <= ?', [(float) $request->max_price / $rate]);
         }
 
         // In stock only

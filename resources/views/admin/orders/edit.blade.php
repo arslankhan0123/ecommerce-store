@@ -83,10 +83,10 @@
                 <div class="bg-white rounded-2xl p-5 space-y-2" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
                     <h3 class="font-semibold text-gray-700 mb-3">Order Summary</h3>
                     <div class="flex justify-between text-sm text-gray-500"><span>Items</span><span>{{ $order->items->count() }}</span></div>
-                    <div class="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>Rs {{ number_format($order->subtotal, 0) }}</span></div>
-                    @if($order->discount > 0)<div class="flex justify-between text-sm text-emerald-600"><span>Discount</span><span>− Rs {{ number_format($order->discount, 0) }}</span></div>@endif
-                    @if($order->shipping_fee > 0)<div class="flex justify-between text-sm text-gray-500"><span>Shipping</span><span>Rs {{ number_format($order->shipping_fee, 0) }}</span></div>@endif
-                    <div class="flex justify-between font-bold text-gray-800 pt-2 border-t border-gray-100"><span>Total</span><span>Rs {{ number_format($order->total, 0) }}</span></div>
+                    <div class="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>{{ $order->money($order->subtotal) }}</span></div>
+                    @if($order->discount > 0)<div class="flex justify-between text-sm text-emerald-600"><span>Discount</span><span>− {{ $order->money($order->discount) }}</span></div>@endif
+                    @if($order->shipping_fee > 0)<div class="flex justify-between text-sm text-gray-500"><span>Shipping</span><span>{{ $order->money($order->shipping_fee) }}</span></div>@endif
+                    <div class="flex justify-between font-bold text-gray-800 pt-2 border-t border-gray-100"><span>Total</span><span>{{ $order->money($order->total) }}</span></div>
                 </div>
 
                 <div class="flex flex-col gap-2">

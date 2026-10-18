@@ -206,7 +206,7 @@
 @php
   $hp = $heroProducts->values();
   $slides = [
-    ['cls'=>'hs-1','eyebrow'=>'Exclusive offer','pill'=>'30% Off','h'=>'Smart Shopping <br><span>Delivered Daily</span>','p'=>'Curated products, honest prices and lightning-fast delivery across Pakistan. Cash on delivery everywhere.','btn'=>'Shop Now','href'=>route('shop.index'),'bg'=>'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=700&q=80','emo'=>'🛍️','chips'=>[['fa-truck-fast','Free delivery','Orders over PKR 3,000'],['fa-bolt','Flash deal','Up to 50% off'],['fa-star','4.9 rating','2,300+ reviews']]],
+    ['cls'=>'hs-1','eyebrow'=>'Exclusive offer','pill'=>'30% Off','h'=>'Smart Shopping <br><span>Delivered Daily</span>','p'=>'Curated products, honest prices and lightning-fast delivery across Pakistan. Cash on delivery everywhere.','btn'=>'Shop Now','href'=>route('shop.index'),'bg'=>'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=700&q=80','emo'=>'🛍️','chips'=>[['fa-truck-fast','Free delivery','Orders over '.zprice(3000)],['fa-bolt','Flash deal','Up to 50% off'],['fa-star','4.9 rating','2,300+ reviews']]],
     ['cls'=>'hs-2','eyebrow'=>'Weekend sale','pill'=>'Up to 50%','h'=>'Weekend Deals <br><span>Live Right Now</span>','p'=>'Biggest discounts of the season on trending picks. Prices drop every Friday — grab them before they are gone.','btn'=>'View Deals','href'=>route('shop.index',['on_sale'=>1]),'bg'=>'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=700&q=80','emo'=>'🔥','chips'=>[['fa-tag','Hot price','Limited stock'],['fa-shield-halved','Secure checkout','Server-verified'],['fa-rotate-left','Easy returns','7-day policy']]],
     ['cls'=>'hs-3','eyebrow'=>'Just landed','pill'=>'New','h'=>'Fresh Picks <br><span>Just For You</span>','p'=>'New arrivals added every week, hand-picked by our team so you always find something worth loving.','btn'=>'Explore New','href'=>route('shop.index',['sort'=>'latest']),'bg'=>'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=700&q=80','emo'=>'✨','chips'=>[['fa-wand-magic-sparkles','New arrivals','Updated weekly'],['fa-money-bill-wave','Cash on delivery','Nationwide'],['fa-headset','24/7 support','We reply fast']]],
   ];
@@ -275,7 +275,7 @@
 {{-- ═══════════ TRUST STRIP ═══════════ --}}
 <section class="wrap" style="padding-top:24px">
   <div class="trust reveal">
-    <div><i class="fa-solid fa-truck-fast"></i>Free delivery over PKR 3,000</div>
+    <div><i class="fa-solid fa-truck-fast"></i>Free delivery over {{ zprice(3000) }}</div>
     <div><i class="fa-solid fa-shield-halved"></i>Secure, verified checkout</div>
     <div><i class="fa-solid fa-rotate-left"></i>7-day easy returns</div>
     <div><i class="fa-solid fa-money-bill-wave"></i>Cash on delivery</div>
@@ -314,7 +314,7 @@
   <div class="promo-wide reveal">
     <img class="bg" src="{{ zbg('hero3', 1800) }}" alt="" loading="lazy"><span class="shade"></span>
     <div class="pw-text">
-      <span class="pw-eyebrow"><i class="fa-solid fa-truck-fast"></i> Free delivery over PKR 3,000</span>
+      <span class="pw-eyebrow"><i class="fa-solid fa-truck-fast"></i> Free delivery over {{ zprice(3000) }}</span>
       <h3>Everything you love,<br><span>delivered to your door</span></h3>
       <p>Thousands of products, honest prices and cash on delivery across Pakistan. Pay when it arrives — no risk, no hassle.</p>
       <div class="pw-ctas">

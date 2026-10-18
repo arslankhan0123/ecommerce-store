@@ -78,7 +78,7 @@
     </div>
 
     @if($order->payment_method==='bank_transfer')
-    <div class="bank reveal"><i class="fa-solid fa-circle-info" style="font-size:18px;margin-top:2px"></i><div><b>Bank transfer instructions</b><br>We'll email our account details within 1 business hour. Please transfer <b>PKR {{ number_format($order->total,0) }}</b> within 24 hours and reply with the receipt to confirm your order.</div></div>
+    <div class="bank reveal"><i class="fa-solid fa-circle-info" style="font-size:18px;margin-top:2px"></i><div><b>Bank transfer instructions</b><br>We'll email our account details within 1 business hour. Please transfer <b>{{ zorder_price($order, $order->total) }}</b> within 24 hours and reply with the receipt to confirm your order.</div></div>
     @endif
 
     <div class="card-z reveal" data-delay="1">
@@ -97,15 +97,15 @@
       @php $img = $it->product?->display_image ?? zcat_image(null,(int)$it->product_id,200); $realI = $it->product?->has_real_image; @endphp
       <div class="oitem">
         <div class="im"><img src="{{ $img }}" alt=""></div>
-        <div><b>{{ $it->product_name }}</b><small>PKR {{ number_format($it->unit_price,0) }} × {{ $it->quantity }}@if($it->product_sku) · {{ $it->product_sku }}@endif</small></div>
-        <div class="pr">PKR {{ number_format($it->subtotal,0) }}</div>
+        <div><b>{{ $it->product_name }}</b><small>{{ zorder_price($order, $it->unit_price) }} × {{ $it->quantity }}@if($it->product_sku) · {{ $it->product_sku }}@endif</small></div>
+        <div class="pr">{{ zorder_price($order, $it->subtotal) }}</div>
       </div>
       @endforeach
       <div style="margin-top:14px">
-        <div class="tot-row"><span>Subtotal</span><b>PKR {{ number_format($order->subtotal,0) }}</b></div>
-        @if($order->discount>0)<div class="tot-row"><span>Discount</span><b style="color:var(--ok)">− PKR {{ number_format($order->discount,0) }}</b></div>@endif
-        <div class="tot-row"><span>Shipping</span><b style="color:var(--ok)">{{ $order->shipping_fee>0 ? 'PKR '.number_format($order->shipping_fee,0) : 'Free' }}</b></div>
-        <div class="grand"><span>Total</span><b>PKR {{ number_format($order->total,0) }}</b></div>
+        <div class="tot-row"><span>Subtotal</span><b>{{ zorder_price($order, $order->subtotal) }}</b></div>
+        @if($order->discount>0)<div class="tot-row"><span>Discount</span><b style="color:var(--ok)">− {{ zorder_price($order, $order->discount) }}</b></div>@endif
+        <div class="tot-row"><span>Shipping</span><b style="color:var(--ok)">{{ $order->shipping_fee>0 ? zorder_price($order, $order->shipping_fee) : 'Free' }}</b></div>
+        <div class="grand"><span>Total</span><b>{{ zorder_price($order, $order->total) }}</b></div>
       </div>
     </div>
 

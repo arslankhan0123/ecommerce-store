@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
+@php $zc = zcur(); @endphp
+<script>window.ZCUR={code:@json($zc['code']),symbol:@json($zc['symbol']),rate:{{ (float) $zc['rate'] }},decimals:{{ (int) $zc['decimals'] }}};
+window.zmoney=function(n){var c=window.ZCUR,v=(Number(n)||0)*c.rate,s=v.toLocaleString('en-US',{minimumFractionDigits:c.decimals,maximumFractionDigits:c.decimals});return (c.symbol.length<=2&&!/^[A-Za-z]+$/.test(c.symbol))?c.symbol+s:c.symbol+' '+s};</script>
 <title>@yield('title', 'Shop') · {{ zstore('name','Zelari') }}</title>
 <meta name="description" content="@yield('meta_description', zstore('name','Zelari').' — '.zstore('tagline','a smarter way to shop').'. Curated products, honest prices, fast delivery across Pakistan.')">
 
@@ -132,20 +135,40 @@ button,input,select,textarea{font-family:inherit}
 .logo:hover svg,.logo:hover img{transform:translateY(-1px) scale(1.03);filter:drop-shadow(0 10px 18px rgba(106,61,245,.35))}
 .logo.sm svg{height:36px}.logo.lg svg{height:66px}
 @media(max-width:576px){.logo svg,.logo img{height:38px}}
-.loc-pill{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;flex-shrink:0;transition:.2s}
-.loc-pill:hover{border-color:var(--p)}
-.loc-pill i.fa-location-dot{color:var(--p);font-size:15px}
-.loc-pill i.fa-chevron-down{font-size:10px;color:var(--faint)}
-@media(max-width:1200px){.loc-pill{display:none}}
-.search{flex:1;display:flex;max-width:720px;margin:0 auto}
-.search form{display:flex;width:100%;border:1.5px solid var(--line-2);border-radius:14px;overflow:hidden;background:#fff;transition:.2s}
-.search form:focus-within{border-color:var(--p);box-shadow:var(--glow)}
+.loc{flex-shrink:0;display:flex}
+.loc-pill{display:flex;align-items:center;gap:9px;border:0;border-right:1.5px solid var(--line);border-radius:12px 0 0 12px;padding:0 12px 0 14px;height:100%;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;background:var(--surface);cursor:pointer;transition:.2s;font-family:inherit}
+.loc-pill:hover,.loc.open .loc-pill{background:var(--p-soft)}
+.loc-pill .flag{font-size:17px;line-height:1}
+.loc .flag img{flex:none;width:24px;min-width:24px;height:18px;object-fit:cover;border-radius:4px;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.loc-pill small{display:block;font-size:10.5px;color:var(--faint);font-weight:600;line-height:1.1}
+.loc-pill strong{display:block;font-size:13px;line-height:1.15}
+.loc-pill strong em{font-style:normal;color:var(--p);font-weight:800;margin-left:4px}
+.loc-pill i.fa-chevron-down{font-size:10px;color:var(--faint);transition:transform .25s}
+.loc.open .loc-pill i.fa-chevron-down{transform:rotate(180deg)}
+.loc-dd{position:absolute;top:calc(100% + 10px);left:-1.5px;width:290px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px -18px rgba(39,30,92,.35);padding:8px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.98);transition:.22s cubic-bezier(.2,.7,.2,1);z-index:1200;max-height:380px;overflow-y:auto}
+.loc.open .loc-dd{opacity:1;visibility:visible;transform:none}
+.loc-dd h6{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:8px 10px 6px}
+.loc-dd button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;padding:9px 10px;border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);transition:.15s}
+.loc-dd button:hover{background:var(--p-soft)}
+.loc-dd button.on{background:var(--p-soft);color:var(--p)}
+.loc-dd button .flag{font-size:19px;width:24px;text-align:center;display:flex;justify-content:center}
+.loc-dd button b{font-size:13.5px;font-weight:700;flex:1}
+.loc-dd button span{font-size:12px;color:var(--muted);font-weight:700;background:var(--surface);padding:3px 8px;border-radius:999px}
+.loc-dd button.on span{background:#fff;color:var(--p)}
+.loc-dd button .fa-check{font-size:12px;color:var(--p)}
+@media(max-width:1300px){.loc .loc-pill small{display:none}}
+.drawer .dloc{padding:12px 18px 4px;border-bottom:1px solid var(--surface)}
+.drawer .dloc label{display:block;font-size:12px;letter-spacing:.06em;color:var(--faint);text-transform:uppercase;margin-bottom:6px}
+.drawer .dloc select{width:100%;border:1.5px solid var(--line-2);border-radius:12px;padding:10px 12px;font:inherit;font-weight:600;background:#fff}
+.search{flex:1;display:flex;align-items:stretch;max-width:640px;margin:0 auto;position:relative;border:1.5px solid var(--line-2);border-radius:14px;background:#fff;transition:.2s}
+.search:focus-within,.search:has(.loc.open){border-color:var(--p);box-shadow:var(--glow)}
+.search form{display:flex;flex:1;min-width:0}
 .search select{border:0;border-right:1.5px solid var(--line);background:var(--surface);padding:0 12px;font-size:13px;font-weight:600;color:var(--ink-2);outline:0;max-width:160px}
 .search .s-ic{align-self:center;color:var(--faint);padding-left:16px;font-size:14px}
 .search input{flex:1;border:0;padding:0 14px;height:46px;font-size:14px;outline:0;min-width:0}
-.search button{border:0;background:var(--grad);color:#fff;width:54px;font-size:16px;cursor:pointer;transition:filter .2s}
-.search button:hover{filter:brightness(1.08)}
-@media(max-width:992px){.search{display:none}.search select{display:none}}
+.search form button{border:0;background:var(--grad);color:#fff;width:54px;font-size:16px;cursor:pointer;transition:filter .2s;border-radius:0 12px 12px 0}
+.search form button:hover{filter:brightness(1.08)}
+@media(max-width:992px){.search{display:none}}
 .hdr-actions{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
 .hdr-call{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:12px;color:var(--ink)}
 .hdr-call i{width:40px;height:40px;border-radius:12px;background:var(--p-soft);display:grid;place-items:center;color:var(--p);font-size:15px}
@@ -383,8 +406,8 @@ body.drawer-open .drawer{transform:none}
     <div class="topbar-loc"><i class="fa-solid fa-location-dot"></i><span>{{ zstore('address') }}</span></div>
     <div class="topbar-marquee">
       <span>
-        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
-        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over PKR 3,000<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
+        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over {{ zprice(3000) }}<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
+        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over {{ zprice(3000) }}<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
       </span>
     </div>
   </div>
@@ -400,6 +423,22 @@ body.drawer-open .drawer{transform:none}
 
 
       <div class="search">
+        @php $zcc = zcountry(); $zcountries = zcountries(); $zhere = $zcountries[$zcc] ?? reset($zcountries); @endphp
+        <div class="loc" id="locPick">
+        <button type="button" class="loc-pill" aria-haspopup="listbox" aria-expanded="false" title="Change location & currency">
+          <span class="flag"><img src="https://flagcdn.com/w40/{{ strtolower($zcc) }}.png" srcset="https://flagcdn.com/w80/{{ strtolower($zcc) }}.png 2x" alt="{{ $zhere['name'] }}" width="24" height="18"></span>
+          <span><small>Deliver to</small><strong>{{ $zhere['name'] }}<em>{{ $zc['code'] }}</em></strong></span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="loc-dd" role="listbox">
+          <h6>Choose your location</h6>
+          @foreach($zcountries as $cc => $c)
+            <button type="button" class="js-loc {{ $cc === $zcc ? 'on' : '' }}" data-cc="{{ $cc }}" role="option" aria-selected="{{ $cc === $zcc ? 'true' : 'false' }}">
+              <span class="flag"><img src="https://flagcdn.com/w40/{{ strtolower($cc) }}.png" srcset="https://flagcdn.com/w80/{{ strtolower($cc) }}.png 2x" alt="" width="24" height="18" loading="lazy"></span><b>{{ $c['name'] }}</b><span>{{ $c['currency'] }}</span>@if($cc === $zcc)<i class="fa-solid fa-check"></i>@endif
+            </button>
+          @endforeach
+        </div>
+      </div>
         <form action="{{ route('shop.index') }}" method="GET">
           <i class="fa-solid fa-magnifying-glass s-ic"></i><input type="text" name="q" value="{{ request('q') }}" placeholder="Search for products, brands and more…" autocomplete="off">
           <button type="submit" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -411,7 +450,7 @@ body.drawer-open .drawer{transform:none}
         <a href="{{ route('shop.index') }}" class="icon-btn" title="Wishlist"><i class="fa-regular fa-heart"></i></a>
         <a href="{{ route('cart.index') }}" class="hdr-cart" id="hdrCart">
           <span class="icon-btn" id="cartIcon"><i class="fa-solid fa-cart-shopping"></i><b class="cnt" id="cartCount">{{ $cartCount ?? 0 }}</b></span>
-          <span><small>My cart</small>PKR <em id="cartTotalTxt" style="font-style:normal">{{ number_format($cartTotal ?? 0,0) }}</em></span>
+          <span><small>My cart</small><em id="cartTotalTxt" style="font-style:normal">{{ zprice($cartTotal ?? 0) }}</em></span>
         </a>
         @auth
           <a href="{{ route('admin.products.index') }}" class="icon-btn" title="Admin"><i class="fa-solid fa-user-gear"></i></a>
@@ -467,6 +506,11 @@ body.drawer-open .drawer{transform:none}
     <button class="icon-btn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <form action="{{ route('shop.index') }}" method="GET"><input type="text" name="q" placeholder="Search products…"><button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button></form>
+  <div class="dloc"><label>Location &amp; currency</label>
+    <select class="js-loc-select">
+      @foreach(zcountries() as $cc => $c)<option value="{{ $cc }}" {{ $cc === zcountry() ? 'selected' : '' }}>{{ $c['name'] }} — {{ $c['currency'] }}</option>@endforeach
+    </select>
+  </div>
   <nav>
     <a href="{{ route('home') }}"><i class="fa-solid fa-house"></i> Home</a>
     <a href="{{ route('shop.index') }}"><i class="fa-solid fa-bag-shopping"></i> Shop</a>
@@ -501,7 +545,7 @@ body.drawer-open .drawer{transform:none}
     <img class="bg" src="{{ zbg('news') }}" alt="" loading="lazy">
     <div>
       <h3>Join Our Newsletter And Get…</h3>
-      <p>PKR 500 discount for your first order</p>
+      <p>{{ zprice(500) }} discount for your first order</p>
       <form class="nl-form" onsubmit="event.preventDefault();zToast('Thanks! You are on the list.');this.reset()">
         <input type="email" placeholder="Enter Your Email" required>
         <button type="submit">Subscribe</button>
@@ -517,7 +561,7 @@ body.drawer-open .drawer{transform:none}
   <div class="wrap">
     <div class="f-feats">
       <div class="f-feat"><i class="fa-solid fa-gem"></i><span>Curated Quality Products</span></div>
-      <div class="f-feat"><i class="fa-solid fa-truck-fast"></i><span>Free Delivery Over PKR 3,000</span></div>
+      <div class="f-feat"><i class="fa-solid fa-truck-fast"></i><span>Free Delivery Over {{ zprice(3000) }}</span></div>
       <div class="f-feat"><i class="fa-solid fa-percent"></i><span>Daily Mega Discounts</span></div>
       <div class="f-feat"><i class="fa-solid fa-tags"></i><span>Best Price On The Market</span></div>
     </div>
@@ -649,7 +693,7 @@ body.drawer-open .drawer{transform:none}
       if(r.ok){
         const j=await r.json();
         document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count);
-        if(j.total!==undefined){ const t=document.getElementById('cartTotalTxt'); if(t) t.textContent=Number(j.total).toLocaleString('en-PK'); }
+        if(j.total!==undefined){ const t=document.getElementById('cartTotalTxt'); if(t) t.textContent=window.zmoney(j.total); }
         fly(btn); zToast('<b>Added to cart!</b> '+(j.name?('“'+j.name+'” is in your cart. '):'')+'<a href="'+CART_URL+'">View cart</a>');
         if(j.notice) setTimeout(()=>zToast(j.notice,'info'),250);
         if(btn){ btn.innerHTML=old; showGoToCart(btn); }
@@ -693,6 +737,28 @@ body.drawer-open .drawer{transform:none}
   document.querySelectorAll('.cmenu').forEach(ul=>ul.addEventListener('scroll',()=>{ ul.querySelectorAll(':scope > li.has-sub > .cmenu-sub').forEach(sub=>{ sub.style.visibility='hidden'; sub.style.opacity='0'; }); },{passive:true}));
   document.querySelectorAll('.cmenu li.has-sub').forEach(li=>li.addEventListener('mouseenter',()=>{ const sub=li.querySelector(':scope > .cmenu-sub'); if(sub){ sub.style.visibility=''; sub.style.opacity=''; } }));
   document.addEventListener('click',e=>{ if(!e.target.closest('.allcat')) document.querySelectorAll('.allcat.open').forEach(x=>x.classList.remove('open')); });
+
+  /* Location / currency picker */
+  const LOC_URL=@json(route('location.set'));
+  const loc=document.getElementById('locPick');
+  if(loc){
+    const pill=loc.querySelector('.loc-pill');
+    pill.addEventListener('click',e=>{ e.stopPropagation(); const o=loc.classList.toggle('open'); pill.setAttribute('aria-expanded',o); });
+    document.addEventListener('click',e=>{ if(!e.target.closest('#locPick')) loc.classList.remove('open'); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') loc.classList.remove('open'); });
+  }
+  async function setLocation(cc){
+    try{
+      const fd=new FormData(); fd.append('country',cc);
+      const r=await fetch(LOC_URL,{method:'POST',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:fd});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.ok){ zToast(j.message||'Could not change location','err'); return; }
+      zToast('Prices now shown in '+j.currency+' ('+j.symbol+')','ok');
+      setTimeout(()=>location.reload(),350);
+    }catch(_){ zToast('Network error — please try again','err'); }
+  }
+  document.querySelectorAll('.js-loc').forEach(b=>b.addEventListener('click',()=>{ if(!b.classList.contains('on')) setLocation(b.dataset.cc); else loc.classList.remove('open'); }));
+  document.querySelectorAll('.js-loc-select').forEach(s=>s.addEventListener('change',()=>setLocation(s.value)));
 
   document.addEventListener('DOMContentLoaded',()=>{ zTilt(); zReveal(); document.querySelectorAll('[data-countdown]').forEach(zCountdown); });
 })();

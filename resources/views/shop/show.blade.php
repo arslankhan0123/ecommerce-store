@@ -134,10 +134,10 @@
       </div>
 
       <div class="pd-price">
-        <b>PKR {{ number_format($product->price,0) }}</b>
-        @if($product->compare_price)<s>PKR {{ number_format($product->compare_price,0) }}</s><span class="save">Save PKR {{ number_format($product->compare_price-$product->price,0) }}</span>@endif
+        <b>{{ zprice($product->price) }}</b>
+        @if($product->compare_price)<s>{{ zprice($product->compare_price) }}</s><span class="save">Save {{ zprice($product->compare_price-$product->price) }}</span>@endif
       </div>
-      <div class="pd-tax">Inclusive of all taxes · Free delivery over PKR 3,000</div>
+      <div class="pd-tax">Inclusive of all taxes · Free delivery over {{ zprice(3000) }}</div>
 
       @if($product->short_description)<div class="pd-short">{{ $product->short_description }}</div>@endif
 
@@ -201,7 +201,7 @@
         <tr><td style="color:var(--muted);width:40%">Product name</td><td><b>{{ $product->name }}</b></td></tr>
         @if($product->sku)<tr><td style="color:var(--muted)">SKU</td><td>{{ $product->sku }}</td></tr>@endif
         @if($product->category)<tr><td style="color:var(--muted)">Category</td><td>{{ $product->category->name }}</td></tr>@endif
-        <tr><td style="color:var(--muted)">Price</td><td>PKR {{ number_format($product->price,0) }}</td></tr>
+        <tr><td style="color:var(--muted)">Price</td><td>{{ zprice($product->price) }}</td></tr>
         <tr><td style="color:var(--muted)">Stock</td><td>{{ $qty }} units</td></tr>
         <tr><td style="color:var(--muted)">Added</td><td>{{ $product->created_at?->format('d M Y') }}</td></tr>
       </table>
@@ -232,7 +232,7 @@
 
 @if($qty > 0)
 <div class="buybar">
-  <div><small style="color:var(--muted);font-size:11px">Price</small><br><b>PKR {{ number_format($product->price,0) }}</b></div>
+  <div><small style="color:var(--muted);font-size:11px">Price</small><br><b>{{ zprice($product->price) }}</b></div>
   <button class="btn-g" style="flex:1" onclick="document.getElementById('atcForm').requestSubmit()"><i class="fa-solid fa-cart-plus"></i> Add to Cart</button>
 </div>
 @endif

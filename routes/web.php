@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Shop\ShopController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
+use App\Http\Controllers\Shop\LocationController;
 use Illuminate\Support\Facades\Route;
 
 // ── Storefront ──────────────────────────────────────────────────────────────
@@ -18,6 +19,7 @@ Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/product/{slug}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/about', [ShopController::class, 'about'])->name('about');
 Route::match(['get','post'], '/contact', [ShopController::class, 'contact'])->name('contact');
+Route::post('/location', [LocationController::class, 'set'])->name('location.set');
 
 // ── Cart ────────────────────────────────────────────────────────────────────
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

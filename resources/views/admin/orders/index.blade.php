@@ -67,6 +67,7 @@
                         <th>Date</th>
                         <th>Items</th>
                         <th>Total</th>
+                        <th>Location</th>
                         <th>Payment</th>
                         <th>Status</th>
                         <th class="text-center">Actions</th>
@@ -98,7 +99,11 @@
                         <td>
                             <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gray-100 text-gray-600 text-xs font-semibold">{{ $order->items_count ?? '—' }}</span>
                         </td>
-                        <td class="font-semibold text-gray-800">Rs {{ number_format($order->total, 0) }}</td>
+                        <td class="font-semibold text-gray-800">{{ $order->money($order->total) }}</td>
+                        <td class="text-sm">
+                            <p class="text-gray-700">{{ $order->shipping_city ?? '—' }}</p>
+                            @if($order->ip_location)<p class="text-xs {{ $order->location_matches === false ? 'text-amber-600' : 'text-gray-400' }}" title="From IP {{ $order->ip_address }}"><span class="font-mono">IP</span> {{ $order->ip_city ?: $order->ip_country }}{{ $order->ip_city && $order->ip_country_code ? ', '.$order->ip_country_code : '' }}</p>@endif
+                        </td>
                         <td>
                             <span class="badge-{{ $pc }}">{{ ucfirst($order->payment_status) }}</span>
                         </td>

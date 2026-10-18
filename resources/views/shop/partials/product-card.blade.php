@@ -102,8 +102,8 @@
     @endif
     <div class="pc-foot">
       <div class="pc-price">
-        <b>PKR {{ number_format($price, 0) }}</b>
-        @if($compare)<s>PKR {{ number_format($compare, 0) }}</s>@endif
+        <b>{{ zprice($price) }}</b>
+        @if($compare)<s>{{ zprice($compare) }}</s>@endif
       </div>
       <form action="{{ route('cart.add') }}" method="POST" class="js-atc">
         @csrf

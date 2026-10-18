@@ -23,7 +23,7 @@
     @if($forAdmin)
       <div style="display:inline-block;background:#fff1f5;color:#c2185b;font-weight:700;font-size:12px;padding:5px 12px;border-radius:999px;margin-bottom:12px;">NEW ORDER RECEIVED</div>
       <h1 style="margin:0 0 8px;font-size:26px;letter-spacing:-.5px;">{{ $order->shipping_name }} just placed an order</h1>
-      <p style="margin:0;color:#6b7191;font-size:15px;line-height:1.6;">Total <b style="color:#0f1230;">PKR {{ number_format($order->total,0) }}</b> · {{ $order->payment_method === 'cash_on_delivery' ? 'Cash on Delivery' : ucwords(str_replace('_',' ',$order->payment_method)) }} · {{ $order->created_at->format('d M Y, g:i A') }}</p>
+      <p style="margin:0;color:#6b7191;font-size:15px;line-height:1.6;">Total <b style="color:#0f1230;">{{ zorder_price($order, $order->total) }}</b> · {{ $order->payment_method === 'cash_on_delivery' ? 'Cash on Delivery' : ucwords(str_replace('_',' ',$order->payment_method)) }} · {{ $order->created_at->format('d M Y, g:i A') }}</p>
     @else
       <div style="display:inline-block;background:#eafaf3;color:#0d8f6a;font-weight:700;font-size:12px;padding:5px 12px;border-radius:999px;margin-bottom:12px;">✓ ORDER CONFIRMED</div>
       <h1 style="margin:0 0 8px;font-size:26px;letter-spacing:-.5px;">Thanks, {{ explode(' ', trim($order->shipping_name))[0] ?? 'there' }}! We've got your order.</h1>
@@ -48,15 +48,15 @@
       <tr>
         <td style="padding:12px 0;border-bottom:1px solid #eef0f6;">
           <div style="font-weight:700;font-size:14px;">{{ $it->product_name }}</div>
-          <div style="color:#6b7191;font-size:12px;margin-top:2px;">PKR {{ number_format($it->unit_price,0) }} × {{ $it->quantity }}@if($it->product_sku) · {{ $it->product_sku }}@endif</div>
+          <div style="color:#6b7191;font-size:12px;margin-top:2px;">{{ zorder_price($order, $it->unit_price) }} × {{ $it->quantity }}@if($it->product_sku) · {{ $it->product_sku }}@endif</div>
         </td>
-        <td align="right" style="padding:12px 0;border-bottom:1px solid #eef0f6;font-weight:800;font-size:14px;white-space:nowrap;">PKR {{ number_format($it->subtotal,0) }}</td>
+        <td align="right" style="padding:12px 0;border-bottom:1px solid #eef0f6;font-weight:800;font-size:14px;white-space:nowrap;">{{ zorder_price($order, $it->subtotal) }}</td>
       </tr>
       @endforeach
-      <tr><td style="padding:10px 0 4px;color:#6b7191;font-size:14px;">Subtotal</td><td align="right" style="padding:10px 0 4px;font-size:14px;">PKR {{ number_format($order->subtotal,0) }}</td></tr>
-      @if($order->discount > 0)<tr><td style="padding:4px 0;color:#6b7191;font-size:14px;">Discount</td><td align="right" style="padding:4px 0;font-size:14px;color:#0d8f6a;">− PKR {{ number_format($order->discount,0) }}</td></tr>@endif
-      <tr><td style="padding:4px 0;color:#6b7191;font-size:14px;">Shipping</td><td align="right" style="padding:4px 0;font-size:14px;color:#0d8f6a;">{{ $order->shipping_fee > 0 ? 'PKR '.number_format($order->shipping_fee,0) : 'Free' }}</td></tr>
-      <tr><td style="padding:12px 0 0;font-size:16px;font-weight:800;border-top:2px solid #0f1230;">Total</td><td align="right" style="padding:12px 0 0;font-size:20px;font-weight:800;color:#6a3df5;border-top:2px solid #0f1230;">PKR {{ number_format($order->total,0) }}</td></tr>
+      <tr><td style="padding:10px 0 4px;color:#6b7191;font-size:14px;">Subtotal</td><td align="right" style="padding:10px 0 4px;font-size:14px;">{{ zorder_price($order, $order->subtotal) }}</td></tr>
+      @if($order->discount > 0)<tr><td style="padding:4px 0;color:#6b7191;font-size:14px;">Discount</td><td align="right" style="padding:4px 0;font-size:14px;color:#0d8f6a;">− {{ zorder_price($order, $order->discount) }}</td></tr>@endif
+      <tr><td style="padding:4px 0;color:#6b7191;font-size:14px;">Shipping</td><td align="right" style="padding:4px 0;font-size:14px;color:#0d8f6a;">{{ $order->shipping_fee > 0 ? zorder_price($order, $order->shipping_fee) : 'Free' }}</td></tr>
+      <tr><td style="padding:12px 0 0;font-size:16px;font-weight:800;border-top:2px solid #0f1230;">Total</td><td align="right" style="padding:12px 0 0;font-size:20px;font-weight:800;color:#6a3df5;border-top:2px solid #0f1230;">{{ zorder_price($order, $order->total) }}</td></tr>
     </table>
   </td></tr>
 
@@ -77,7 +77,7 @@
             ✓ Order confirmed<br>
             ○ Packed within 24 hours<br>
             ○ Delivered in 2–5 business days<br>
-            @if($order->payment_method==='cash_on_delivery')○ Pay <b style="color:#0f1230;">PKR {{ number_format($order->total,0) }}</b> in cash on delivery @endif
+            @if($order->payment_method==='cash_on_delivery')○ Pay <b style="color:#0f1230;">{{ zorder_price($order, $order->total) }}</b> in cash on delivery @endif
             @if($order->payment_method==='bank_transfer')○ Bank details will follow by email @endif
           </div>
         </div>

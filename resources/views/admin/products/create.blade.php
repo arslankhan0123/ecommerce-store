@@ -92,9 +92,9 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Purchase Price <span class="text-red-500">*</span></label>
                             <div class="relative">
-                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-xs">{{ config('currencies.base') }}</span>
                                 <input type="number" name="purchase_price" value="{{ old('purchase_price') }}" step="0.01" min="0" required placeholder="0.00"
-                                       class="w-full pl-7 pr-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 @error('purchase_price') border-red-500 @enderror">
+                                       class="w-full pl-12 pr-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 @error('purchase_price') border-red-500 @enderror">
                             </div>
                             <p class="mt-1 text-xs text-gray-400">Cost / buying price</p>
                             @error('purchase_price')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
@@ -102,9 +102,9 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Sale Price</label>
                             <div class="relative">
-                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-xs">{{ config('currencies.base') }}</span>
                                 <input type="number" name="sale_price" value="{{ old('sale_price') }}" step="0.01" min="0" placeholder="0.00"
-                                       class="w-full pl-7 pr-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 @error('sale_price') border-red-500 @enderror">
+                                       class="w-full pl-12 pr-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 @error('sale_price') border-red-500 @enderror">
                             </div>
                             <p class="mt-1 text-xs text-gray-400">Discounted selling price</p>
                             @error('sale_price')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror

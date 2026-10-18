@@ -23,6 +23,6 @@
   <div style="min-width:0">
     <a href="{{ route('shop.show',$product->slug) }}" class="prow-name">{{ $product->name }}</a>
     <span class="stars">@for($i=1;$i<=5;$i++)<i class="fa-solid fa-star {{ $i>$n?'off':'' }}"></i>@endfor</span> <small style="font-size:11px;color:var(--faint)">({{ ($product->id*7)%60+12 }})</small>
-    <div class="prow-price">PKR {{ number_format($product->price,0) }}@if($product->compare_price)<s>PKR {{ number_format($product->compare_price,0) }}</s>@endif</div>
+    <div class="prow-price">{{ zprice($product->price) }}@if($product->compare_price)<s>{{ zprice($product->compare_price) }}</s>@endif</div>
   </div>
 </div>

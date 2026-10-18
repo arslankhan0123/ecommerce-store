@@ -95,9 +95,9 @@
     <tr class="{{ $i % 2 ? 'alt' : '' }}">
       <td>{{ $i + 1 }}</td>
       <td><b>{{ $it->product_name }}</b>@if($it->product_sku)<br><span class="sku">SKU: {{ $it->product_sku }}</span>@endif</td>
-      <td class="right">PKR {{ number_format($it->unit_price, 0) }}</td>
+      <td class="right">{{ zorder_price($order, $it->unit_price) }}</td>
       <td class="right">{{ $it->quantity }}</td>
-      <td class="right b">PKR {{ number_format($it->subtotal, 0) }}</td>
+      <td class="right b">{{ zorder_price($order, $it->subtotal) }}</td>
     </tr>
     @endforeach
   </tbody>
@@ -112,10 +112,10 @@
     </td>
     <td>
       <table class="sum">
-        <tr><td class="muted">Subtotal</td><td class="right b">PKR {{ number_format($order->subtotal, 0) }}</td></tr>
-        @if($order->discount > 0)<tr><td class="muted">Discount</td><td class="right b" style="color:#0d8f6a">− PKR {{ number_format($order->discount, 0) }}</td></tr>@endif
-        <tr><td class="muted">Shipping</td><td class="right b">{{ $order->shipping_fee > 0 ? 'PKR ' . number_format($order->shipping_fee, 0) : 'Free' }}</td></tr>
-        <tr class="grand"><td>Total</td><td class="right">PKR {{ number_format($order->total, 0) }}</td></tr>
+        <tr><td class="muted">Subtotal</td><td class="right b">{{ zorder_price($order, $order->subtotal) }}</td></tr>
+        @if($order->discount > 0)<tr><td class="muted">Discount</td><td class="right b" style="color:#0d8f6a">− {{ zorder_price($order, $order->discount) }}</td></tr>@endif
+        <tr><td class="muted">Shipping</td><td class="right b">{{ $order->shipping_fee > 0 ? zorder_price($order, $order->shipping_fee) : 'Free' }}</td></tr>
+        <tr class="grand"><td>Total</td><td class="right">{{ zorder_price($order, $order->total) }}</td></tr>
       </table>
     </td>
   </tr>

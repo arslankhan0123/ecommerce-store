@@ -50,8 +50,17 @@ class CheckoutController extends Controller
             }
         }
 
+        // Currency the customer is looking at + where their IP says they are (for fraud checks)
+        $currency = \App\Support\Currency::current();
+        $ip       = (string) $request->ip();
         try {
-            $order = DB::transaction(function () use ($request, $cart) {
+            $geo = \App\Support\Currency::ipDetails($ip);
+        } catch (\Throwable $e) {
+            $geo = ['country_code' => null, 'country' => null, 'region' => null, 'city' => null];
+        }
+
+        try {
+            $order = DB::transaction(function () use ($request, $cart, $currency, $ip, $geo) {
 
                 $subtotal    = 0;
                 $lineItems   = [];
@@ -116,6 +125,16 @@ class CheckoutController extends Controller
                     'shipping_address' => $request->address,
                     'shipping_city'    => $request->city,
                     'notes'            => $request->notes,
+                    // snapshot of the currency shown at checkout (amounts above are in the base currency)
+                    'currency_code'    => $currency['code'],
+                    'currency_symbol'  => $currency['symbol'],
+                    'exchange_rate'    => $currency['rate'],
+                    // IP-derived location
+                    'ip_address'       => $ip ?: null,
+                    'ip_country_code'  => $geo['country_code'] ?? null,
+                    'ip_country'       => $geo['country'] ?? null,
+                    'ip_region'        => $geo['region'] ?? null,
+                    'ip_city'          => $geo['city'] ?? null,
                 ]);
 
                 $order->items()->createMany($lineItems);

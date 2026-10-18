@@ -85,8 +85,14 @@ class OrderController extends Controller {
         $shippingFee = (float)($request->shipping_fee ?? 0);
         $total       = $subtotal - $discount + $shippingFee;
 
+        $defCode = \App\Support\Currency::default();
+        $defCur  = \App\Support\Currency::all()[$defCode] ?? ['symbol' => '$', 'rate' => 1];
+
         $order = Order::create([
             'order_number'     => 'ORD-' . strtoupper(Str::random(8)),
+            'currency_code'    => $defCode,
+            'currency_symbol'  => $defCur['symbol'],
+            'exchange_rate'    => $defCur['rate'],
             'customer_id'      => $request->customer_id ?: null,
             'status'           => $request->status,
             'payment_status'   => $request->payment_status,

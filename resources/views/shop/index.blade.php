@@ -62,7 +62,7 @@
   'slides' => [
     ['title' => ($selectedCategory ? e($selectedCategory->name) : 'All <span>Products</span>'), 'text' => $selectedCategory ? ($selectedCategory->description ?: 'Everything in '.$selectedCategory->name.', hand-picked and ready to ship.') : 'Browse the full Zelari catalog — '.$products->total().' products, filtered your way.', 'icon' => $selectedCategory ? zcat_icon($selectedCategory->name) : 'fa-bag-shopping'],
     ['title' => 'Weekend <span>Deals Live</span>', 'text' => 'Up to 50% off selected items. Prices refresh every Friday.', 'icon' => 'fa-bolt'],
-    ['title' => 'Free Delivery <span>Over PKR 3,000</span>', 'text' => 'Cash on delivery available nationwide, 7-day easy returns.', 'icon' => 'fa-truck-fast'],
+    ['title' => 'Free Delivery <span>Over '.zprice(3000).'</span>', 'text' => 'Cash on delivery available nationwide, 7-day easy returns.', 'icon' => 'fa-truck-fast'],
   ],
 ])
 
@@ -86,9 +86,9 @@
         <div class="fcard">
           <h5>Price <i class="fa-solid fa-sliders"></i></h5>
           <div class="price-in">
-            <input type="number" name="min_price" placeholder="Min {{ (int)($priceBounds->min_p ?? 0) }}" value="{{ request('min_price') }}" min="0">
+            <input type="number" name="min_price" placeholder="Min {{ (int) floor(($priceBounds->min_p ?? 0) * zcur()['rate']) }}" value="{{ request('min_price') }}" min="0">
             <span style="color:var(--faint)">—</span>
-            <input type="number" name="max_price" placeholder="Max {{ (int)($priceBounds->max_p ?? 0) }}" value="{{ request('max_price') }}" min="0">
+            <input type="number" name="max_price" placeholder="Max {{ (int) ceil(($priceBounds->max_p ?? 0) * zcur()['rate']) }}" value="{{ request('max_price') }}" min="0">
           </div>
           <label class="chk"><input type="checkbox" name="in_stock" value="1" {{ request('in_stock')?'checked':'' }} onchange="this.form.submit()"> In stock only</label>
           <label class="chk"><input type="checkbox" name="on_sale" value="1" {{ request('on_sale')?'checked':'' }} onchange="this.form.submit()"> On sale</label>
@@ -106,7 +106,7 @@
       <div class="chips">
         @if(request('q'))<a href="{{ route('shop.index', request()->except(['q','page'])) }}">Search: "{{ request('q') }}" <i class="fa-solid fa-xmark"></i></a>@endif
         @if($selectedCategory)<a href="{{ route('shop.index', request()->except(['category','page'])) }}">{{ $selectedCategory->name }} <i class="fa-solid fa-xmark"></i></a>@endif
-        @if(request('min_price')||request('max_price'))<a href="{{ route('shop.index', request()->except(['min_price','max_price','page'])) }}">PKR {{ request('min_price',0) }} – {{ request('max_price','∞') }} <i class="fa-solid fa-xmark"></i></a>@endif
+        @if(request('min_price')||request('max_price'))<a href="{{ route('shop.index', request()->except(['min_price','max_price','page'])) }}">{{ zcur()['symbol'] }}{{ request('min_price',0) }} – {{ request('max_price','∞') }} <i class="fa-solid fa-xmark"></i></a>@endif
         @if(request('in_stock'))<a href="{{ route('shop.index', request()->except(['in_stock','page'])) }}">In stock <i class="fa-solid fa-xmark"></i></a>@endif
         @if(request('on_sale'))<a href="{{ route('shop.index', request()->except(['on_sale','page'])) }}">On sale <i class="fa-solid fa-xmark"></i></a>@endif
         <a href="{{ route('shop.index') }}" class="clear">Clear all</a>
