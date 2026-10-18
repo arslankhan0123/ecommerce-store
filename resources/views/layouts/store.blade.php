@@ -172,6 +172,32 @@ button,input,select,textarea{font-family:inherit}
 .cat-list a .ci{width:34px;height:34px;border-radius:10px;background:var(--surface);display:grid;place-items:center;font-size:14px;color:var(--p);flex-shrink:0}
 .cat-list a .n{margin-left:auto;font-size:11px;color:var(--faint);font-weight:700;background:var(--surface);padding:2px 8px;border-radius:999px}
 .cat-list .all{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;color:var(--p);justify-content:center}
+/* ─── Cascading category menu ─── */
+.cmenu{list-style:none;margin:0;padding:8px;min-width:260px}
+.cmenu li{position:relative}
+.cmenu li>a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink-2);transition:.15s;white-space:nowrap}
+.cmenu li>a .ci{width:34px;height:34px;border-radius:10px;background:var(--surface);display:grid;place-items:center;font-size:14px;color:var(--p);flex-shrink:0}
+.cmenu li>a .nm{flex:1}
+.cmenu li>a .arr{font-size:10px;color:var(--faint);transition:transform .2s}
+.cmenu li>a .cnt-b{font-size:11px;font-weight:700;color:var(--faint);background:var(--surface);padding:2px 8px;border-radius:999px}
+.cmenu li:hover>a{background:var(--p-soft);color:var(--p)}
+.cmenu li:hover>a .ci{background:var(--grad);color:#fff}
+.cmenu li:hover>a .arr{transform:translateX(3px);color:var(--p)}
+.cmenu-sub{position:absolute;top:-8px;left:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);opacity:0;visibility:hidden;transform:translateX(8px);transition:.2s;z-index:60}
+.cmenu-sub::before{content:"";position:absolute;top:0;bottom:0;left:-12px;width:12px}
+.cmenu li.has-sub:hover>.cmenu-sub{opacity:1;visibility:visible;transform:none}
+.cmenu li.has-sub.flip>.cmenu-sub{left:auto;right:calc(100% + 6px);transform:translateX(-8px)}
+.cmenu li.has-sub.flip:hover>.cmenu-sub{transform:none}
+.cmenu-sub li>a{font-weight:600;font-size:13.5px}
+.shop-dd{display:flex;align-items:stretch;width:auto;padding:0;left:-60px;overflow:visible}
+.shop-dd .cmenu-root{padding:10px;border-right:1px solid var(--line)}
+.shop-dd .shop-promo{width:250px;padding:18px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;border-radius:0 16px 16px 0;background:var(--grad);color:#fff;position:relative;overflow:hidden}
+.shop-dd .shop-promo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35;mix-blend-mode:luminosity}
+.shop-dd .shop-promo>*{position:relative}
+.shop-dd .shop-promo b{font-size:17px}
+.shop-dd .shop-promo small{opacity:.9;font-size:12.5px}
+.shop-dd .shop-promo a{display:inline-flex;align-self:flex-start;background:#fff;color:var(--p);padding:8px 14px;border-radius:9px;font-size:13px;font-weight:700;margin-top:4px}
+.allcat .dd{padding:0;width:auto}
 .nav-main{display:flex;align-items:center;gap:6px;margin:0;padding:0;list-style:none}
 .nav-item{position:relative}
 .nav-item>a{display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;font-weight:700;font-size:14.5px;color:var(--ink);transition:.15s}
@@ -205,10 +231,22 @@ body.drawer-open .drawer{transform:none}
 .drawer form button{border:0;background:var(--grad);color:#fff;width:46px}
 .drawer nav a{display:flex;align-items:center;gap:12px;padding:13px 18px;font-weight:700;font-size:15px;border-bottom:1px solid var(--surface)}
 .drawer nav a i{width:22px;color:var(--p)}
+.ctree-item a{display:flex;align-items:center;gap:10px;padding:8px 10px;padding-left:calc(10px + var(--d,0) * 16px);border-radius:10px;font-size:14px;color:var(--ink-2);font-weight:600;transition:.15s}
+.ctree-item a i:first-child{width:16px;color:var(--p);font-size:13px;text-align:center}
+.ctree-item a:hover{background:var(--p-soft);color:var(--p)}
+.ctree-item a.on{background:var(--grad);color:#fff}
+.ctree-item a.on i:first-child{color:#fff}
+.ctree-item a.path{color:var(--p)}
+.ctree-item a .n{margin-left:auto;font-size:11px;background:var(--surface);color:var(--muted);padding:2px 8px;border-radius:999px;font-weight:700}
+.ctree-item a.on .n{background:rgba(255,255,255,.25);color:#fff}
+.ctree-item a .tog{margin-left:auto;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:11px;color:var(--faint);transition:.2s}
+.ctree-item a .n + .tog{margin-left:6px}
+.ctree-item a .tog:hover{background:rgba(106,61,245,.12);color:var(--p)}
+.ctree-item a .tog.open{transform:rotate(180deg)}
+.ctree-kids{display:none}
+.ctree-kids.show{display:block}
 .drawer .dcats{padding:8px 18px 20px}
 .drawer .dcats h6{font-size:12px;letter-spacing:.06em;color:var(--faint);margin:12px 0 6px;text-transform:uppercase}
-.drawer .dcats a{display:block;padding:8px 0;font-size:14px;color:var(--ink-2);border-bottom:1px dashed var(--line)}
-.drawer .dcats a small{color:var(--faint);margin-left:6px}
 
 /* ─── Mobile bottom nav ─── */
 .mnav{display:none;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:900;box-shadow:0 -8px 30px -14px rgba(39,30,92,.3)}
@@ -389,13 +427,11 @@ body.drawer-open .drawer{transform:none}
     <div class="navrow">
       <div class="allcat" id="allcat">
         <button class="allcat-btn" type="button"><i class="fa-solid fa-table-cells-large"></i> All Categories <i class="fa-solid fa-chevron-down"></i></button>
-        <div class="dd cat-list">
-          @forelse($navCategories ?? [] as $c)
-            <a href="{{ route('shop.index',['category'=>$c->slug]) }}"><span class="ci"><i class="fa-solid {{ zcat_icon($c->name) }}"></i></span>{{ $c->name }}@if($c->children->count())<span class="n">{{ $c->children->count() }}</span>@endif</a>
-          @empty
-            <a href="{{ route('shop.index') }}"><span class="ci"><i class="fa-solid fa-box"></i></span>All products</a>
-          @endforelse
-          <a href="{{ route('shop.index') }}" class="all">Browse everything <i class="fa-solid fa-arrow-right"></i></a>
+        <div class="dd">
+          @if(($navCategories ?? collect())->isNotEmpty())
+            @include('shop.partials.cat-menu', ['items' => $navCategories, 'depth' => 0])
+          @endif
+          <div class="cat-list" style="padding:0 8px 8px"><a href="{{ route('shop.index') }}" class="all">Browse everything <i class="fa-solid fa-arrow-right"></i></a></div>
         </div>
       </div>
 
@@ -403,19 +439,17 @@ body.drawer-open .drawer{transform:none}
         <li class="nav-item"><a href="{{ route('home') }}" class="{{ request()->routeIs('home')?'active':'' }}">Home</a></li>
         <li class="nav-item">
           <a href="{{ route('shop.index') }}" class="{{ request()->routeIs('shop.*')?'active':'' }}">Shop <i class="fa-solid fa-chevron-down"></i></a>
-          <div class="dd mega">
-            @foreach(($navCategories ?? collect())->take(6) as $c)
-              <div class="col">
-                <h6><i class="fa-solid {{ zcat_icon($c->name) }}"></i> <a href="{{ route('shop.index',['category'=>$c->slug]) }}" style="color:inherit">{{ $c->name }}</a></h6>
-                @foreach($c->children->take(5) as $ch)
-                  <a href="{{ route('shop.index',['category'=>$ch->slug]) }}">{{ $ch->name }}</a>
-                @endforeach
-                <a href="{{ route('shop.index',['category'=>$c->slug]) }}" class="more">View all <i class="fa-solid fa-arrow-right"></i></a>
-              </div>
-            @endforeach
-            <div class="mega-promo">
-              <div><b>Weekend Deals</b><br><small>Up to 50% off selected items — limited time</small></div>
-              <a href="{{ route('shop.index',['on_sale'=>1]) }}">Shop deals</a>
+          <div class="dd shop-dd">
+            @if(($navCategories ?? collect())->isNotEmpty())
+              @include('shop.partials.cat-menu', ['items' => $navCategories, 'depth' => 0])
+            @else
+              <ul class="cmenu cmenu-root"><li><a href="{{ route('shop.index') }}"><span class="ci"><i class="fa-solid fa-box"></i></span><span class="nm">All products</span></a></li></ul>
+            @endif
+            <div class="shop-promo">
+              <img src="{{ zbg('hero2', 600) }}" alt="">
+              <b>Weekend Deals</b>
+              <small>Up to 50% off selected items — limited time</small>
+              <a href="{{ route('shop.index',['on_sale'=>1]) }}">Shop deals <i class="fa-solid fa-arrow-right"></i></a>
             </div>
           </div>
         </li>
@@ -446,9 +480,7 @@ body.drawer-open .drawer{transform:none}
   </nav>
   <div class="dcats">
     <h6>Categories</h6>
-    @foreach($navCategories ?? [] as $c)
-      <a href="{{ route('shop.index',['category'=>$c->slug]) }}"><i class="fa-solid {{ zcat_icon($c->name) }}" style="color:var(--p);width:20px"></i> {{ $c->name }}@if($c->children->count())<small>({{ $c->children->count() }})</small>@endif</a>
-    @endforeach
+    @include('shop.partials.cat-tree', ['items' => $navCategories ?? collect(), 'activePath' => [], 'depth' => 0])
   </div>
 </aside>
 
@@ -629,6 +661,10 @@ body.drawer-open .drawer{transform:none}
   const open=()=>document.body.classList.add('drawer-open'), close=()=>document.body.classList.remove('drawer-open');
   document.getElementById('burger').onclick=open; document.getElementById('drawerClose').onclick=close; document.getElementById('drawerBg').onclick=close;
   document.querySelectorAll('.allcat-btn').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')));
+  document.querySelectorAll('.cmenu li.has-sub').forEach(li=>li.addEventListener('mouseenter',()=>{
+    const sub=li.querySelector(':scope > .cmenu-sub'); if(!sub) return; li.classList.remove('flip');
+    const r=li.getBoundingClientRect(); if(r.right + sub.offsetWidth + 12 > innerWidth) li.classList.add('flip');
+  }));
   document.addEventListener('click',e=>{ if(!e.target.closest('.allcat')) document.querySelectorAll('.allcat.open').forEach(x=>x.classList.remove('open')); });
 
   document.addEventListener('DOMContentLoaded',()=>{ zTilt(); zReveal(); document.querySelectorAll('[data-countdown]').forEach(zCountdown); });

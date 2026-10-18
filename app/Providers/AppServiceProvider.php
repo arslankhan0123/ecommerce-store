@@ -22,9 +22,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.store', function ($view) {
             $navCategories = Category::whereNull('parent_id')
                 ->where('status', 'active')
-                ->with(['children' => fn ($q) => $q->where('status', 'active')->orderBy('name')])
+                ->with('childrenRecursive')
                 ->orderBy('name')
                 ->get();
+            $countMap = Category::productCountMap();
+            $navCategories->each(fn ($c) => $c->assignCounts($countMap));
 
             $cart      = session('cart', []);
             $cartCount = array_sum(array_column($cart, 'quantity'));

@@ -13,10 +13,11 @@ class ShopController extends Controller
     {
         $parentCategories = Category::whereNull('parent_id')
             ->where('status', 'active')
-            ->with(['children' => fn($q) => $q->where('status', 'active')])
-            ->withCount('products')
+            ->with('childrenRecursive')
             ->orderBy('name')
             ->get();
+        $countMap = Category::productCountMap();
+        $parentCategories->each(fn($c) => $c->assignCounts($countMap));
 
         $base = fn() => Product::where('status', 'active')->with(['category', 'images']);
 
@@ -29,7 +30,7 @@ class ShopController extends Controller
         // Category sections (first 3 parent categories that actually have products)
         $categorySections = collect();
         foreach ($parentCategories as $cat) {
-            $ids = array_merge([$cat->id], $cat->children->pluck('id')->all());
+            $ids = $cat->descendantIds();
             $products = $base()->whereIn('category_id', $ids)->latest()->take(10)->get();
             if ($products->count() >= 1) {
                 $categorySections->push(['category' => $cat, 'products' => $products]);
@@ -69,12 +70,12 @@ class ShopController extends Controller
             ->with(['category', 'images']);
 
         // Category / subcategory filter
-        if ($request->filled('category')) {
-            $cat = Category::where('slug', $request->category)->first();
-            if ($cat) {
-                $ids = $this->getCategoryIds($cat);
-                $query->whereIn('category_id', $ids);
-            }
+        $selectedCategory = $request->filled('category')
+            ? Category::where('slug', $request->category)->with('childrenRecursive', 'parent')->first()
+            : null;
+
+        if ($selectedCategory) {
+            $query->whereIn('category_id', $selectedCategory->descendantIds());
         }
 
         // Price range
@@ -118,20 +119,28 @@ class ShopController extends Controller
 
         $categories = Category::whereNull('parent_id')
             ->where('status', 'active')
-            ->with(['children' => fn($q) => $q->where('status', 'active')])
-            ->withCount('products')
+            ->with('childrenRecursive')
             ->orderBy('name')
             ->get();
+        $countMap = Category::productCountMap();
+        $categories->each(fn($c) => $c->assignCounts($countMap));
 
-        $selectedCategory = $request->filled('category')
-            ? Category::where('slug', $request->category)->first()
-            : null;
+        // Sub-category view: also offer products from the rest of the parent category
+        $moreProducts   = collect();
+        $parentCategory = null;
+        if ($selectedCategory && $selectedCategory->parent) {
+            $parentCategory = Category::with('childrenRecursive')->find($selectedCategory->parent_id);
+            $moreProducts = Product::where('status', 'active')
+                ->whereIn('category_id', array_diff($parentCategory->descendantIds(), $selectedCategory->descendantIds()))
+                ->with(['category', 'images'])
+                ->latest()->take(10)->get();
+        }
 
         $priceBounds = Product::where('status', 'active')
             ->selectRaw('MIN(COALESCE(sale_price, purchase_price)) as min_p, MAX(COALESCE(sale_price, purchase_price)) as max_p')
             ->first();
 
-        return view('shop.index', compact('products', 'categories', 'selectedCategory', 'priceBounds'));
+        return view('shop.index', compact('products', 'categories', 'selectedCategory', 'priceBounds', 'moreProducts', 'parentCategory'));
     }
 
     public function show(string $slug)
@@ -184,14 +193,4 @@ class ShopController extends Controller
         return view('shop.contact');
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────
-
-    private function getCategoryIds(Category $cat): array
-    {
-        $ids = [$cat->id];
-        foreach ($cat->children as $child) {
-            $ids[] = $child->id;
-        }
-        return $ids;
-    }
 }

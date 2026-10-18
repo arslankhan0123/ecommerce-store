@@ -58,7 +58,7 @@
 @section('content')
 @include('shop.partials.page-hero', [
   'id' => 'shopHero',
-  'crumbs' => [['Home', route('home')], ['Shop', $selectedCategory ? route('shop.index') : null], ...($selectedCategory ? [[$selectedCategory->name, null]] : [])],
+  'crumbs' => [['Home', route('home')], ['Shop', $selectedCategory ? route('shop.index') : null], ...($selectedCategory ? array_merge(array_map(fn($a)=>[$a->name, route('shop.index',['category'=>$a->slug])], $selectedCategory->ancestors()), [[$selectedCategory->name, null]]) : [])],
   'slides' => [
     ['title' => ($selectedCategory ? e($selectedCategory->name) : 'All <span>Products</span>'), 'text' => $selectedCategory ? ($selectedCategory->description ?: 'Everything in '.$selectedCategory->name.', hand-picked and ready to ship.') : 'Browse the full Zelari catalog — '.$products->total().' products, filtered your way.', 'icon' => $selectedCategory ? zcat_icon($selectedCategory->name) : 'fa-bag-shopping'],
     ['title' => 'Weekend <span>Deals Live</span>', 'text' => 'Up to 50% off selected items. Prices refresh every Friday.', 'icon' => 'fa-bolt'],
@@ -78,19 +78,9 @@
 
         <div class="fcard">
           <h5>Categories <i class="fa-solid fa-layer-group"></i></h5>
-          <div class="fcat">
-            <a href="{{ route('shop.index', request()->except(['category','page'])) }}" class="{{ !request('category')?'on':'' }}"><i class="fa-solid fa-table-cells-large"></i> All products</a>
-            @foreach($categories as $c)
-              <a href="{{ route('shop.index', array_merge(request()->except('page'), ['category'=>$c->slug])) }}" class="{{ request('category')===$c->slug?'on':'' }}"><i class="fa-solid {{ zcat_icon($c->name) }}"></i> {{ $c->name }}<span class="n">{{ $c->products_count }}</span></a>
-              @if($c->children->count() && (request('category')===$c->slug || $c->children->pluck('slug')->contains(request('category'))))
-                <div class="sub">
-                  @foreach($c->children as $ch)
-                    <a href="{{ route('shop.index', array_merge(request()->except('page'), ['category'=>$ch->slug])) }}" class="{{ request('category')===$ch->slug?'on':'' }}"><i class="fa-solid fa-angle-right"></i> {{ $ch->name }}</a>
-                  @endforeach
-                </div>
-              @endif
-            @endforeach
-          </div>
+          @php $activePath = $selectedCategory ? array_merge(array_map(fn($a)=>$a->slug, $selectedCategory->ancestors()), [$selectedCategory->slug]) : []; @endphp
+          <div class="ctree-item" style="--d:0"><a href="{{ route('shop.index', request()->except(['category','page'])) }}" class="{{ !request('category')?'on':'' }}"><i class="fa-solid fa-table-cells-large"></i> All products</a></div>
+          @include('shop.partials.cat-tree', ['items' => $categories, 'activePath' => $activePath, 'depth' => 0])
         </div>
 
         <div class="fcard">
@@ -154,6 +144,20 @@
           <p>Try a different category, widen the price range, or clear the search.</p>
           <a href="{{ route('shop.index') }}" class="btn-g">Show all products</a>
         </div>
+      @endif
+
+      @if(isset($moreProducts) && $moreProducts->count())
+      <div style="margin-top:44px">
+        <div class="sec-head reveal">
+          <div><h2 class="sec-title">More from {{ $parentCategory->name }}</h2><div class="sec-deco"><i></i><b></b></div><p class="sec-sub">Other products across the {{ $parentCategory->name }} category</p></div>
+          <a href="{{ route('shop.index',['category'=>$parentCategory->slug]) }}" class="sec-link">View all {{ $parentCategory->name }} <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="grid">
+          @foreach($moreProducts as $i => $product)
+            <div class="reveal" data-delay="{{ ($i%4)+1 }}">@include('shop.partials.product-card', ['product'=>$product])</div>
+          @endforeach
+        </div>
+      </div>
       @endif
     </div>
   </div>

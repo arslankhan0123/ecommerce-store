@@ -268,7 +268,7 @@
       <a href="{{ route('shop.index',['category'=>$c->slug]) }}" class="ctile reveal" data-delay="{{ ($i%4)+1 }}" data-tilt="10">
         <span class="ico"><img src="{{ zcat_image($c->name, $i, 300) }}" alt="" loading="lazy"><i class="fa-solid {{ zcat_icon($c->name) }}"></i></span>
         <b>{{ $c->name }}</b>
-        <small>{{ $c->products_count }} items</small>
+        <small>{{ $c->total_count ?? 0 }} items</small>
       </a>
     @empty
       <a href="{{ route('shop.index') }}" class="ctile"><span class="ico"><i class="fa-solid fa-box"></i></span><b>All products</b></a>
