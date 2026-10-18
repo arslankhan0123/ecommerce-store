@@ -39,6 +39,10 @@ class Setting extends Model
             'store_instagram'    => '',
             'store_twitter'      => '',
             'store_pinterest'    => '',
+            // Branding (paths relative to /public, uploaded from Admin → Settings)
+            'brand_logo'             => '',
+            'brand_icon'             => '',
+            'brand_print'            => '',
             // Payments
             'pay_cod_enabled'        => '1',
             'pay_stripe_enabled'     => '0',

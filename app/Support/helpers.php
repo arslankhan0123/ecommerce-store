@@ -213,6 +213,41 @@ if (!function_exists('zlogo')) {
     }
 }
 
+if (!function_exists('zbrand')) {
+    /**
+     * Branding asset URL from Settings, falling back to the bundled default.
+     * $key: logo | icon | print   (store settings brand_logo / brand_icon / brand_print)
+     */
+    function zbrand(string $key): string
+    {
+        $defaults = ['logo' => 'images/logo.png', 'icon' => 'images/favicon-192.png', 'print' => 'images/logo-print.png'];
+        $rel = \App\Models\Setting::get('brand_' . $key);
+        if ($rel && is_file(public_path($rel))) {
+            return asset($rel) . '?v=' . filemtime(public_path($rel));
+        }
+        return asset($defaults[$key] ?? $defaults['logo']);
+    }
+}
+if (!function_exists('zbrand_path')) {
+    /** Absolute filesystem path of a branding asset (for dompdf). */
+    function zbrand_path(string $key): string
+    {
+        $defaults = ['logo' => 'images/logo.png', 'icon' => 'images/favicon-192.png', 'print' => 'images/logo-print.png'];
+        $rel = \App\Models\Setting::get('brand_' . $key);
+        if ($rel && is_file(public_path($rel))) {
+            return public_path($rel);
+        }
+        return public_path($defaults[$key] ?? $defaults['logo']);
+    }
+}
+if (!function_exists('zbrand_custom')) {
+    /** True when the admin uploaded their own file for this asset. */
+    function zbrand_custom(string $key): bool
+    {
+        $rel = \App\Models\Setting::get('brand_' . $key);
+        return $rel && is_file(public_path($rel));
+    }
+}
 if (!function_exists('zstore')) {
     /** Store setting shortcut: zstore('phone') => Setting store_phone. */
     function zstore(string $key, $default = null)

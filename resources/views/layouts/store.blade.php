@@ -10,11 +10,16 @@ window.zmoney=function(n){var c=window.ZCUR,v=(Number(n)||0)*c.rate,s=v.toLocale
 <title>@yield('title', 'Shop') · {{ zstore('name','Zelari') }}</title>
 <meta name="description" content="@yield('meta_description', zstore('name','Zelari').' — '.zstore('tagline','a smarter way to shop').'. Curated products, honest prices, fast delivery across Pakistan.')">
 
+@if(zbrand_custom('icon'))
+<link rel="icon" href="{{ zbrand('icon') }}">
+<link rel="apple-touch-icon" href="{{ zbrand('icon') }}">
+@else
 <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-192.png') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
 <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+@endif
 <meta name="theme-color" content="#6a3df5">
 <meta property="og:image" content="{{ asset('images/logo.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -133,7 +138,8 @@ button,input,select,textarea{font-family:inherit}
 .logo{display:flex;align-items:center;flex-shrink:0;position:relative}
 .logo svg,.logo img{height:46px;width:auto;display:block;transition:transform .35s cubic-bezier(.2,.7,.2,1),filter .35s}
 .logo:hover svg,.logo:hover img{transform:translateY(-1px) scale(1.03);filter:drop-shadow(0 10px 18px rgba(106,61,245,.35))}
-.logo.sm svg{height:36px}.logo.lg svg{height:66px}
+.logo.sm svg,.logo.sm img{height:36px}.logo.lg svg,.logo.lg img{height:66px}
+.logo img{max-width:220px;object-fit:contain}
 @media(max-width:576px){.logo svg,.logo img{height:38px}}
 .loc{flex-shrink:0;display:flex}
 .loc-pill{display:flex;align-items:center;gap:9px;border:0;border-right:1.5px solid var(--line);border-radius:12px 0 0 12px;padding:0 12px 0 14px;height:100%;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap;background:var(--surface);cursor:pointer;transition:.2s;font-family:inherit}
@@ -419,7 +425,7 @@ body.drawer-open .drawer{transform:none}
     <div class="hdr-main">
       <button class="icon-btn burger" id="burger" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
 
-      <a href="{{ route('home') }}" class="logo" aria-label="{{ zstore('name','Zelari') }} home">{!! zlogo('logo.svg') !!}</a>
+      <a href="{{ route('home') }}" class="logo" aria-label="{{ zstore('name','Zelari') }} home">@if(zbrand_custom('logo'))<img src="{{ zbrand('logo') }}" alt="{{ zstore('name','Zelari') }}">@else{!! zlogo('logo.svg') !!}@endif</a>
 
 
       <div class="search">
@@ -502,7 +508,7 @@ body.drawer-open .drawer{transform:none}
 <div class="drawer-bg" id="drawerBg"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-head">
-    <a href="{{ route('home') }}" class="logo sm">{!! zlogo('logo.svg', 'd') !!}</a>
+    <a href="{{ route('home') }}" class="logo sm">@if(zbrand_custom('logo'))<img src="{{ zbrand('logo') }}" alt="{{ zstore('name','Zelari') }}">@else{!! zlogo('logo.svg', 'd') !!}@endif</a>
     <button class="icon-btn" id="drawerClose"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <form action="{{ route('shop.index') }}" method="GET"><input type="text" name="q" placeholder="Search products…"><button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button></form>
@@ -568,7 +574,7 @@ body.drawer-open .drawer{transform:none}
 
     <div class="f-main">
       <div class="f-brand">
-        <a href="{{ route('home') }}" class="logo lg">{!! zlogo('logo-tagline.svg') !!}</a>
+        <a href="{{ route('home') }}" class="logo lg">@if(zbrand_custom('logo'))<img src="{{ zbrand('logo') }}" alt="{{ zstore('name','Zelari') }}">@else{!! zlogo('logo-tagline.svg') !!}@endif</a>
         <p>{{ zstore('tagline') ? zstore('tagline').'. ' : '' }}We curate quality products, keep prices honest, and deliver fast across Pakistan — with cash on delivery everywhere.</p>
         @if(zstore('address'))<div class="fl"><i class="fa-solid fa-location-dot"></i> {{ zstore('address') }}</div>@endif
         @if(zstore('email'))<div class="fl"><i class="fa-solid fa-envelope"></i> <a href="mailto:{{ zstore('email') }}">{{ zstore('email') }}</a></div>@endif

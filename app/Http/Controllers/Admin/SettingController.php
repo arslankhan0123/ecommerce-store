@@ -55,6 +55,61 @@ class SettingController extends Controller
         return back()->with('success', 'Settings saved successfully.');
     }
 
+    /** POST /admin/settings/branding — logo, icon and print logo uploads */
+    public function updateBranding(Request $request)
+    {
+        $request->validate([
+            'brand_logo'  => 'nullable|file|mimes:png,jpg,jpeg,webp,svg|max:2048',
+            'brand_icon'  => 'nullable|file|mimes:png,ico,svg,jpg,jpeg,webp|max:1024',
+            'brand_print' => 'nullable|file|mimes:png,jpg,jpeg|max:2048',
+        ], [
+            'brand_print.mimes' => 'The print logo must be a PNG or JPG (PDF generation cannot use SVG).',
+        ]);
+
+        $dir = public_path('uploads/branding');
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+
+        $changed = [];
+        foreach (['brand_logo', 'brand_icon', 'brand_print'] as $key) {
+            // Remove
+            if ($request->boolean('remove_' . $key)) {
+                $old = Setting::get($key);
+                if ($old && is_file(public_path($old))) @unlink(public_path($old));
+                Setting::set($key, '');
+                $changed[] = $key;
+                continue;
+            }
+            // Upload
+            if ($request->hasFile($key)) {
+                $file = $request->file($key);
+                $ext  = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+                if ($ext === 'svg' && !$this->safeSvg($file->getRealPath())) {
+                    return back()->with('error', 'That SVG contains scripts or external references and was rejected. Export a plain SVG or use PNG.');
+                }
+                $name = substr($key, 6) . '-' . substr(md5((string) microtime(true)), 0, 8) . '.' . $ext;
+                $old  = Setting::get($key);
+                $file->move($dir, $name);
+                if ($old && is_file(public_path($old))) @unlink(public_path($old));
+                Setting::set($key, 'uploads/branding/' . $name);
+                $changed[] = $key;
+            }
+        }
+
+        return back()->with('success', $changed ? 'Branding updated.' : 'No branding changes were made.');
+    }
+
+    /** Reject SVGs that could run code when inlined. */
+    private function safeSvg(string $path): bool
+    {
+        $svg = strtolower((string) @file_get_contents($path));
+        foreach (['<script', 'javascript:', 'onload=', 'onerror=', 'onclick=', '<foreignobject', 'xlink:href="http', 'href="http', '<iframe', '<embed', '<object'] as $bad) {
+            if (str_contains($svg, $bad)) return false;
+        }
+        return true;
+    }
+
     /** PUT /admin/settings/payments */
     public function updatePayments(Request $request)
     {

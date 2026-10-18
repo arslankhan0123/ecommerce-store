@@ -44,7 +44,7 @@ class OrderPlaced extends Mailable
                     'address' => Setting::get('store_address', ''),
                     'email'   => Setting::get('store_email', Setting::get('mail_from_address', '')),
                 ],
-                'logo'     => asset('images/logo.png'),
+                'logo'     => zbrand('print'),
             ],
         );
     }

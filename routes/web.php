@@ -93,6 +93,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-email', [SettingController::class, 'test'])->name('settings.test');
     Route::put('/settings/payments', [SettingController::class, 'updatePayments'])->name('settings.payments');
+    Route::post('/settings/branding', [SettingController::class, 'updateBranding'])->name('settings.branding');
 
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');

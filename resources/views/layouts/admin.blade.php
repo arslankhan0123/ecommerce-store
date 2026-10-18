@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — ShopNest Admin</title>
+    <title>@yield('title', 'Dashboard') — {{ zstore('name', 'Zelari') }} Admin</title>
+    <link rel="icon" href="{{ zbrand('icon') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -566,15 +567,11 @@
 
         <!-- Brand -->
         <div class="flex items-center gap-3 px-4 py-5 relative">
-            <div class="brand-logo w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-                    <path
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                        stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                </svg>
+            <div class="brand-logo w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img src="{{ zbrand('icon') }}" alt="" class="w-full h-full object-cover">
             </div>
             <div class="brand-text">
-                <div class="text-white font-bold text-lg leading-tight">ShopNest</div>
+                <div class="text-white font-bold text-lg leading-tight truncate max-w-[150px]">{{ zstore('name', 'Zelari') }}</div>
                 <div class="text-indigo-300 text-xs font-medium">Admin Panel</div>
             </div>
             <!-- Collapse toggle (desktop) -->
@@ -970,8 +967,8 @@
         <!-- ── FOOTER ── -->
         <footer class="px-6 py-4 border-t border-gray-200 bg-white">
             <div class="flex items-center justify-between text-xs text-gray-400">
-                <span>© {{ date('Y') }} ShopNest — All rights reserved.</span>
-                <span>Built with ❤️ by ShopNest Team</span>
+                <span>© {{ date('Y') }} {{ zstore('name', 'Zelari') }} — All rights reserved.</span>
+                <span>{{ zstore('tagline', '') }}</span>
             </div>
         </footer>
     </div>
