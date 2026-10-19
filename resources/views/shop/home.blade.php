@@ -63,7 +63,7 @@
 .hero-nav.prev{left:16px}.hero-nav.next{right:16px}
 .hero-nav:hover{background:var(--p);color:#fff}
 /* side banner */
-.side-banner{position:relative;height:480px;border-radius:var(--r-lg);overflow:hidden;background:linear-gradient(160deg,#6a3df5,#2e1b8f);color:#fff;padding:30px 28px;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.side-banner{position:relative;height:480px;border-radius:var(--r-lg);overflow:hidden;background:linear-gradient(160deg,var(--brand),var(--brand-dark));color:#fff;padding:30px 28px;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
 @media(max-width:992px){.side-banner{height:auto;min-height:260px}}
 .side-banner .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:transform .8s}
 .side-banner:hover .bg{transform:scale(1.06)}
@@ -164,7 +164,7 @@
 @media(max-width:1100px){.promos{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.promos{grid-template-columns:1fr}}
 .promo{position:relative;height:250px;border-radius:var(--r-lg);overflow:hidden;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;box-shadow:var(--shadow)}
-.promo.g1{background:linear-gradient(160deg,#6a3df5,#3b1fa3)}
+.promo.g1{background:linear-gradient(160deg,var(--brand),var(--brand-dark))}
 .promo.g2{background:linear-gradient(160deg,#ff5c8a,#b4124b)}
 .promo.g3{background:linear-gradient(160deg,#0ea5e9,#0b4f87)}
 .promo.g4{background:linear-gradient(160deg,#f59e0b,#b4530a)}
@@ -222,7 +222,7 @@
         <div class="swiper-slide hs {{ $s['cls'] }}">
           <img class="hs-bg" src="{{ $s['bg'] }}" alt="" loading="{{ $i ? 'lazy' : 'eager' }}" data-swiper-parallax="35%">
           <span class="hs-shade"></span>
-          <span class="hs-orb" style="width:320px;height:320px;background:#8b5cf6;left:-80px;top:-120px"></span>
+          <span class="hs-orb" style="width:320px;height:320px;background:var(--brand-light);left:-80px;top:-120px"></span>
           <span class="hs-orb" style="width:260px;height:260px;background:#22d3ee;right:30%;bottom:-120px;animation-delay:-7s"></span>
           <div class="hs-content">
             <div class="hs-eyebrow" data-swiper-parallax="-120"><b>{{ $s['pill'] }}</b> {{ $s['eyebrow'] }}</div>

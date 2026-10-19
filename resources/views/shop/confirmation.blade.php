@@ -55,7 +55,7 @@
 <section class="ok-page">
   <div class="wrap ok-inner">
     <div class="ok-hero">
-      @for($i=0;$i<18;$i++)<span class="confetti" style="left:{{ 50 + (($i*37)%40 - 20) }}%;background:{{ ['#6a3df5','#22d3ee','#ff4d7d','#ffd36b','#14b88a'][$i%5] }};--dx:{{ (($i*53)%240)-120 }}px;--dy:{{ (($i*29)%160)-200 }}px;animation-delay:{{ ($i%6)*.08 }}s"></span>@endfor
+      @for($i=0;$i<18;$i++)<span class="confetti" style="left:{{ 50 + (($i*37)%40 - 20) }}%;background:{{ [ztheme('brand'),ztheme('accent'),'#ff4d7d','#ffd36b','#14b88a'][$i%5] }};--dx:{{ (($i*53)%240)-120 }}px;--dy:{{ (($i*29)%160)-200 }}px;animation-delay:{{ ($i%6)*.08 }}s"></span>@endfor
       <div class="ok-ring"><i class="fa-solid fa-check"></i></div>
       <h1>Order confirmed 🎉</h1>
       <p>Thanks, <b>{{ $order->shipping_name ?? $order->customer?->name ?? 'friend' }}</b>. We've received your order and emailed a confirmation with your PDF invoice to <b>{{ $order->customer_email ?? $order->customer?->email }}</b>.</p>

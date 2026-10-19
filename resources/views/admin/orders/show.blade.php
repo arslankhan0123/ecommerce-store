@@ -171,8 +171,7 @@
             <div class="bg-white rounded-2xl p-5" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Customer</p>
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
-                         style="background:#6366f1">{{ strtoupper(substr($order->customer->name,0,1)) }}</div>
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0 bg-brand">{{ strtoupper(substr($order->customer->name,0,1)) }}</div>
                     <div>
                         <p class="font-semibold text-sm text-gray-800">{{ $order->customer->name }}</p>
                         <p class="text-xs text-gray-400">{{ $order->customer->email }}</p>

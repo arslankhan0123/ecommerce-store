@@ -20,7 +20,8 @@ window.zmoney=function(n){var c=window.ZCUR,v=(Number(n)||0)*c.rate,s=v.toLocale
 <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
 <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 @endif
-<meta name="theme-color" content="#6a3df5">
+<meta name="theme-color" content="{{ ztheme('brand_dark') }}">
+@include('partials.theme-vars')
 <meta property="og:image" content="{{ asset('images/logo.png') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,16 +33,15 @@ window.zmoney=function(n){var c=window.ZCUR,v=(Number(n)||0)*c.rate,s=v.toLocale
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root{
-  --p:#6a3df5; --p-dark:#5530d6; --p-soft:#efeaff; --p2:#22d3ee; --p2-soft:#e4fbff;
-  --grad:linear-gradient(135deg,#6a3df5 0%,#8b5cf6 45%,#22d3ee 100%);
-  --grad-h:linear-gradient(135deg,#5530d6 0%,#7c4dff 45%,#06b6d4 100%);
-  --ink:#0f1230; --ink-2:#2a2e52; --muted:#6b7191; --faint:#9aa0bd;
-  --surface:#f6f7fc; --line:#e7e9f3; --line-2:#d9dcec; --white:#fff;
-  --sale:#ff4d7d; --ok:#14b88a; --warn:#f6a609; --star:#ffb400;
+  /* Colours live in config/theme.php → partials/theme-vars (--brand, --accent, …). These are aliases used by this layout. */
+  --p:var(--brand); --p-dark:var(--brand-dark); --p-soft:var(--brand-soft); --p2:var(--accent); --p2-soft:var(--accent-soft);
+  --grad:var(--brand-grad);
+  --grad-h:var(--brand-grad-hover);
+  --white:#fff;
   --r:14px; --r-lg:22px;
-  --shadow:0 10px 30px -12px rgba(39,30,92,.18);
-  --shadow-lg:0 30px 60px -20px rgba(39,30,92,.28);
-  --glow:0 0 0 4px rgba(106,61,245,.14);
+  --shadow:0 10px 30px -12px rgba(var(--shadow-rgb),.18);
+  --shadow-lg:0 30px 60px -20px rgba(var(--shadow-rgb),.3);
+  --glow:0 0 0 4px rgba(var(--shadow-rgb),.14);
   --head-h:74px;
 }
 *{box-sizing:border-box}
@@ -315,7 +315,7 @@ body.drawer-open .drawer{transform:none}
 .nl-box .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.35;mix-blend-mode:luminosity}
 .nl-box>*:not(.bg){position:relative;z-index:1}
 .nl-box::before,.nl-box::after{z-index:1;content:"";position:absolute;border-radius:50%;filter:blur(40px);opacity:.6;animation:orb 14s ease-in-out infinite}
-.nl-box::before{width:260px;height:260px;background:#6a3df5;top:-100px;right:28%}
+.nl-box::before{width:260px;height:260px;background:var(--brand-light);top:-100px;right:28%}
 .nl-box::after{width:220px;height:220px;background:#22d3ee;bottom:-120px;right:4%;animation-delay:-6s}
 .nl-box h3{font-size:28px;font-weight:800;margin:0 0 6px;letter-spacing:-.5px;position:relative}
 .nl-box p{margin:0 0 18px;color:#ffd36b;font-weight:600;position:relative}

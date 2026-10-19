@@ -33,8 +33,7 @@
                     {{ $d['text'] }}
                 </p>
             </div>
-            <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                 style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-brand-grad">
                 <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -44,7 +43,7 @@
         <div class="flex items-end gap-1 h-8">
             @foreach($bars($spark['revenue']) as $i => $h)
                 <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity" title="{{ now()->subMonths(11 - $i)->format('M Y') }}: {{ zprice($spark['revenue'][$i]) }}"
-                     style="height:{{ $h }}%; background:linear-gradient(to top,#6366f1,#8b5cf6);"></div>
+                     style="height:{{ $h }}%; background:linear-gradient(to top,var(--brand),var(--brand-light));"></div>
             @endforeach
         </div>
     </div>
@@ -194,8 +193,7 @@
                 @forelse($cats as $cat)
                 <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center"
-                             style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-brand-grad">
                             <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                         </div>
                         <div>
@@ -233,8 +231,7 @@
             <div class="grid grid-cols-2 gap-3">
                 <a href="{{ route('admin.categories.create') }}"
                    class="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-indigo-50 transition text-center group">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition"
-                         style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition bg-brand-grad">
                         <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                     </div>
                     <span class="text-xs font-medium text-gray-600">Add Category</span>
@@ -273,7 +270,7 @@
     @php
         $sd = $deltaLine($salesDelta, 'vs yesterday');
         $tiles = [
-            ['Sales Today', zprice($salesToday), $salesDelta === null ? ($salesToday > 0 ? 'First sales of the day' : 'No sales yet today') : ($salesDelta > 0 ? '↑ ' : ($salesDelta < 0 ? '↓ ' : '')) . abs($salesDelta) . '% vs yesterday', 'linear-gradient(135deg,#6366f1,#8b5cf6)', route('admin.orders.index')],
+            ['Sales Today', zprice($salesToday), $salesDelta === null ? ($salesToday > 0 ? 'First sales of the day' : 'No sales yet today') : ($salesDelta > 0 ? '↑ ' : ($salesDelta < 0 ? '↓ ' : '')) . abs($salesDelta) . '% vs yesterday', 'var(--brand-grad)', route('admin.orders.index')],
             ['Pending Orders', $pendingOrders, $pendingOrders ? '⚡ ' . $unpaidOrders . ' awaiting payment' : 'All caught up', 'linear-gradient(135deg,#f59e0b,#d97706)', route('admin.orders.index', ['status' => 'pending'])],
             ['Low Stock Items', $lowStock, $lowStock ? '⚠ ' . $outOfStock . ' out of stock' : 'Stock levels healthy', 'linear-gradient(135deg,#ef4444,#dc2626)', route('admin.products.index')],
             ['Paid Today', zprice($paidToday), $paidTodayCount . ' ' . Str::plural('payment', $paidTodayCount) . ' received', 'linear-gradient(135deg,#10b981,#059669)', route('admin.payments.index', ['status' => 'paid'])],

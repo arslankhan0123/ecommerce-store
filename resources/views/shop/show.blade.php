@@ -106,7 +106,7 @@
     {{-- Gallery --}}
     <div class="gal">
       <div class="gal-main" id="galMain">
-        <span class="orb" style="width:240px;height:240px;background:#8b5cf6;left:-60px;top:-60px"></span>
+        <span class="orb" style="width:240px;height:240px;background:var(--brand-light);left:-60px;top:-60px"></span>
         <span class="orb" style="width:200px;height:200px;background:#22d3ee;right:-40px;bottom:-60px;animation-delay:-6s"></span>
         @if($product->discount_percent)<span class="gal-badge">-{{ $product->discount_percent }}% OFF</span>@endif
         <div class="stage">

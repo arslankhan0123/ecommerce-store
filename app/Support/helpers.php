@@ -213,6 +213,13 @@ if (!function_exists('zlogo')) {
     }
 }
 
+if (!function_exists('ztheme')) {
+    /** Brand colour from config/theme.php, e.g. ztheme('brand') => '#1e1b4b'. For inline styles (email/PDF). */
+    function ztheme(string $key, ?string $default = null): string
+    {
+        return (string) config('theme.' . $key, $default ?? '#1e1b4b');
+    }
+}
 if (!function_exists('zbrand')) {
     /**
      * Branding asset URL from Settings, falling back to the bundled default.

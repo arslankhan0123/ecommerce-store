@@ -167,7 +167,7 @@
       if(!r.ok){ throw new Error(j.message||'Could not start card payment.'); }
       stripe=Stripe(STRIPE_KEY);
       const cs=getComputedStyle(document.documentElement);
-      elements=stripe.elements({clientSecret:j.clientSecret,appearance:{theme:'stripe',variables:{colorPrimary:cs.getPropertyValue('--p').trim()||'#6a3df5',borderRadius:'12px',fontFamily:'inherit',fontSizeBase:'14px'}}});
+      elements=stripe.elements({clientSecret:j.clientSecret,appearance:{theme:'stripe',variables:{colorPrimary:cs.getPropertyValue('--p').trim()||@json(ztheme('brand')),borderRadius:'12px',fontFamily:'inherit',fontSizeBase:'14px'}}});
       const pe=elements.create('payment',{layout:'tabs'});
       pe.on('ready',()=>{ document.getElementById('peLoad').style.display='none'; mounted=true; });
       pe.on('loaderror',ev=>{ showErr(ev.error?.message||'Card form failed to load.'); document.getElementById('peLoad').style.display='none'; });

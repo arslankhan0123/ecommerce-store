@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — {{ zstore('name', 'Zelari') }} Admin</title>
+    @include('partials.theme-vars')
     <link rel="icon" href="{{ zbrand('icon') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -20,9 +21,10 @@
 
         :root {
             --sidebar-w: 260px;
-            --indigo: #6366f1;
-            --indigo-dark: #4f46e5;
-            --violet: #8b5cf6;
+            /* Aliases → config/theme.php via partials/theme-vars */
+            --indigo: var(--brand);
+            --indigo-dark: var(--brand-dark);
+            --violet: var(--brand-light);
         }
 
         /* ── Sidebar ─────────────────────────── */
@@ -347,8 +349,21 @@
             margin-bottom: 6px;
         }
 
+
+        /* Brand overrides for Tailwind's indigo utilities used throughout the admin pages.
+           Scoped under body so they beat the CDN utilities without !important. */
+        body .text-indigo-600, body .text-indigo-700, body .hover\:text-indigo-600:hover, body .hover\:text-indigo-800:hover { color: var(--brand); }
+        body .text-indigo-300 { color: var(--brand-light); }
+        body .bg-indigo-600, body .hover\:bg-indigo-700:hover { background-color: var(--brand); }
+        body .bg-indigo-50, body .hover\:bg-indigo-50:hover, body .bg-indigo-50\/60 { background-color: var(--brand-soft); }
+        body .hover\:bg-indigo-100:hover { background-color: var(--brand-soft); filter: brightness(.97); }
+        body .bg-indigo-100 { background-color: var(--brand-soft); }
+        body .border-indigo-100, body .border-indigo-200, body .border-indigo-300 { border-color: rgba(var(--shadow-rgb), .18); }
+        body .text-indigo-600.rounded, body .badge-indigo { color: var(--brand); }
+        body .focus\:ring-indigo-500:focus, body .form-input:focus { --tw-ring-color: var(--brand); border-color: var(--brand); }
+        body input[type=checkbox].text-indigo-600, body input[type=radio].text-indigo-600 { accent-color: var(--brand); }
         .btn-primary {
-            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            background: var(--brand-grad);
             color: white;
             border: none;
             cursor: pointer;
@@ -451,7 +466,7 @@
         .sb-blob-1 {
             width: 200px;
             height: 200px;
-            background: #6366f1;
+            background: var(--brand);
             top: -60px;
             right: -60px;
             animation: sbfloat 8s ease-in-out infinite;
@@ -460,7 +475,7 @@
         .sb-blob-2 {
             width: 150px;
             height: 150px;
-            background: #8b5cf6;
+            background: var(--brand-light);
             bottom: 100px;
             left: -40px;
             animation: sbfloat 10s ease-in-out infinite reverse;
@@ -762,8 +777,7 @@
         <!-- Sidebar bottom user -->
         <div class="sidebar-user">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm"
-                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                <div class="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm bg-brand-grad">
                     {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                 </div>
                 <div class="user-info min-w-0">
@@ -861,8 +875,7 @@
                 <div class="relative" @click.outside="profileOpen=false">
                     <button class="flex items-center gap-2.5 hover:bg-gray-50 rounded-xl px-2.5 py-1.5 transition"
                         @click="profileOpen=!profileOpen">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                            style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm bg-brand-grad">
                             {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                         </div>
                         <div class="hidden sm:block text-left">
@@ -882,8 +895,7 @@
                         <!-- Header -->
                         <div class="p-4 border-b border-gray-100">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-brand-grad">
                                     {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                                 </div>
                                 <div>

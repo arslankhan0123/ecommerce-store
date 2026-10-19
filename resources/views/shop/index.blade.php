@@ -24,7 +24,7 @@
 .price-in input:focus{border-color:var(--p)}
 .chk{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;color:var(--ink-2);cursor:pointer;font-weight:600}
 .chk input{width:18px;height:18px;accent-color:var(--p)}
-.side-promo{border-radius:var(--r);background:linear-gradient(160deg,#6a3df5,#22d3ee);color:#fff;padding:24px;position:relative;overflow:hidden}
+.side-promo{border-radius:var(--r);background:linear-gradient(160deg,var(--brand-dark),var(--brand) 60%,var(--accent));color:#fff;padding:24px;position:relative;overflow:hidden}
 .side-promo b{font-size:22px;display:block;line-height:1.1}
 .side-promo span{font-size:13px;opacity:.9}
 .side-promo .e{position:absolute;right:-10px;bottom:-14px;font-size:84px;transform:rotate(-12deg);animation:floatY 6s ease-in-out infinite}
