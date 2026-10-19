@@ -4,6 +4,18 @@
 @section('breadcrumb', 'Welcome back, ' . Auth::user()->name . '! Here\'s what\'s happening.')
 
 @section('content')
+@php
+    // Scale a 12-value series to bar heights (%). Flat/empty series show short, even bars.
+    $bars = function ($series) {
+        $max = max(1, (float) collect($series)->max());
+        return collect($series)->map(fn ($v) => $v > 0 ? max(8, (int) round($v / $max * 100)) : 6)->all();
+    };
+    $deltaLine = function (?float $d, string $when = 'from last month') {
+        if ($d === null) return ['text' => 'New this month', 'cls' => 'text-emerald-600', 'up' => true];
+        if ($d == 0.0)   return ['text' => 'No change ' . $when, 'cls' => 'text-gray-400', 'up' => null];
+        return ['text' => ($d > 0 ? '+' : '') . $d . '% ' . $when, 'cls' => $d > 0 ? 'text-emerald-600' : 'text-rose-500', 'up' => $d > 0];
+    };
+@endphp
 
 <!-- Stats Row -->
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-7">
@@ -13,10 +25,12 @@
         <div class="flex items-start justify-between mb-4">
             <div>
                 <p class="text-sm font-medium text-gray-500">Total Revenue</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1">$48,295</p>
-                <p class="text-xs mt-2 flex items-center gap-1 text-emerald-600 font-medium">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
-                    +12.5% from last month
+                @php $d = $deltaLine($revenueDelta); @endphp
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ zprice($revenueTotal) }}</p>
+                <p class="text-xs mt-2 flex items-center gap-1 {{ $d['cls'] }} font-medium">
+                    @if($d['up'] === true)<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+                    @elseif($d['up'] === false)<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>@endif
+                    {{ $d['text'] }}
                 </p>
             </div>
             <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
@@ -28,8 +42,8 @@
         </div>
         <!-- Mini chart bar -->
         <div class="flex items-end gap-1 h-8">
-            @foreach([40,65,45,80,55,90,70,85,60,95,75,100] as $h)
-                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity"
+            @foreach($bars($spark['revenue']) as $i => $h)
+                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity" title="{{ now()->subMonths(11 - $i)->format('M Y') }}: {{ zprice($spark['revenue'][$i]) }}"
                      style="height:{{ $h }}%; background:linear-gradient(to top,#6366f1,#8b5cf6);"></div>
             @endforeach
         </div>
@@ -40,10 +54,12 @@
         <div class="flex items-start justify-between mb-4">
             <div>
                 <p class="text-sm font-medium text-gray-500">Total Orders</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1">1,847</p>
-                <p class="text-xs mt-2 flex items-center gap-1 text-emerald-600 font-medium">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
-                    +8.2% from last month
+                @php $d = $deltaLine($ordersDelta); @endphp
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($ordersTotal) }}</p>
+                <p class="text-xs mt-2 flex items-center gap-1 {{ $d['cls'] }} font-medium">
+                    @if($d['up'] === true)<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+                    @elseif($d['up'] === false)<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>@endif
+                    {{ $d['text'] }}
                 </p>
             </div>
             <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
@@ -54,8 +70,8 @@
             </div>
         </div>
         <div class="flex items-end gap-1 h-8">
-            @foreach([55,70,50,85,60,75,90,65,80,70,88,95] as $h)
-                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity"
+            @foreach($bars($spark['orders']) as $i => $h)
+                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity" title="{{ now()->subMonths(11 - $i)->format('M Y') }}: {{ (int) $spark['orders'][$i] }} orders"
                      style="height:{{ $h }}%; background:linear-gradient(to top,#06b6d4,#0891b2);"></div>
             @endforeach
         </div>
@@ -66,10 +82,10 @@
         <div class="flex items-start justify-between mb-4">
             <div>
                 <p class="text-sm font-medium text-gray-500">Total Products</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1">3,142</p>
-                <p class="text-xs mt-2 flex items-center gap-1 text-emerald-600 font-medium">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
-                    +24 added this week
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($productsTotal) }}</p>
+                <p class="text-xs mt-2 flex items-center gap-1 {{ $productsWeek > 0 ? 'text-emerald-600' : 'text-gray-400' }} font-medium">
+                    @if($productsWeek > 0)<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>@endif
+                    {{ $productsWeek > 0 ? '+' . $productsWeek . ' added this week' : 'None added this week' }}
                 </p>
             </div>
             <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
@@ -80,8 +96,8 @@
             </div>
         </div>
         <div class="flex items-end gap-1 h-8">
-            @foreach([60,75,55,80,65,90,70,85,75,88,82,100] as $h)
-                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity"
+            @foreach($bars($spark['products']) as $i => $h)
+                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity" title="{{ now()->subMonths(11 - $i)->format('M Y') }}: {{ (int) $spark['products'][$i] }} added"
                      style="height:{{ $h }}%; background:linear-gradient(to top,#f59e0b,#d97706);"></div>
             @endforeach
         </div>
@@ -92,10 +108,12 @@
         <div class="flex items-start justify-between mb-4">
             <div>
                 <p class="text-sm font-medium text-gray-500">Total Customers</p>
-                <p class="text-3xl font-bold text-gray-800 mt-1">9,628</p>
-                <p class="text-xs mt-2 flex items-center gap-1 text-rose-500 font-medium">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
-                    -2.1% from last month
+                @php $d = $deltaLine($customersDelta); @endphp
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($customersTotal) }}</p>
+                <p class="text-xs mt-2 flex items-center gap-1 {{ $d['cls'] }} font-medium">
+                    @if($d['up'] === true)<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+                    @elseif($d['up'] === false)<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>@endif
+                    {{ $d['text'] }}
                 </p>
             </div>
             <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
@@ -106,8 +124,8 @@
             </div>
         </div>
         <div class="flex items-end gap-1 h-8">
-            @foreach([80,65,90,55,75,70,85,60,95,70,80,88] as $h)
-                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity"
+            @foreach($bars($spark['customers']) as $i => $h)
+                <div class="flex-1 rounded-sm opacity-30 hover:opacity-60 transition-opacity" title="{{ now()->subMonths(11 - $i)->format('M Y') }}: {{ (int) $spark['customers'][$i] }} new"
                      style="height:{{ $h }}%; background:linear-gradient(to top,#10b981,#059669);"></div>
             @endforeach
         </div>
@@ -123,9 +141,9 @@
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div>
                 <h2 class="font-semibold text-gray-800">Recent Orders</h2>
-                <p class="text-xs text-gray-400 mt-0.5">Latest 5 transactions</p>
+                <p class="text-xs text-gray-400 mt-0.5">Latest 5 orders</p>
             </div>
-            <a href="#" class="text-xs text-indigo-600 font-medium hover:text-indigo-800 transition">View all →</a>
+            <a href="{{ route('admin.orders.index') }}" class="text-xs text-indigo-600 font-medium hover:text-indigo-800 transition">View all →</a>
         </div>
         <div class="overflow-x-auto">
             <table class="data-table">
@@ -139,35 +157,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach([
-                        ['#SN-8821','Ali Hassan','3 items','$249.00','Delivered'],
-                        ['#SN-8820','Sara Khan','1 item','$89.99','Processing'],
-                        ['#SN-8819','Usman Malik','5 items','$412.50','Shipped'],
-                        ['#SN-8818','Ayesha Raza','2 items','$155.00','Pending'],
-                        ['#SN-8817','Bilal Ahmed','1 item','$35.00','Cancelled'],
-                    ] as [$id,$name,$items,$amount,$status])
+                    @forelse($recentOrders as $o)
+                    @php $name = $o->customer->name ?? $o->shipping_name ?? 'Guest'; @endphp
                     <tr>
-                        <td class="font-semibold text-indigo-600">{{ $id }}</td>
+                        <td><a href="{{ route('admin.orders.show', $o) }}" class="font-semibold text-indigo-600 hover:underline font-mono text-sm">{{ $o->order_number }}</a><div class="text-[11px] text-gray-400">{{ $o->created_at->diffForHumans() }}</div></td>
                         <td>
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
-                                    {{ strtoupper(substr($name,0,1)) }}
-                                </div>
-                                {{ $name }}
+                                <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">{{ strtoupper(substr($name,0,1)) }}</div>
+                                <div><div class="text-sm">{{ $name }}</div>@if($o->shipping_city)<div class="text-[11px] text-gray-400">{{ $o->shipping_city }}</div>@endif</div>
                             </div>
                         </td>
-                        <td class="text-gray-500">{{ $items }}</td>
-                        <td class="font-semibold">{{ $amount }}</td>
-                        <td>
-                            @php
-                                $colors = ['Delivered'=>'#dcfce7:#16a34a','Processing'=>'#dbeafe:#2563eb','Shipped'=>'#fef9c3:#ca8a04','Pending'=>'#fee2e2:#dc2626','Cancelled'=>'#f3f4f6:#6b7280'];
-                                [$bg,$fg] = explode(':',$colors[$status]);
-                            @endphp
-                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold"
-                                  style="background:{{ $bg }};color:{{ $fg }}">{{ $status }}</span>
-                        </td>
+                        <td class="text-gray-500">{{ $o->items_count }} {{ Str::plural('item', $o->items_count) }}</td>
+                        <td class="font-semibold">{{ $o->money($o->total) }}<div class="text-[11px] font-normal {{ $o->payment_status === 'paid' ? 'text-emerald-600' : 'text-gray-400' }}">{{ $o->payment_label }}{{ $o->payment_status === 'paid' ? ' · paid' : '' }}</div></td>
+                        <td><span class="badge-{{ $o->status_color }}">{{ ucfirst($o->status) }}</span></td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr><td colspan="5" class="text-center text-gray-400 py-10 text-sm">No orders yet — they'll show up here as customers check out.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -179,14 +185,12 @@
         <!-- Categories quick access -->
         <div class="bg-white rounded-2xl p-5" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="font-semibold text-gray-800">Categories</h2>
+                <h2 class="font-semibold text-gray-800">Top Categories</h2>
                 <a href="{{ route('admin.categories.index') }}"
                    class="text-xs text-indigo-600 font-medium hover:text-indigo-800">View all →</a>
             </div>
             <div class="space-y-2.5">
-                @php
-                    $cats = \App\Models\Category::withCount('children')->latest()->take(5)->get();
-                @endphp
+                @php $cats = $topCategories; @endphp
                 @forelse($cats as $cat)
                 <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <div class="flex items-center gap-2.5">
@@ -196,7 +200,7 @@
                         </div>
                         <div>
                             <div class="text-sm font-medium text-gray-700">{{ $cat->name }}</div>
-                            <div class="text-xs text-gray-400">{{ $cat->children_count }} sub-cats</div>
+                            <div class="text-xs text-gray-400">{{ $cat->products_count }} {{ Str::plural('product', $cat->products_count) }}@if($cat->children_count) · {{ $cat->children_count }} sub</div>@else</div>@endif
                         </div>
                     </div>
                     <span class="{{ $cat->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
@@ -235,7 +239,7 @@
                     </div>
                     <span class="text-xs font-medium text-gray-600">Add Category</span>
                 </a>
-                <a href="#"
+                <a href="{{ route('admin.products.create') }}"
                    class="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-amber-50 transition text-center group">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition"
                          style="background:linear-gradient(135deg,#f59e0b,#d97706);">
@@ -251,13 +255,13 @@
                     </div>
                     <span class="text-xs font-medium text-gray-600">My Profile</span>
                 </a>
-                <a href="#"
+                <a href="{{ route('admin.payments.index') }}"
                    class="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-cyan-50 transition text-center group">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition"
                          style="background:linear-gradient(135deg,#06b6d4,#0891b2);">
                         <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
-                    <span class="text-xs font-medium text-gray-600">Reports</span>
+                    <span class="text-xs font-medium text-gray-600">Payments</span>
                 </a>
             </div>
         </div>
@@ -266,18 +270,22 @@
 
 <!-- Bottom: Activity feed + Platform stats -->
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-    @foreach([
-        ['Sales Today','$2,840','↑ 18% vs yesterday','linear-gradient(135deg,#6366f1,#8b5cf6)'],
-        ['Pending Orders','24','⚡ Need attention','linear-gradient(135deg,#f59e0b,#d97706)'],
-        ['Low Stock Items','7','⚠ Restock needed','linear-gradient(135deg,#ef4444,#dc2626)'],
-        ['Avg. Rating','4.8 ★','Based on 1,240 reviews','linear-gradient(135deg,#10b981,#059669)'],
-    ] as [$title,$val,$sub,$grad])
-    <div class="rounded-2xl p-5 text-white relative overflow-hidden" style="background:{{ $grad }};box-shadow:0 8px 30px rgba(0,0,0,.15)">
+    @php
+        $sd = $deltaLine($salesDelta, 'vs yesterday');
+        $tiles = [
+            ['Sales Today', zprice($salesToday), $salesDelta === null ? ($salesToday > 0 ? 'First sales of the day' : 'No sales yet today') : ($salesDelta > 0 ? '↑ ' : ($salesDelta < 0 ? '↓ ' : '')) . abs($salesDelta) . '% vs yesterday', 'linear-gradient(135deg,#6366f1,#8b5cf6)', route('admin.orders.index')],
+            ['Pending Orders', $pendingOrders, $pendingOrders ? '⚡ ' . $unpaidOrders . ' awaiting payment' : 'All caught up', 'linear-gradient(135deg,#f59e0b,#d97706)', route('admin.orders.index', ['status' => 'pending'])],
+            ['Low Stock Items', $lowStock, $lowStock ? '⚠ ' . $outOfStock . ' out of stock' : 'Stock levels healthy', 'linear-gradient(135deg,#ef4444,#dc2626)', route('admin.products.index')],
+            ['Paid Today', zprice($paidToday), $paidTodayCount . ' ' . Str::plural('payment', $paidTodayCount) . ' received', 'linear-gradient(135deg,#10b981,#059669)', route('admin.payments.index', ['status' => 'paid'])],
+        ];
+    @endphp
+    @foreach($tiles as [$title,$val,$sub,$grad,$href])
+    <a href="{{ $href }}" class="rounded-2xl p-5 text-white relative overflow-hidden block hover:-translate-y-0.5 transition" style="background:{{ $grad }};box-shadow:0 8px 30px rgba(0,0,0,.15)">
         <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 80% 20%,white,transparent)"></div>
         <p class="text-white/70 text-sm font-medium">{{ $title }}</p>
         <p class="text-3xl font-bold mt-1 mb-2">{{ $val }}</p>
         <p class="text-white/60 text-xs">{{ $sub }}</p>
-    </div>
+    </a>
     @endforeach
 </div>
 
