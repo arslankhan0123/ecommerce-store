@@ -58,6 +58,14 @@ class ContentController extends Controller
             'faqs' => [
                 'store_faqs'         => 'nullable|string|max:8000',
             ],
+            'auth' => [
+                'auth_title'  => 'required|string|max:90',
+                'auth_text'   => 'nullable|string|max:200',
+                'auth_perk1_icon' => 'nullable|string|max:40', 'auth_perk1_title' => 'nullable|string|max:40', 'auth_perk1_text' => 'nullable|string|max:80',
+                'auth_perk2_icon' => 'nullable|string|max:40', 'auth_perk2_title' => 'nullable|string|max:40', 'auth_perk2_text' => 'nullable|string|max:80',
+                'auth_perk3_icon' => 'nullable|string|max:40', 'auth_perk3_title' => 'nullable|string|max:40', 'auth_perk3_text' => 'nullable|string|max:80',
+                'auth_perk4_icon' => 'nullable|string|max:40', 'auth_perk4_title' => 'nullable|string|max:40', 'auth_perk4_text' => 'nullable|string|max:80',
+            ],
             default => abort(404),
         };
 
@@ -77,8 +85,8 @@ class ContentController extends Controller
                 $data[$k] = trim((string) ($data[$k] ?? ''));
             }
         }
-        if ($section === 'promo') {
-            $data['promo_enabled'] = $request->boolean('promo_enabled') ? '1' : '0';
+        if ($section === 'promo' || $section === 'auth') {
+            if ($section === 'promo') $data['promo_enabled'] = $request->boolean('promo_enabled') ? '1' : '0';
             foreach ($data as $k => $v) {
                 if ($k === 'promo_enabled') continue;
                 $v = trim((string) $v);
@@ -97,7 +105,7 @@ class ContentController extends Controller
 
         Setting::setMany($data);
 
-        $label = ['shipping' => 'Shipping & delivery', 'deal' => 'Deal of the week banner', 'promo' => 'Promo banner', 'faqs' => 'FAQs'][$section];
+        $label = ['shipping' => 'Shipping & delivery', 'deal' => 'Deal of the week banner', 'promo' => 'Promo banner', 'faqs' => 'FAQs', 'auth' => 'Login & register pages'][$section];
         return redirect()->route('admin.content.index', ['#' . $section])->with('success', "$label saved.");
     }
 }

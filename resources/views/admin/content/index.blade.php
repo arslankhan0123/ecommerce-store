@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('title', 'Website Content')
-@section('breadcrumb', 'Dynamic sections of the storefront — delivery promises, home-page deal banner and FAQs')
+@section('breadcrumb', 'Dynamic sections of the storefront — delivery promises, home-page banners, FAQs and login pages')
 
 @section('content')
 @php $s = $settings; @endphp
@@ -186,6 +186,43 @@
             <button type="submit" class="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm" style="background:linear-gradient(135deg,#0ea5e9,#22d3ee);box-shadow:0 8px 24px rgba(14,165,233,.3)">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 Save FAQs
+            </button>
+        </form>
+    </div>
+
+    {{-- ───────────── Login & register pages ───────────── --}}
+    <div id="auth" class="bg-white rounded-2xl p-6 scroll-mt-24" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white bg-brand-grad" style="box-shadow:0 8px 24px rgba(var(--shadow-rgb),.35)">
+                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Login &amp; register pages</h2>
+                <p class="text-gray-500 text-sm">The headline, intro and the four perk cards on the left of the login, register and password pages. Placeholders: <code class="bg-slate-100 px-1 rounded">{store}</code> <code class="bg-slate-100 px-1 rounded">{days}</code> <code class="bg-slate-100 px-1 rounded">{returns}</code> <code class="bg-slate-100 px-1 rounded">{free}</code> <code class="bg-slate-100 px-1 rounded">{coverage}</code> <code class="bg-slate-100 px-1 rounded">{hours}</code> are filled from your settings. Leave a perk title empty to hide that card.</p>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('admin.content.update', 'auth') }}">
+            @csrf @method('PUT')
+            <div class="grid md:grid-cols-2 gap-5 mb-5">
+                <div><label class="form-label">Headline</label><input type="text" name="auth_title" class="form-input" value="{{ old('auth_title', $s['auth_title'] ?? '') }}" maxlength="90" required><p class="text-xs text-gray-400 mt-1">The last part of the headline is highlighted automatically.</p></div>
+                <div><label class="form-label">Intro text</label><input type="text" name="auth_text" class="form-input" value="{{ old('auth_text', $s['auth_text'] ?? '') }}" maxlength="200"></div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                @for($i = 1; $i <= 4; $i++)
+                <div class="rounded-xl border border-slate-200 p-4">
+                    <p class="text-xs font-bold text-gray-500 mb-3">Perk {{ $i }}</p>
+                    <div class="grid grid-cols-[110px_1fr] gap-3 mb-3">
+                        <div><label class="form-label">Icon</label><input type="text" name="auth_perk{{ $i }}_icon" class="form-input font-mono text-xs" value="{{ old("auth_perk{$i}_icon", $s["auth_perk{$i}_icon"] ?? '') }}" placeholder="fa-truck-fast"></div>
+                        <div><label class="form-label">Title</label><input type="text" name="auth_perk{{ $i }}_title" class="form-input" value="{{ old("auth_perk{$i}_title", $s["auth_perk{$i}_title"] ?? '') }}" maxlength="40"></div>
+                    </div>
+                    <div><label class="form-label">Text</label><input type="text" name="auth_perk{{ $i }}_text" class="form-input" value="{{ old("auth_perk{$i}_text", $s["auth_perk{$i}_text"] ?? '') }}" maxlength="80"></div>
+                </div>
+                @endfor
+            </div>
+            <p class="text-xs text-gray-400 mb-4">Icons are <a href="https://fontawesome.com/search?o=r&m=free&s=solid" target="_blank" rel="noopener" class="underline">Font Awesome solid</a> names, e.g. <code class="bg-slate-100 px-1 rounded">fa-truck-fast</code>, <code class="bg-slate-100 px-1 rounded">fa-shield-halved</code>, <code class="bg-slate-100 px-1 rounded">fa-headset</code>.</p>
+            <button type="submit" class="btn-brand inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Save login &amp; register content
             </button>
         </form>
     </div>

@@ -71,6 +71,12 @@ class Setting extends Model
             'promo_perk4_icon'       => 'fa-headset',         'promo_perk4_title' => '24/7 support', 'promo_perk4_text' => 'Real people, fast replies',
             // Contact page FAQs — one per line: "Question? | Answer"
             'store_faqs'             => '',
+            'auth_title'             => 'Shopping that feels simple, honest and fast.',
+            'auth_text'              => 'One account for faster checkout, order tracking and invoices — across {store}.',
+            'auth_perk1_icon' => 'fa-truck-fast',       'auth_perk1_title' => '{days}-day delivery',     'auth_perk1_text' => '{coverage}',
+            'auth_perk2_icon' => 'fa-rotate-left',      'auth_perk2_title' => '{returns}-day returns',   'auth_perk2_text' => 'Changed your mind? No problem',
+            'auth_perk3_icon' => 'fa-shield-halved',    'auth_perk3_title' => 'Secure checkout',         'auth_perk3_text' => 'Card details never touch our server',
+            'auth_perk4_icon' => 'fa-money-bill-wave',  'auth_perk4_title' => 'Free delivery over {free}','auth_perk4_text' => 'Cash on delivery available',
             // Branding (paths relative to /public, uploaded from Admin → Settings)
             'brand_logo'             => '',
             'brand_icon'             => '',

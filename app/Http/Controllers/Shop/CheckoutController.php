@@ -457,8 +457,10 @@ class CheckoutController extends Controller
     private function findSessionOrder(string $orderNumber): Order
     {
         $order = Order::with(['items.product', 'customer'])->where('order_number', $orderNumber)->firstOrFail();
-        $isOwner = (int) session('last_order_id') === (int) $order->id;
-        if (!$isOwner && !auth()->check()) {
+        $isOwner = (int) session('last_order_id') === (int) $order->id
+            || (auth()->check() && strcasecmp((string) auth()->user()->email, (string) $order->customer_email) === 0);
+        $isStaff = auth()->check() && method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin();
+        if (!$isOwner && !$isStaff) {
             abort(403);
         }
         return $order;

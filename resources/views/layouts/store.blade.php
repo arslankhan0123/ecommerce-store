@@ -169,6 +169,29 @@ button,input,select,textarea{font-family:inherit}
 .loc-dd button.on span{background:#fff;color:var(--p)}
 .loc-dd button .fa-check{font-size:12px;color:var(--p)}
 @media(max-width:1300px){.loc .loc-pill small{display:none}}
+.acct{position:relative}
+.acct-av{width:30px;height:30px;border-radius:50%;background:var(--brand-grad);color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center}
+.acct-av.lg{width:40px;height:40px;font-size:16px;flex-shrink:0}
+.acct-btn{padding:0}
+.acct.open .acct-btn{border-color:var(--p);box-shadow:var(--glow)}
+.acct-dd{position:absolute;top:calc(100% + 10px);right:0;width:260px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px -18px rgba(var(--shadow-rgb),.35);padding:8px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.98);transition:.22s cubic-bezier(.2,.7,.2,1);z-index:1200}
+.acct.open .acct-dd{opacity:1;visibility:visible;transform:none}
+.acct-head{display:flex;align-items:center;gap:12px;padding:10px 10px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.acct-head b{display:block;font-size:14px;line-height:1.2}
+.acct-head small{display:block;color:var(--muted);font-size:12px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
+.acct-head.guest{display:block}
+.acct-head.guest small{white-space:normal;max-width:none;line-height:1.45}
+.acct-dd a,.acct-dd button{display:flex;align-items:center;gap:11px;width:100%;padding:10px 10px;border-radius:10px;font-size:13.5px;font-weight:700;color:var(--ink);border:0;background:none;cursor:pointer;font-family:inherit;text-align:left;transition:.15s}
+.acct-dd a i,.acct-dd button i{width:18px;text-align:center;color:var(--p)}
+.acct-dd a:hover,.acct-dd button:hover{background:var(--p-soft)}
+.acct-dd a em{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;background:var(--p-soft);color:var(--p);padding:2px 8px;border-radius:999px}
+.acct-dd a.acct-primary{background:var(--brand-grad);color:#fff;justify-content:center;margin-bottom:4px}
+.acct-dd a.acct-primary i{color:#fff}
+.acct-dd a.acct-primary:hover{background:var(--brand-grad-hover)}
+.acct-dd a.is-admin i{color:var(--accent)}
+.acct-out{margin:6px 0 0;padding-top:6px;border-top:1px solid var(--line)}
+.acct-out button{color:var(--sale)}
+.acct-out button i{color:var(--sale)}
 .drawer .dloc{padding:12px 18px 4px;border-bottom:1px solid var(--surface)}
 .drawer .dloc label{display:block;font-size:12px;letter-spacing:.06em;color:var(--faint);text-transform:uppercase;margin-bottom:6px}
 .drawer .dloc select{width:100%;border:1.5px solid var(--line-2);border-radius:12px;padding:10px 12px;font:inherit;font-weight:600;background:#fff}
@@ -468,11 +491,30 @@ body.drawer-open .drawer{transform:none}
           <span class="icon-btn" id="cartIcon"><i class="fa-solid fa-cart-shopping"></i><b class="cnt" id="cartCount">{{ $cartCount ?? 0 }}</b></span>
           <span><small>My cart</small><em id="cartTotalTxt" style="font-style:normal">{{ zprice($cartTotal ?? 0) }}</em></span>
         </a>
-        @auth
-          <a href="{{ route('admin.products.index') }}" class="icon-btn" title="Admin"><i class="fa-solid fa-user-gear"></i></a>
-        @else
-          <a href="{{ route('login') }}" class="icon-btn" title="Account"><i class="fa-regular fa-user"></i></a>
-        @endauth
+        <div class="acct" id="acctMenu">
+          <button type="button" class="icon-btn acct-btn" aria-haspopup="menu" aria-expanded="false" title="Account">
+            @auth<span class="acct-av">{{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>@else<i class="fa-regular fa-user"></i>@endauth
+          </button>
+          <div class="acct-dd" role="menu">
+            @auth
+              <div class="acct-head">
+                <span class="acct-av lg">{{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                <div><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></div>
+              </div>
+              <a href="{{ route('account.index') }}" role="menuitem"><i class="fa-regular fa-id-badge"></i> My account</a>
+              <a href="{{ route('account.index', ['tab' => 'orders']) }}#orders" role="menuitem"><i class="fa-solid fa-box"></i> My orders</a>
+              <a href="{{ route('cart.index') }}" role="menuitem"><i class="fa-solid fa-cart-shopping"></i> My cart <em>{{ $cartCount ?? 0 }}</em></a>
+              @if(method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin())
+                <a href="{{ route('dashboard') }}" role="menuitem" class="is-admin"><i class="fa-solid fa-user-gear"></i> Admin panel</a>
+              @endif
+              <form method="POST" action="{{ route('logout') }}" class="acct-out">@csrf<button type="submit" role="menuitem"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</button></form>
+            @else
+              <div class="acct-head guest"><b>Welcome to {{ zstore('name','Zelari') }}</b><small>Log in to track orders and check out faster.</small></div>
+              <a href="{{ route('login') }}" class="acct-primary" role="menuitem"><i class="fa-solid fa-arrow-right-to-bracket"></i> Log in</a>
+              @if(\Illuminate\Support\Facades\Route::has('register'))<a href="{{ route('register') }}" role="menuitem"><i class="fa-solid fa-user-plus"></i> Create account</a>@endif
+            @endauth
+          </div>
+        </div>
       </div>
     </div>
 
@@ -538,6 +580,15 @@ body.drawer-open .drawer{transform:none}
     <a href="{{ route('about') }}"><i class="fa-solid fa-circle-info"></i> About</a>
     <a href="{{ route('contact') }}"><i class="fa-solid fa-envelope"></i> Contact</a>
     <a href="{{ route('cart.index') }}"><i class="fa-solid fa-cart-shopping"></i> Cart ({{ $cartCount ?? 0 }})</a>
+    @auth
+      <a href="{{ route('account.index') }}"><i class="fa-regular fa-id-badge"></i> My account</a>
+      <a href="{{ route('account.index', ['tab' => 'orders']) }}#orders"><i class="fa-solid fa-box"></i> My orders</a>
+      @if(method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin())<a href="{{ route('dashboard') }}"><i class="fa-solid fa-user-gear"></i> Admin panel</a>@endif
+      <form method="POST" action="{{ route('logout') }}" style="margin:0;border:0;padding:0;display:block">@csrf<button type="submit" style="display:flex;align-items:center;gap:12px;padding:13px 18px;font-weight:700;font-size:15px;border:0;border-bottom:1px solid var(--surface);background:none;width:100%;text-align:left;color:var(--sale);font-family:inherit;cursor:pointer"><i class="fa-solid fa-arrow-right-from-bracket" style="width:22px"></i> Log out</button></form>
+    @else
+      <a href="{{ route('login') }}"><i class="fa-solid fa-arrow-right-to-bracket"></i> Log in</a>
+      @if(\Illuminate\Support\Facades\Route::has('register'))<a href="{{ route('register') }}"><i class="fa-solid fa-user-plus"></i> Create account</a>@endif
+    @endauth
   </nav>
   <div class="dcats">
     <h6>Categories</h6>
@@ -757,6 +808,15 @@ body.drawer-open .drawer{transform:none}
   document.querySelectorAll('.cmenu').forEach(ul=>ul.addEventListener('scroll',()=>{ ul.querySelectorAll(':scope > li.has-sub > .cmenu-sub').forEach(sub=>{ sub.style.visibility='hidden'; sub.style.opacity='0'; }); },{passive:true}));
   document.querySelectorAll('.cmenu li.has-sub').forEach(li=>li.addEventListener('mouseenter',()=>{ const sub=li.querySelector(':scope > .cmenu-sub'); if(sub){ sub.style.visibility=''; sub.style.opacity=''; } }));
   document.addEventListener('click',e=>{ if(!e.target.closest('.allcat')) document.querySelectorAll('.allcat.open').forEach(x=>x.classList.remove('open')); });
+
+  /* Account menu */
+  const acct=document.getElementById('acctMenu');
+  if(acct){
+    const b=acct.querySelector('.acct-btn');
+    b.addEventListener('click',e=>{ e.stopPropagation(); const o=acct.classList.toggle('open'); b.setAttribute('aria-expanded',o); document.getElementById('locPick')?.classList.remove('open'); });
+    document.addEventListener('click',e=>{ if(!e.target.closest('#acctMenu')) acct.classList.remove('open'); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') acct.classList.remove('open'); });
+  }
 
   /* Location / currency picker */
   const LOC_URL=@json(route('location.set'));

@@ -46,10 +46,6 @@
 .empty h3{font-weight:800;margin-bottom:6px}
 .empty p{color:var(--muted);margin-bottom:18px}
 .pager{margin-top:28px;display:flex;justify-content:center}
-.pager .pagination{gap:6px}
-.pager .page-link{border-radius:10px!important;border:1.5px solid var(--line-2);color:var(--ink);font-weight:700;padding:8px 14px}
-.pager .page-item.active .page-link{background:var(--grad);border-color:transparent}
-.pager .page-link:hover{background:var(--p-soft);color:var(--p)}
 .filter-toggle{display:none}
 @media(max-width:992px){.filter-toggle{display:inline-flex}.side{display:none}.side.open{display:block}}
 </style>
@@ -136,7 +132,7 @@
             <div class="reveal" data-delay="{{ ($i%4)+1 }}">@include('shop.partials.product-card', ['product'=>$product])</div>
           @endforeach
         </div>
-        <div class="pager">{{ $products->links() }}</div>
+        <div class="pager">{{ $products->links('vendor.pagination.store') }}</div>
       @else
         <div class="empty">
           <span class="e">🔍</span>
