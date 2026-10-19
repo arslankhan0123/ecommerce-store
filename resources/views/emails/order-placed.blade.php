@@ -32,7 +32,7 @@
   {{-- Header --}}
   <tr><td class="pad" bgcolor="{{ ztheme('brand') }}" style="background:{{ ztheme('brand') }};border-radius:18px 18px 0 0;padding:24px 32px;">
     <table role="presentation" width="100%"><tr>
-      <td class="hdr-right" style="padding:0;"><img src="{{ $logo }}" alt="{{ $store['name'] }}" height="40" style="height:40px;display:block;border:0;"></td>
+      <td class="hdr-right" style="padding:0;">@include('emails.partials.logo')</td>
       <td class="hdr-right" align="right" style="color:#ffffff;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;white-space:nowrap;">Order #{{ $order->order_number }}</td>
     </tr></table>
   </td></tr>
