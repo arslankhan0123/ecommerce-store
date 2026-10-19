@@ -197,6 +197,7 @@ class CheckoutController extends Controller
                 $order = Order::create([
                     'order_number'     => 'ORD-' . strtoupper(Str::random(8)),
                     'customer_id'      => $customer->id,
+                    'user_id'          => $request->user()?->id, // logged-in account, if any (guests stay null)
                     'customer_email'   => $request->email,
                     'status'           => 'pending',
                     'payment_status'   => 'unpaid',
@@ -458,6 +459,7 @@ class CheckoutController extends Controller
     {
         $order = Order::with(['items.product', 'customer'])->where('order_number', $orderNumber)->firstOrFail();
         $isOwner = (int) session('last_order_id') === (int) $order->id
+            || (auth()->check() && $order->user_id && (int) $order->user_id === (int) auth()->id())
             || (auth()->check() && strcasecmp((string) auth()->user()->email, (string) $order->customer_email) === 0);
         $isStaff = auth()->check() && method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin();
         if (!$isOwner && !$isStaff) {

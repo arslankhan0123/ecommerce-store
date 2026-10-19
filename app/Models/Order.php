@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model {
     protected $fillable = [
-        'order_number','customer_id','customer_email','status','payment_status','payment_method',
+        'order_number','customer_id','user_id','customer_email','status','payment_status','payment_method',
         'subtotal','discount','shipping_fee','total',
         'shipping_name','shipping_phone','shipping_address','shipping_city','notes',
         'currency_code','currency_symbol','exchange_rate','payment_intent_id','paid_at',
@@ -53,6 +53,11 @@ class Order extends Model {
             if (($c['currency'] ?? null) === $this->currency_code) { $orderCountry = $cc; break; }
         }
         return $orderCountry ? $orderCountry === $this->ip_country_code : null;
+    }
+
+    /** The storefront account that placed the order (null for guest checkout). */
+    public function user(): BelongsTo {
+        return $this->belongsTo(User::class);
     }
 
     public function customer(): BelongsTo {

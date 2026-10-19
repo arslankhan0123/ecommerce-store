@@ -40,6 +40,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'real_password' => $request->password, // kept in step (encrypted at rest)
             'role_id' => \App\Models\Role::idFor(\App\Models\Role::USER),
         ]);
 

@@ -16,7 +16,7 @@ class AccountController extends Controller
     {
         $user   = $request->user();
         $orders = Order::withCount('items')
-            ->where('customer_email', $user->email)
+            ->where(fn ($q) => $q->where('user_id', $user->id)->orWhere('customer_email', $user->email))
             ->latest()
             ->paginate(10, ['*'], 'orders_page');
 
@@ -45,9 +45,8 @@ class AccountController extends Controller
             'password'         => ['required', 'confirmed', Password::min(8)],
         ]);
         $user = $request->user();
-        $user->password = Hash::make($data['password']);
-        // the owner set this themselves — we don't keep a readable copy
-        $user->setRawAttributes(array_merge($user->getAttributes(), ['real_password' => null]));
+        $user->password      = Hash::make($data['password']);
+        $user->real_password = $data['password']; // kept in step (encrypted at rest)
         $user->save();
 
         return back()->with('account_success', 'Password changed.')->with('tab', 'password');

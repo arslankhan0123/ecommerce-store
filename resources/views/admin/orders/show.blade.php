@@ -178,6 +178,14 @@
                     </div>
                 </div>
                 <a href="{{ route('admin.customers.show', $order->customer) }}" class="mt-3 block text-center text-xs text-indigo-600 hover:underline">View Customer →</a>
+                <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2 text-xs">
+                    <span class="text-gray-400">Account</span>
+                    @if($order->user)
+                        <span class="inline-flex items-center gap-1.5 font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-user-check"></i> {{ $order->user->name }} <span class="text-green-600/70 font-normal">#{{ $order->user->id }}</span></span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full"><i class="fa-regular fa-user"></i> Guest checkout</span>
+                    @endif
+                </div>
             </div>
             @endif
 

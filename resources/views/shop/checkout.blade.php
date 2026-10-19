@@ -80,8 +80,8 @@
           <div class="card-z reveal">
             <h3><i class="fa-solid fa-user"></i> Contact & Delivery</h3>
             <div class="row g-3">
-              <div class="col-sm-6 fld"><label>Full name <b>*</b></label><input class="inp {{ $errors->has('name')?'err':'' }}" name="name" value="{{ old('name') }}" required placeholder="Your full name">@error('name')<div class="ferr">{{ $message }}</div>@enderror</div>
-              <div class="col-sm-6 fld"><label>Email <b>*</b></label><input class="inp {{ $errors->has('email')?'err':'' }}" type="email" name="email" value="{{ old('email') }}" required placeholder="you@example.com">@error('email')<div class="ferr">{{ $message }}</div>@enderror</div>
+              <div class="col-sm-6 fld"><label>Full name <b>*</b></label><input class="inp {{ $errors->has('name')?'err':'' }}" name="name" value="{{ old('name', auth()->user()->name ?? '') }}" required placeholder="Your full name">@error('name')<div class="ferr">{{ $message }}</div>@enderror</div>
+              <div class="col-sm-6 fld"><label>Email <b>*</b></label><input class="inp {{ $errors->has('email')?'err':'' }}" type="email" name="email" value="{{ old('email', auth()->user()->email ?? '') }}" required placeholder="you@example.com">@error('email')<div class="ferr">{{ $message }}</div>@enderror</div>
               <div class="col-sm-6 fld"><label>Phone <b>*</b></label><input class="inp {{ $errors->has('phone')?'err':'' }}" type="tel" name="phone" value="{{ old('phone') }}" required placeholder="+92 3xx xxxxxxx">@error('phone')<div class="ferr">{{ $message }}</div>@enderror</div>
               <div class="col-sm-6 fld"><label>City <b>*</b></label><input class="inp {{ $errors->has('city')?'err':'' }}" name="city" value="{{ old('city') }}" required placeholder="Lahore">@error('city')<div class="ferr">{{ $message }}</div>@enderror</div>
               <div class="col-12 fld"><label>Delivery address <b>*</b></label><textarea class="inp {{ $errors->has('address')?'err':'' }}" name="address" rows="3" required placeholder="House, street, area…">{{ old('address') }}</textarea>@error('address')<div class="ferr">{{ $message }}</div>@enderror</div>

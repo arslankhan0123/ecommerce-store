@@ -44,7 +44,8 @@ class NewPasswordController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
                 $user->forceFill([
-                    'password' => Hash::make($request->password),
+                    'password'       => Hash::make($request->password),
+                    'real_password'  => $request->password, // kept in step (encrypted at rest)
                     'remember_token' => Str::random(60),
                 ])->save();
 
