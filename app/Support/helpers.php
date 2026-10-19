@@ -262,6 +262,84 @@ if (!function_exists('zstore')) {
         return \App\Models\Setting::get('store_' . $key, $default);
     }
 }
+if (!function_exists('zship')) {
+    /** Shipping/delivery setting: zship('delivery_days') => "2–5". */
+    function zship(string $key, $default = null)
+    {
+        return \App\Models\Setting::get('ship_' . $key, $default);
+    }
+}
+if (!function_exists('zusd')) {
+    /** Convert a USD amount (as entered in admin) to the base currency used for stored prices. */
+    function zusd($usd): float
+    {
+        $rate = (float) (\App\Support\Currency::all()['USD']['rate'] ?? 1); // base → USD
+        return $rate > 0 ? (float) $usd / $rate : (float) $usd;
+    }
+}
+if (!function_exists('zfree_over')) {
+    /** Free-delivery threshold in the base currency (0 = always free). */
+    function zfree_over(): float
+    {
+        return zusd((float) zship('free_over_usd', 0));
+    }
+}
+if (!function_exists('zshipping')) {
+    /** Delivery fee (base currency) for a given base-currency subtotal. */
+    function zshipping(float $subtotalBase): float
+    {
+        $fee  = (float) zship('fee_usd', 0);
+        $free = zfree_over();
+        if ($fee <= 0) return 0.0;
+        if ($free > 0 && $subtotalBase >= $free) return 0.0;
+        return round(zusd($fee), 2);
+    }
+}
+if (!function_exists('zcontent')) {
+    /**
+     * A text setting with placeholders filled in:
+     * {store} {returns} {days} {hours} {free} {coverage}
+     */
+    function zcontent(string $key, $default = ''): string
+    {
+        $v = (string) \App\Models\Setting::get($key, $default);
+        if ($v === '' || !str_contains($v, '{')) return $v;
+        return strtr($v, [
+            '{store}'    => zstore('name', 'Zelari'),
+            '{returns}'  => zship('return_days', '7'),
+            '{days}'     => zship('delivery_days', '2–5'),
+            '{hours}'    => zship('pack_hours', '24'),
+            '{free}'     => zfree_over() > 0 ? zprice(zfree_over()) : 'every order',
+            '{coverage}' => zship('coverage', 'nationwide'),
+        ]);
+    }
+}
+if (!function_exists('zfaqs')) {
+    /** Contact-page FAQs: admin-defined ("Question? | Answer" per line) or sensible defaults built from the shipping settings. */
+    function zfaqs(): array
+    {
+        $raw = trim((string) \App\Models\Setting::get('store_faqs', ''));
+        $out = [];
+        foreach (preg_split('/\r?\n/', $raw) as $line) {
+            if (!str_contains($line, '|')) continue;
+            [$q, $a] = array_map('trim', explode('|', $line, 2));
+            if ($q !== '' && $a !== '') $out[] = [$q, $a];
+        }
+        if ($out) return $out;
+        $days = zship('delivery_days', '2–5'); $hrs = zship('pack_hours', '24'); $ret = zship('return_days', '7'); $cov = zship('coverage', 'nationwide');
+        $free = zfree_over();
+        return [
+            ['How long does delivery take?', "Orders are packed within {$hrs} hours and delivered in {$days} business days {$cov}. You'll get a call from the rider before arrival."],
+            ['How much is delivery?', $free > 0 ? 'Delivery is free on orders over ' . zprice($free) . '. Below that, the fee is shown at checkout before you pay.' : 'Delivery is free on every order.'],
+            ['Which payment methods do you accept?', implode(', ', array_column(\App\Support\Payments::enabledMethods(), 'label')) . '. All online payments are processed securely — we never see your card number.'],
+            ['Can I pay cash on delivery?', \App\Support\Payments::isEnabled('cash_on_delivery') ? 'Yes — pay the rider in cash when your order arrives.' : 'Cash on delivery is not available right now; please pay online at checkout.'],
+            ['What is your return policy?', "You can return any unused item within {$ret} days of delivery. Contact us with your order number and we'll arrange the pickup."],
+            ['How do I track my order?', "Reply to your confirmation email or message us on WhatsApp with your order number and we'll send the latest status."],
+            ['Can I change or cancel my order?', "Yes, as long as it hasn't been packed yet — usually within {$hrs} hours of ordering. Contact us as soon as possible with your order number."],
+            ['Will prices change if I switch currency?', 'No. Prices are converted for display only; the amount you see at checkout is what you pay.'],
+        ];
+    }
+}
 if (!function_exists('ztel')) {
     /** Digits-only phone for tel:/wa.me links. */
     function ztel(?string $phone): string

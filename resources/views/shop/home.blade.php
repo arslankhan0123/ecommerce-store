@@ -206,7 +206,7 @@
 @php
   $hp = $heroProducts->values();
   $slides = [
-    ['cls'=>'hs-1','eyebrow'=>'Exclusive offer','pill'=>'30% Off','h'=>'Smart Shopping <br><span>Delivered Daily</span>','p'=>'Curated products, honest prices and lightning-fast delivery across Pakistan. Cash on delivery everywhere.','btn'=>'Shop Now','href'=>route('shop.index'),'bg'=>'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=700&q=80','emo'=>'🛍️','chips'=>[['fa-truck-fast','Free delivery','Orders over '.zprice(3000)],['fa-bolt','Flash deal','Up to 50% off'],['fa-star','4.9 rating','2,300+ reviews']]],
+    ['cls'=>'hs-1','eyebrow'=>'Exclusive offer','pill'=>'30% Off','h'=>'Smart Shopping <br><span>Delivered Daily</span>','p'=>'Curated products, honest prices and lightning-fast delivery across Pakistan. Cash on delivery everywhere.','btn'=>'Shop Now','href'=>route('shop.index'),'bg'=>'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=700&q=80','emo'=>'🛍️','chips'=>[['fa-truck-fast','Free delivery', zfree_over() > 0 ? 'Orders over '.zprice(zfree_over()) : 'On every order'],['fa-bolt','Flash deal','Up to 50% off'],['fa-star','4.9 rating','2,300+ reviews']]],
     ['cls'=>'hs-2','eyebrow'=>'Weekend sale','pill'=>'Up to 50%','h'=>'Weekend Deals <br><span>Live Right Now</span>','p'=>'Biggest discounts of the season on trending picks. Prices drop every Friday — grab them before they are gone.','btn'=>'View Deals','href'=>route('shop.index',['on_sale'=>1]),'bg'=>'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=700&q=80','emo'=>'🔥','chips'=>[['fa-tag','Hot price','Limited stock'],['fa-shield-halved','Secure checkout','Server-verified'],['fa-rotate-left','Easy returns','7-day policy']]],
     ['cls'=>'hs-3','eyebrow'=>'Just landed','pill'=>'New','h'=>'Fresh Picks <br><span>Just For You</span>','p'=>'New arrivals added every week, hand-picked by our team so you always find something worth loving.','btn'=>'Explore New','href'=>route('shop.index',['sort'=>'latest']),'bg'=>'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1800&q=80','card'=>'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=700&q=80','emo'=>'✨','chips'=>[['fa-wand-magic-sparkles','New arrivals','Updated weekly'],['fa-money-bill-wave','Cash on delivery','Nationwide'],['fa-headset','24/7 support','We reply fast']]],
   ];
@@ -234,7 +234,7 @@
             </div>
             <div class="hs-stats" data-swiper-parallax="-520">
               <div><b>2,300+</b><small>Happy customers</small></div>
-              <div><b>2–5 days</b><small>Nationwide delivery</small></div>
+              <div><b>{{ zship('delivery_days','2–5') }} days</b><small>{{ ucfirst(zship('coverage','nationwide')) }} delivery</small></div>
               <div><b>COD</b><small>Cash on delivery</small></div>
             </div>
           </div>
@@ -275,9 +275,9 @@
 {{-- ═══════════ TRUST STRIP ═══════════ --}}
 <section class="wrap" style="padding-top:24px">
   <div class="trust reveal">
-    <div><i class="fa-solid fa-truck-fast"></i>Free delivery over {{ zprice(3000) }}</div>
+    <div><i class="fa-solid fa-truck-fast"></i>{{ zfree_over() > 0 ? 'Free delivery over '.zprice(zfree_over()) : 'Free delivery on every order' }}</div>
     <div><i class="fa-solid fa-shield-halved"></i>Secure, verified checkout</div>
-    <div><i class="fa-solid fa-rotate-left"></i>7-day easy returns</div>
+    <div><i class="fa-solid fa-rotate-left"></i>{{ zship('return_days','7') }}-day easy returns</div>
     <div><i class="fa-solid fa-money-bill-wave"></i>Cash on delivery</div>
     <div><i class="fa-solid fa-headset"></i>24/7 customer support</div>
   </div>
@@ -309,27 +309,30 @@
   </div>
 </section>
 
-{{-- ═══════════ PROMO BANNER ═══════════ --}}
+{{-- ═══════════ PROMO BANNER (Admin → Website Content) ═══════════ --}}
+@if(\App\Models\Setting::get('promo_enabled', '1') === '1')
 <section class="wrap">
   <div class="promo-wide reveal">
     <img class="bg" src="{{ zbg('hero3', 1800) }}" alt="" loading="lazy"><span class="shade"></span>
     <div class="pw-text">
-      <span class="pw-eyebrow"><i class="fa-solid fa-truck-fast"></i> Free delivery over {{ zprice(3000) }}</span>
-      <h3>Everything you love,<br><span>delivered to your door</span></h3>
-      <p>Thousands of products, honest prices and cash on delivery across Pakistan. Pay when it arrives — no risk, no hassle.</p>
+      <span class="pw-eyebrow"><i class="fa-solid fa-truck-fast"></i> {{ zfree_over() > 0 ? 'Free delivery over '.zprice(zfree_over()) : 'Free delivery on every order' }}</span>
+      <h3>{{ zcontent('promo_title', 'Everything you love,') }}@if($acc = zcontent('promo_title_accent'))<br><span>{{ $acc }}</span>@endif</h3>
+      <p>{{ zcontent('promo_text') }}</p>
       <div class="pw-ctas">
-        <a href="{{ route('shop.index') }}" class="btn-sale" style="padding:13px 24px;font-size:15px">Start shopping <i class="fa-solid fa-arrow-right"></i></a>
-        <a href="{{ route('shop.index',['on_sale'=>1]) }}" class="pw-ghost"><i class="fa-solid fa-bolt"></i> Today's deals</a>
+        @if($l1 = zcontent('promo_btn1_label'))<a href="{{ \App\Models\Setting::get('promo_btn1_link') ?: route('shop.index') }}" class="btn-sale" style="padding:13px 24px;font-size:15px">{{ $l1 }} <i class="fa-solid fa-arrow-right"></i></a>@endif
+        @if($l2 = zcontent('promo_btn2_label'))<a href="{{ \App\Models\Setting::get('promo_btn2_link') ?: route('shop.index',['on_sale'=>1]) }}" class="pw-ghost"><i class="fa-solid fa-bolt"></i> {{ $l2 }}</a>@endif
       </div>
     </div>
     <div class="pw-perks">
-      <div><i class="fa-solid fa-money-bill-wave"></i><b>Cash on delivery</b><small>Pay at your doorstep</small></div>
-      <div><i class="fa-solid fa-rotate-left"></i><b>7-day returns</b><small>Changed your mind? No problem</small></div>
-      <div><i class="fa-solid fa-shield-halved"></i><b>Secure checkout</b><small>Prices verified on our server</small></div>
-      <div><i class="fa-solid fa-headset"></i><b>24/7 support</b><small>Real people, fast replies</small></div>
+      @for($k = 1; $k <= 4; $k++)
+        @if($pt = zcontent("promo_perk{$k}_title"))
+        <div><i class="fa-solid {{ \App\Models\Setting::get("promo_perk{$k}_icon", 'fa-circle-check') }}"></i><b>{{ $pt }}</b><small>{{ zcontent("promo_perk{$k}_text") }}</small></div>
+        @endif
+      @endfor
     </div>
   </div>
 </section>
+@endif
 
 {{-- ═══════════ CATEGORY SECTION 1 ═══════════ --}}
 @if($categorySections->get(0))
@@ -348,15 +351,22 @@
 @endif
 
 {{-- ═══════════ COUNTDOWN ═══════════ --}}
-@php $dealImg = $deals->first() ? $deals->first()->display_image : zbg('promo2', 800); @endphp
+@php
+  $dealImg = $deals->first() ? $deals->first()->display_image : zbg('promo2', 800);
+  $dealEnd = null;
+  if ($raw = \App\Models\Setting::get('deal_ends_at')) { try { $dealEnd = \Carbon\Carbon::parse($raw); } catch (\Throwable) {} }
+  if (!$dealEnd || $dealEnd->isPast()) { $dealEnd = now()->endOfWeek(); }
+  $dealLink = \App\Models\Setting::get('deal_link') ?: route('shop.index', ['on_sale' => 1]);
+@endphp
+@if(\App\Models\Setting::get('deal_enabled', '1') === '1')
 <section class="wrap">
-  <div class="cd reveal" data-countdown data-end="{{ now()->endOfWeek()->getTimestamp() * 1000 }}">
+  <div class="cd reveal" data-countdown data-end="{{ $dealEnd->getTimestamp() * 1000 }}">
     <img class="bg" src="{{ zbg('hero2', 1800) }}" alt="" loading="lazy"><span class="shade"></span>
     <div>
-      <span class="cd-eyebrow"><i class="fa-solid fa-bolt"></i> Deal of the week</span>
-      <h3>Special offers<br><span>ending soon</span></h3>
-      <p>Our biggest markdowns of the week — once the timer hits zero, prices go back up. Grab yours before they're gone.</p>
-      <a href="{{ route('shop.index',['on_sale'=>1]) }}" class="btn-sale" style="padding:13px 24px;font-size:15px">Shop the deals <i class="fa-solid fa-arrow-right"></i></a>
+      <span class="cd-eyebrow"><i class="fa-solid fa-bolt"></i> {{ \App\Models\Setting::get('deal_eyebrow', 'Deal of the week') }}</span>
+      <h3>{{ \App\Models\Setting::get('deal_title', 'Special offers') }}<br><span>{{ \App\Models\Setting::get('deal_title_accent', 'ending soon') }}</span></h3>
+      <p>{{ \App\Models\Setting::get('deal_text', 'Our biggest markdowns of the week — once the timer hits zero, prices go back up.') }}</p>
+      <a href="{{ $dealLink }}" class="btn-sale" style="padding:13px 24px;font-size:15px">{{ \App\Models\Setting::get('deal_button', 'Shop the deals') }} <i class="fa-solid fa-arrow-right"></i></a>
     </div>
     <div class="cd-timer">
       <div class="cd-box"><span data-u="d">00</span><small>DAYS</small></div><span class="cd-sep">:</span>
@@ -366,10 +376,11 @@
     </div>
     <div class="cd-art">
       <div class="card"><img src="{{ $dealImg }}" alt=""></div>
-      <span class="tag">Up to 50% OFF</span>
+      @if($b = \App\Models\Setting::get('deal_badge'))<span class="tag">{{ $b }}</span>@endif
     </div>
   </div>
 </section>
+@endif
 
 {{-- ═══════════ HOT DEALS SLIDER ═══════════ --}}
 <section class="sec wrap">
@@ -422,7 +433,7 @@
         <img class="bg" src="{{ zbg('promo'.($i+1), 900) }}" alt="" loading="lazy"><span class="shade"></span>
         <h4>{{ $d[1] }}</h4>
         <p>{{ $d[2] }}</p>
-        <div class="by"><span>By <b>Zelari</b></span><span style="background:var(--sale);padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700">Shop Now <i class="fa-solid fa-arrow-right"></i></span></div>
+        <div class="by"><span>By <b>{{ zstore('name','Zelari') }}</b></span><span style="background:var(--sale);padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700">Shop Now <i class="fa-solid fa-arrow-right"></i></span></div>
       </a>
     @endforeach
   </div>

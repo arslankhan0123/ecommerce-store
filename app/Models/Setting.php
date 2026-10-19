@@ -39,6 +39,38 @@ class Setting extends Model
             'store_instagram'    => '',
             'store_twitter'      => '',
             'store_pinterest'    => '',
+            // Shipping & delivery promises (shown on product pages, cart, checkout, emails, PDF)
+            'ship_free_over_usd'     => '30',     // free delivery when order subtotal ≥ this (entered in USD, converted to each currency)
+            'ship_fee_usd'           => '0',      // flat delivery fee below the threshold (USD); 0 = always free
+            'ship_delivery_days'     => '2–5',    // e.g. "2–5" (business days)
+            'ship_pack_hours'        => '24',
+            'ship_return_days'       => '7',
+            'ship_coverage'          => 'nationwide',
+            // Deal-of-the-week countdown banner (home page)
+            'deal_enabled'           => '1',
+            'deal_eyebrow'           => 'Deal of the week',
+            'deal_title'             => 'Special offers',
+            'deal_title_accent'      => 'ending soon',
+            'deal_text'              => 'Our biggest markdowns of the week — once the timer hits zero, prices go back up. Grab yours before they\'re gone.',
+            'deal_badge'             => 'Up to 50% OFF',
+            'deal_button'            => 'Shop the deals',
+            'deal_ends_at'           => '',       // Y-m-d H:i, blank = end of the current week
+            'deal_link'              => '',       // blank = all products on sale
+            // Home-page promo banner ("Everything you love, delivered to your door")
+            'promo_enabled'          => '1',
+            'promo_title'            => 'Everything you love,',
+            'promo_title_accent'     => 'delivered to your door',
+            'promo_text'             => 'Thousands of products, honest prices and cash on delivery across Pakistan. Pay when it arrives — no risk, no hassle.',
+            'promo_btn1_label'       => 'Start shopping',
+            'promo_btn1_link'        => '',
+            'promo_btn2_label'       => "Today's deals",
+            'promo_btn2_link'        => '',
+            'promo_perk1_icon'       => 'fa-money-bill-wave', 'promo_perk1_title' => 'Cash on delivery', 'promo_perk1_text' => 'Pay at your doorstep',
+            'promo_perk2_icon'       => 'fa-rotate-left',     'promo_perk2_title' => '{returns}-day returns', 'promo_perk2_text' => 'Changed your mind? No problem',
+            'promo_perk3_icon'       => 'fa-shield-halved',   'promo_perk3_title' => 'Secure checkout', 'promo_perk3_text' => 'Prices verified on our server',
+            'promo_perk4_icon'       => 'fa-headset',         'promo_perk4_title' => '24/7 support', 'promo_perk4_text' => 'Real people, fast replies',
+            // Contact page FAQs — one per line: "Question? | Answer"
+            'store_faqs'             => '',
             // Branding (paths relative to /public, uploaded from Admin → Settings)
             'brand_logo'             => '',
             'brand_icon'             => '',

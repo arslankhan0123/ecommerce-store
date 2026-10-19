@@ -178,7 +178,7 @@ class CheckoutController extends Controller
                     $product->decrement('quantity', $item['quantity']);
                 }
 
-                $shippingFee = 0; // configurable; 0 for now
+                $shippingFee = zshipping((float) $subtotal); // from Admin → Settings → Shipping
                 $total       = $subtotal + $shippingFee;
 
                 // ── Find or create customer ──────────────────────────────

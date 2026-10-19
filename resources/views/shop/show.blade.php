@@ -137,13 +137,13 @@
         <b>{{ zprice($product->price) }}</b>
         @if($product->compare_price)<s>{{ zprice($product->compare_price) }}</s><span class="save">Save {{ zprice($product->compare_price-$product->price) }}</span>@endif
       </div>
-      <div class="pd-tax">Inclusive of all taxes · Free delivery over {{ zprice(3000) }}</div>
+      <div class="pd-tax">Inclusive of all taxes · {{ zfree_over() > 0 ? 'Free delivery over '.zprice(zfree_over()) : 'Free delivery' }}</div>
 
       @if($product->short_description)<div class="pd-short">{{ $product->short_description }}</div>@endif
 
       @if($qty<=0)<span class="stock out"><span class="d"></span> Out of stock</span>
       @elseif($qty<=5)<span class="stock low"><span class="d"></span> Hurry! Only {{ $qty }} left</span>
-      @else<span class="stock ok"><span class="d"></span> In stock — ships within 24h</span>@endif
+      @else<span class="stock ok"><span class="d"></span> In stock — ships within {{ zship('pack_hours','24') }}h</span>@endif
 
       @if($qty > 0)
       <form action="{{ route('cart.add') }}" method="POST" class="js-atc" id="atcForm">
@@ -172,12 +172,12 @@
         @if($product->sku)<div><span>SKU: </span><b>{{ $product->sku }}</b></div>@endif
         @if($product->category)<div><span>Category: </span><b>{{ $product->category->name }}</b></div>@endif
         <div><span>Availability: </span><b>{{ $qty>0 ? $qty.' units' : 'Out of stock' }}</b></div>
-        <div><span>Delivery: </span><b>2–5 business days</b></div>
+        <div><span>Delivery: </span><b>{{ zship('delivery_days','2–5') }} business days</b></div>
       </div>
 
       <div class="guar">
         <div><i class="fa-solid fa-shield-halved"></i> Secure checkout</div>
-        <div><i class="fa-solid fa-rotate-left"></i> 7-day returns</div>
+        <div><i class="fa-solid fa-rotate-left"></i> {{ zship('return_days','7') }}-day returns</div>
         <div><i class="fa-solid fa-truck-fast"></i> Fast dispatch</div>
         <div><i class="fa-solid fa-money-bill-wave"></i> Cash on delivery</div>
       </div>

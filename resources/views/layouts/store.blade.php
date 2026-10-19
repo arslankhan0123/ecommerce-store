@@ -418,8 +418,8 @@ body.drawer-open .drawer{transform:none}
     <div class="topbar-loc"><i class="fa-solid fa-location-dot"></i><span>{{ zstore('address') }}</span></div>
     <div class="topbar-marquee">
       <span>
-        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over {{ zprice(3000) }}<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
-        <b>Welcome to {{ zstore('name','Zelari') }}!</b> Free delivery on orders over {{ zprice(3000) }}<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
+        <b>Welcome to {{ zstore('name','Zelari') }}!</b> {{ zfree_over() > 0 ? 'Free delivery on orders over '.zprice(zfree_over()) : 'Free delivery on every order' }}<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
+        <b>Welcome to {{ zstore('name','Zelari') }}!</b> {{ zfree_over() > 0 ? 'Free delivery on orders over '.zprice(zfree_over()) : 'Free delivery on every order' }}<i class="sep"></i><em>New arrivals</em> added every week<i class="sep"></i>Weekend deals refresh every Friday<i class="sep"></i>Cash on delivery available nationwide<i class="sep"></i>7-day easy returns on every order<i class="sep"></i>
       </span>
     </div>
   </div>
@@ -581,7 +581,7 @@ body.drawer-open .drawer{transform:none}
   <div class="wrap">
     <div class="f-feats">
       <div class="f-feat"><i class="fa-solid fa-gem"></i><span>Curated Quality Products</span></div>
-      <div class="f-feat"><i class="fa-solid fa-truck-fast"></i><span>Free Delivery Over {{ zprice(3000) }}</span></div>
+      <div class="f-feat"><i class="fa-solid fa-truck-fast"></i><span>{{ zfree_over() > 0 ? 'Free Delivery Over '.zprice(zfree_over()) : 'Free Delivery On Every Order' }}</span></div>
       <div class="f-feat"><i class="fa-solid fa-percent"></i><span>Daily Mega Discounts</span></div>
       <div class="f-feat"><i class="fa-solid fa-tags"></i><span>Best Price On The Market</span></div>
     </div>

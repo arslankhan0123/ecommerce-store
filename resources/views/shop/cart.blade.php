@@ -68,11 +68,11 @@
 @section('content')
 @include('shop.partials.page-hero', ['id'=>'cartHero','crumbs'=>[['Home',route('home')],['Cart',null]],'slides'=>[
   ['title'=>'Your <span>Shopping Cart</span>','text'=>'Review your picks, adjust quantities, and check out in under a minute.','icon'=>'fa-cart-shopping'],
-  ['title'=>'Free Delivery <span>Over '.zprice(3000).'</span>','text'=>'Add a little more and shipping is on us.','icon'=>'fa-truck-fast'],
+  ['title'=> zfree_over() > 0 ? 'Free Delivery <span>Over '.zprice(zfree_over()).'</span>' : 'Free Delivery <span>On Every Order</span>','text'=>'Add a little more and shipping is on us.','icon'=>'fa-truck-fast'],
 ]])
 
 <section class="cartp wrap">
-  @php $items = $cart ?? session('cart', []); $count = array_sum(array_column($items,'quantity')); $total = array_sum(array_map(fn($i)=>$i['price']*$i['quantity'],$items)); $free = 3000; @endphp
+  @php $items = $cart ?? session('cart', []); $count = array_sum(array_column($items,'quantity')); $total = array_sum(array_map(fn($i)=>$i['price']*$i['quantity'],$items)); $free = zfree_over(); $shipFee = zshipping($total); @endphp
 
   <div class="steps">
     <div class="step on"><i>1</i> Cart</div><span class="step-line"></span>
@@ -121,15 +121,17 @@
     <aside class="sum reveal" data-delay="1">
       <h3>Order Summary</h3>
       <div class="row2"><span>Items (<span id="sumCount">{{ $count }}</span>)</span><b id="sumSub">{{ zprice($total) }}</b></div>
-      <div class="row2"><span>Shipping</span><b id="sumShip" style="color:{{ $total>=$free?'var(--ok)':'var(--ink)' }}">{{ $total>=$free ? 'Free' : 'Calculated at checkout' }}</b></div>
+      <div class="row2"><span>Shipping</span><b id="sumShip" style="color:{{ $shipFee <= 0 ?'var(--ok)':'var(--ink)' }}">{{ $shipFee <= 0 ? 'Free' : zprice($shipFee) }}</b></div>
       <div class="row2"><span>Discount</span><b>— {{ zprice(0) }}</b></div>
       <hr>
       <div class="tot"><span>Total</span><b id="sumTotal">{{ zprice($total) }}</b></div>
-      <div class="ship-bar" id="shipBar" data-free="{{ $free }}">
+      @if($free > 0)
+      <div class="ship-bar" id="shipBar" data-free="{{ $free }}" data-fee="{{ zshipping(0) }}">
         <span class="ship-msg">@if($total >= $free)<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You've unlocked <b>free delivery</b>!
         @else<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>{{ zprice($free-$total) }}</b> more for free delivery @endif</span>
-        <div class="bar"><i style="width:{{ min(100,round($total/$free*100)) }}%"></i></div>
+        <div class="bar"><i style="width:{{ min(100,round($total/max(1,$free)*100)) }}%"></i></div>
       </div>
+      @endif
       <a href="{{ route('checkout.index') }}" class="btn-g"><i class="fa-solid fa-lock"></i> Proceed to Checkout</a>
       <div class="secure"><i class="fa-solid fa-shield-halved"></i> Secure, server-verified checkout</div>
       <div style="display:flex;justify-content:center;margin-top:12px">@include('shop.partials.payment-icons', ['size' => 'sm'])</div>
@@ -170,10 +172,11 @@
       const t=document.getElementById('sumTotal'); t.textContent=fmt(j.total); bump(t);
       document.querySelectorAll('#cartCount,.js-cart-count').forEach(el=>el.textContent=j.count);
       const ht=document.getElementById('cartTotalTxt'); if(ht) ht.textContent=fmt(j.total);
-      const bar=document.getElementById('shipBar'); const free=+bar.dataset.free; const ship=document.getElementById('sumShip');
-      if(j.total>=free){ bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You\'ve unlocked <b>free delivery</b>!'; ship.textContent='Free'; ship.style.color='var(--ok)'; }
-      else { bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>'+fmt(free-j.total)+'</b> more for free delivery'; ship.textContent='Calculated at checkout'; ship.style.color='var(--ink)'; }
-      bar.querySelector('.bar i').style.width=Math.min(100,Math.round(j.total/free*100))+'%';
+      const bar=document.getElementById('shipBar'); const ship=document.getElementById('sumShip');
+      if(bar){ const free=+bar.dataset.free, fee=+bar.dataset.fee||0;
+        if(j.total>=free){ bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-circle-check" style="color:var(--ok)"></i> You\'ve unlocked <b>free delivery</b>!'; ship.textContent='Free'; ship.style.color='var(--ok)'; }
+        else { bar.querySelector('.ship-msg').innerHTML='<i class="fa-solid fa-truck-fast" style="color:var(--p)"></i> Add <b>'+fmt(free-j.total)+'</b> more for free delivery'; ship.textContent=fee>0?fmt(fee):'Free'; ship.style.color=fee>0?'var(--ink)':'var(--ok)'; }
+        bar.querySelector('.bar i').style.width=Math.min(100,Math.round(j.total/free*100))+'%'; }
       if(j.empty){ setTimeout(()=>location.reload(),350); }
     }catch(e){ zToast('Network error — please try again','err'); }
     finally{ form.classList.remove('loading'); busy=false; }

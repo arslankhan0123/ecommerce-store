@@ -59,7 +59,7 @@
 
 @section('content')
 @include('shop.partials.page-hero', ['id'=>'aboutHero','crumbs'=>[['Home',route('home')],['About',null]],'slides'=>[
-  ['title'=>'We are <span>Zelari</span>','text'=>'A modern online store built around one idea: shopping should be simple, honest and fast.','icon'=>'fa-rocket'],
+  ['title'=>'We are <span>'.e(zstore('name','Zelari')).'</span>','text'=>'A modern online store built around one idea: shopping should be simple, honest and fast.','icon'=>'fa-rocket'],
   ['title'=>'Quality You <span>Can Trust</span>','text'=>'Every product is checked by our team before it reaches our shelves.','icon'=>'fa-gem'],
   ['title'=>'Honest Pricing, <span>Always</span>','text'=>'No hidden fees. No surprise charges. What you see is what you pay.','icon'=>'fa-handshake'],
 ]])
@@ -69,8 +69,8 @@
     <div class="reveal">
       <span class="ab-eyebrow"><i class="fa-solid fa-sparkles"></i> Our story</span>
       <h2>A smarter way to shop, <span>built in Pakistan</span></h2>
-      <p>Zelari started with a simple frustration: buying good things online shouldn't mean guessing about quality, prices or delivery. So we built a store that gets the basics right — curated products, transparent pricing and delivery you can count on.</p>
-      <p>Today we ship across the country with cash on delivery, 7-day returns and a support team that actually replies. We're just getting started.</p>
+      <p>{{ zstore('name','Zelari') }} started with a simple frustration: buying good things online shouldn't mean guessing about quality, prices or delivery. So we built a store that gets the basics right — curated products, transparent pricing and delivery you can count on.</p>
+      <p>Today we ship across the country with cash on delivery, {{ zship('return_days','7') }}-day returns and a support team that actually replies. We're just getting started.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:22px">
         <a href="{{ route('shop.index') }}" class="btn-g"><i class="fa-solid fa-bag-shopping"></i> Shop now</a>
         <a href="{{ route('contact') }}" class="btn-o"><i class="fa-solid fa-envelope"></i> Contact us</a>
@@ -85,7 +85,7 @@
         <div class="cube">
           <div class="face f">🛍️</div><div class="face b">🚚</div><div class="face r">💜</div><div class="face l">⚡</div><div class="face t">✨</div><div class="face d">🎁</div>
         </div>
-        <div class="sat s1"><i class="fa-solid fa-truck-fast"></i> 2–5 day delivery</div>
+        <div class="sat s1"><i class="fa-solid fa-truck-fast"></i> {{ zship('delivery_days','2–5') }} day delivery</div>
         <div class="sat s2"><i class="fa-solid fa-shield-halved"></i> Secure checkout</div>
         <div class="sat s3"><i class="fa-solid fa-star"></i> 4.9 avg rating</div>
       </div>
@@ -112,9 +112,9 @@
       <p>A short history of a store that keeps growing with its customers.</p>
     </div>
     <div class="tl reveal" data-delay="1">
-      <div class="tl-item"><small>DAY ONE</small><b>Zelari launches in Lahore</b><p>A small catalog, cash on delivery and a promise to keep things honest.</p></div>
-      <div class="tl-item"><small>GROWTH</small><b>Nationwide delivery</b><p>Partnerships with couriers bring 2–5 day delivery to every major city.</p></div>
-      <div class="tl-item"><small>TRUST</small><b>7-day returns & 24/7 support</b><p>Because buying online should feel as safe as buying in person.</p></div>
+      <div class="tl-item"><small>DAY ONE</small><b>{{ zstore('name','Zelari') }} launches</b><p>A small catalog, cash on delivery and a promise to keep things honest.</p></div>
+      <div class="tl-item"><small>GROWTH</small><b>Nationwide delivery</b><p>Partnerships with couriers bring {{ zship('delivery_days','2–5') }} day delivery to every major city.</p></div>
+      <div class="tl-item"><small>TRUST</small><b>{{ zship('return_days','7') }}-day returns & 24/7 support</b><p>Because buying online should feel as safe as buying in person.</p></div>
       <div class="tl-item"><small>TODAY</small><b>Thousands of happy customers</b><p>And a catalog that grows every single week.</p></div>
     </div>
   </div>

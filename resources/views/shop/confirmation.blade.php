@@ -122,8 +122,8 @@
       <h3><i class="fa-solid fa-route"></i> What happens next?</h3>
       <div class="next">
         <div class="nx done"><i class="fa-solid fa-envelope-open-text"></i><div class="tx"><b>Confirmation email</b><small>Sent to {{ $order->customer_email }} with your invoice attached.</small></div><span class="n">1</span></div>
-        <div class="nx"><i class="fa-solid fa-box-open"></i><div class="tx"><b>Packed within 24 hours</b><small>We check every item and pack it carefully.</small></div><span class="n">2</span></div>
-        <div class="nx"><i class="fa-solid fa-truck-fast"></i><div class="tx"><b>Delivered in 2–5 days</b><small>Our rider calls you before arriving{{ $order->payment_method === 'cash_on_delivery' ? ' — keep '.zorder_price($order, $order->total).' ready' : '' }}.</small></div><span class="n">3</span></div>
+        <div class="nx"><i class="fa-solid fa-box-open"></i><div class="tx"><b>Packed within {{ zship('pack_hours','24') }} hours</b><small>We check every item and pack it carefully.</small></div><span class="n">2</span></div>
+        <div class="nx"><i class="fa-solid fa-truck-fast"></i><div class="tx"><b>Delivered in {{ zship('delivery_days','2–5') }} days</b><small>Our rider calls you before arriving{{ $order->payment_method === 'cash_on_delivery' ? ' — keep '.zorder_price($order, $order->total).' ready' : '' }}.</small></div><span class="n">3</span></div>
       </div>
     </div>
 

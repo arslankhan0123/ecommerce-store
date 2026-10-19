@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — {{ zstore('name', 'Zelari') }} Admin</title>
     @include('partials.theme-vars')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="icon" href="{{ zbrand('icon') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -737,6 +738,19 @@
                     </a>
                 </div>
             </div>
+
+            <!-- Website -->
+            <div class="nav-label px-5 mb-1 mt-4">
+                <span class="text-white/30 text-xs font-semibold uppercase tracking-widest">Website</span>
+            </div>
+            <a href="{{ route('admin.content.index') }}"
+                class="nav-item {{ request()->routeIs('admin.content.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                </svg>
+                <span class="nav-label">Website Content</span>
+            </a>
 
             <!-- Payments -->
             <div class="nav-label px-5 mb-1 mt-4">

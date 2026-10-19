@@ -81,7 +81,7 @@
   <tr>
     <td class="cell"><div class="card"><div class="lbl">Billed to</div><b>{{ $order->shipping_name }}</b><br>{{ $order->customer_email }}<br>{{ $order->shipping_phone }}</div></td>
     <td class="cell"><div class="card"><div class="lbl">Ship to</div>{{ $order->shipping_address }}<br>{{ $order->shipping_city }}<br>&nbsp;</div></td>
-    <td class="cell"><div class="card"><div class="lbl">Payment</div><b>{{ $method }}</b><br>{{ $paid ? 'Payment received' : ($order->payment_method === 'cash_on_delivery' ? 'Pay on delivery' : 'Awaiting payment') }}<br>Delivery: 2–5 business days</div></td>
+    <td class="cell"><div class="card"><div class="lbl">Payment</div><b>{{ $method }}</b><br>{{ $paid ? 'Payment received' : ($order->payment_method === 'cash_on_delivery' ? 'Pay on delivery' : 'Awaiting payment') }}<br>Delivery: {{ zship('delivery_days','2–5') }} business days</div></td>
   </tr>
 </table>
 
@@ -106,7 +106,7 @@
   <tr>
     <td class="note muted">
       <b style="color:{{ ztheme('brand_dark') }}">Thank you for shopping with {{ $store['name'] }}.</b><br>
-      Items can be returned within 7 days of delivery in unused condition.<br>
+      Items can be returned within {{ zship('return_days','7') }} days of delivery in unused condition.<br>
       Keep this invoice for your records.
     </td>
     <td>

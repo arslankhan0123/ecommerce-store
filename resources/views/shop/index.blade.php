@@ -62,7 +62,7 @@
   'slides' => [
     ['title' => ($selectedCategory ? e($selectedCategory->name) : 'All <span>Products</span>'), 'text' => $selectedCategory ? ($selectedCategory->description ?: 'Everything in '.$selectedCategory->name.', hand-picked and ready to ship.') : 'Browse the full Zelari catalog — '.$products->total().' products, filtered your way.', 'icon' => $selectedCategory ? zcat_icon($selectedCategory->name) : 'fa-bag-shopping'],
     ['title' => 'Weekend <span>Deals Live</span>', 'text' => 'Up to 50% off selected items. Prices refresh every Friday.', 'icon' => 'fa-bolt'],
-    ['title' => 'Free Delivery <span>Over '.zprice(3000).'</span>', 'text' => 'Cash on delivery available nationwide, 7-day easy returns.', 'icon' => 'fa-truck-fast'],
+    ['title' => zfree_over() > 0 ? 'Free Delivery <span>Over '.zprice(zfree_over()).'</span>' : 'Free Delivery <span>On Every Order</span>', 'text' => zship('return_days','7').'-day easy returns, delivery in '.zship('delivery_days','2–5').' business days.', 'icon' => 'fa-truck-fast'],
   ],
 ])
 

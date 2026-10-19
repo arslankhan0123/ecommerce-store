@@ -127,7 +127,7 @@
           </div>
         </div>
 
-        @php $subtotal = array_sum(array_map(fn($i)=>$i['price']*$i['quantity'],$cart)); $shipping = 0; @endphp
+        @php $subtotal = array_sum(array_map(fn($i)=>$i['price']*$i['quantity'],$cart)); $shipping = zshipping($subtotal); @endphp
         <aside class="sum reveal" data-delay="2">
           <h3>Order Summary</h3>
           <div class="sitems">
@@ -142,7 +142,7 @@
           </div>
           <hr>
           <div class="row2"><span>Subtotal</span><b>{{ zprice($subtotal) }}</b></div>
-          <div class="row2"><span>Shipping</span><b style="color:var(--ok)">{{ $shipping>0 ? zprice($shipping) : 'Free' }}</b></div>
+          <div class="row2"><span>Shipping</span><b style="color:{{ $shipping>0 ? 'var(--ink)' : 'var(--ok)' }}">{{ $shipping>0 ? zprice($shipping) : 'Free' }}</b></div>
           <hr>
           <div class="tot"><span>Total</span><b>{{ zprice($subtotal+$shipping) }}</b></div>
           <button type="submit" class="btn-g place" id="placeBtn" {{ empty($methods) ? 'disabled' : '' }}><i class="fa-solid fa-lock"></i> <span id="placeTxt">Place Order</span></button>

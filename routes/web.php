@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Shop\ShopController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
@@ -89,6 +90,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
         Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
     });
+
+    Route::get('/content', [ContentController::class, 'index'])->name('content.index');
+    Route::put('/content/{section}', [ContentController::class, 'update'])->name('content.update');
 
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');

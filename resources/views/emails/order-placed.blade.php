@@ -104,8 +104,8 @@
           <div style="font-size:10px;color:#9aa0bd;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">What's next</div>
           <table role="presentation" cellspacing="0" cellpadding="0" style="color:#6b7191;font-size:13px;line-height:1.5;">
             <tr><td valign="top" style="padding:0 8px 6px 0;color:#0d8f6a;font-weight:700;">✓</td><td style="padding:0 0 6px;">Order confirmed</td></tr>
-            <tr><td valign="top" style="padding:0 8px 6px 0;">○</td><td style="padding:0 0 6px;">Packed within 24 hours</td></tr>
-            <tr><td valign="top" style="padding:0 8px 6px 0;">○</td><td style="padding:0 0 6px;">Delivered in 2–5 business days</td></tr>
+            <tr><td valign="top" style="padding:0 8px 6px 0;">○</td><td style="padding:0 0 6px;">Packed within {{ zship('pack_hours','24') }} hours</td></tr>
+            <tr><td valign="top" style="padding:0 8px 6px 0;">○</td><td style="padding:0 0 6px;">Delivered in {{ zship('delivery_days','2–5') }} business days</td></tr>
             @if($order->payment_method==='cash_on_delivery')<tr><td valign="top" style="padding:0 8px 0 0;">○</td><td>Pay <b style="color:{{ ztheme('brand_dark') }};">{{ zorder_price($order, $order->total) }}</b> in cash on delivery</td></tr>@endif
             @if($order->payment_method==='bank_transfer')<tr><td valign="top" style="padding:0 8px 0 0;">○</td><td>Bank details will follow by email</td></tr>@endif
             @if($order->payment_method==='card')<tr><td valign="top" style="padding:0 8px 0 0;color:#0d8f6a;font-weight:700;">✓</td><td>Paid by card — nothing more to do</td></tr>@endif

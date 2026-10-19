@@ -92,7 +92,7 @@
 
   <div class="faq">
     <div class="sec-head reveal"><div><h2 class="sec-title tt-none">Frequently asked</h2><div class="sec-deco"><i></i><b></b></div></div></div>
-    @foreach([['How long does delivery take?','Orders are packed within 24 hours and delivered in 2–5 business days across Pakistan. You\'ll get a call from the rider before arrival.'],['Can I pay cash on delivery?','Yes — cash on delivery is available nationwide. Bank transfer is also available at checkout.'],['What is your return policy?','You can return any unused item within 7 days of delivery. Contact us with your order number and we\'ll arrange the pickup.'],['How do I track my order?','Reply to your confirmation email or message us on WhatsApp with your order number and we\'ll send the latest status.']] as $i => [$q,$a])
+    @foreach(zfaqs() as $i => [$q,$a])
       <details class="reveal" data-delay="{{ ($i%4)+1 }}"><summary>{{ $q }} <i class="fa-solid fa-plus"></i></summary><p>{{ $a }}</p></details>
     @endforeach
   </div>
