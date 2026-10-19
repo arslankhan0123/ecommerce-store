@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class OrderController extends Controller {
 
     public function index(Request $request) {
-        $query = Order::with('customer')->latest();
+        $query = Order::with('customer', 'user')->latest();
         if ($request->filled('search')) {
             $s = $request->search;
             $query->where(fn($q) =>

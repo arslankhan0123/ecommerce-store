@@ -87,9 +87,13 @@
                         </td>
                         <td>
                             @if($order->customer)
+                            @php $acctMismatch = $order->user && strcasecmp((string) $order->user->email, (string) $order->customer->email) !== 0; @endphp
                             <div>
                                 <p class="text-sm font-medium text-gray-800">{{ $order->customer->name }}</p>
                                 <p class="text-xs text-gray-400">{{ $order->customer->email }}</p>
+                                @if($acctMismatch)
+                                <p class="text-xs text-gray-500 mt-0.5" title="Logged-in account that placed this order">(<b class="text-gray-800">{{ $order->user->email }}</b>)</p>
+                                @endif
                             </div>
                             @else
                             <span class="text-gray-400 text-sm">{{ $order->shipping_name ?? 'Guest' }}</span>
