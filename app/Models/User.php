@@ -62,4 +62,10 @@ class User extends Authenticatable
         if ($value === null || $value === '') return null;
         try { return Crypt::decryptString($value); } catch (\Throwable) { return null; }
     }
+
+    /** Branded reset email, sent via the SMTP settings saved in Admin → Settings. */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordLink($token));
+    }
 }

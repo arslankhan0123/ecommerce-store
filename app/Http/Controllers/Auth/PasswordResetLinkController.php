@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -30,16 +31,28 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        // Outgoing mail uses the SMTP details saved in Admin → Settings.
+        if (!Setting::applyMailConfig()) {
+            report(new \RuntimeException('Password reset requested but SMTP is not configured in Admin → Settings.'));
+            return back()->withInput($request->only('email'))
+                ->withErrors(['email' => 'Email sending is not set up yet. Please contact us and we will reset your password for you.']);
+        }
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        try {
+            $status = Password::sendResetLink($request->only('email'));
+        } catch (\Throwable $e) {
+            report($e);
+            Setting::recordMailResult($e->getMessage());
+            return back()->withInput($request->only('email'))
+                ->withErrors(['email' => 'We could not send the email right now. Please try again in a few minutes or contact us.']);
+        }
+
+        // Don't reveal whether the address exists; always show the same confirmation.
+        if ($status === Password::RESET_LINK_SENT || $status === Password::INVALID_USER) {
+            return back()->with('status', 'If an account exists for that email, a reset link is on its way. It expires in '
+                . (int) config('auth.passwords.' . config('auth.defaults.passwords') . '.expire', 60) . ' minutes.');
+        }
+
+        return back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
     }
 }
