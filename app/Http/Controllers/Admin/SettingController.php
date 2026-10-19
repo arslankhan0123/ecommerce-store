@@ -119,6 +119,10 @@ class SettingController extends Controller
             'stripe_publishable_key' => ['nullable', 'string', 'max:255', 'regex:/^pk_(test|live)_[A-Za-z0-9]+$/'],
             'stripe_secret_key'      => ['nullable', 'string', 'max:255', 'regex:/^(sk|rk)_(test|live)_[A-Za-z0-9]+$/'],
             'stripe_webhook_secret'  => ['nullable', 'string', 'max:255', 'regex:/^whsec_[A-Za-z0-9]+$/'],
+            'pay_paypal_enabled'     => 'nullable|boolean',
+            'paypal_mode'            => 'nullable|in:sandbox,live',
+            'paypal_client_id'       => 'nullable|string|max:255',
+            'paypal_secret'          => 'nullable|string|max:255',
         ], [
             'stripe_publishable_key.regex' => 'The publishable key should start with pk_test_ or pk_live_.',
             'stripe_secret_key.regex'      => 'The secret key should start with sk_test_ or sk_live_.',
@@ -127,9 +131,12 @@ class SettingController extends Controller
 
         $data['pay_cod_enabled']    = $request->boolean('pay_cod_enabled') ? '1' : '0';
         $data['pay_stripe_enabled'] = $request->boolean('pay_stripe_enabled') ? '1' : '0';
+        $data['pay_paypal_enabled'] = $request->boolean('pay_paypal_enabled') ? '1' : '0';
+        $data['paypal_mode']        = ($data['paypal_mode'] ?? 'sandbox') === 'live' ? 'live' : 'sandbox';
+        $data['paypal_client_id']   = trim((string) ($data['paypal_client_id'] ?? ''));
 
         // Blank secret fields keep what is already stored (they are never echoed back to the form)
-        foreach (['stripe_secret_key', 'stripe_webhook_secret'] as $k) {
+        foreach (['stripe_secret_key', 'stripe_webhook_secret', 'paypal_secret'] as $k) {
             if (($data[$k] ?? '') === '') unset($data[$k]);
         }
         $data['stripe_publishable_key'] = trim((string) ($data['stripe_publishable_key'] ?? ''));
@@ -141,24 +148,42 @@ class SettingController extends Controller
             return back()->withInput()->with('error', 'Your Stripe publishable key and secret key are from different modes (test vs live). Use a matching pair.');
         }
 
-        if ($data['pay_cod_enabled'] === '0' && ($data['pay_stripe_enabled'] === '0' || !$pub || !$sec)) {
-            return back()->withInput()->with('error', 'At least one payment method must stay enabled. Turn Cash on Delivery back on or finish the Stripe setup.');
+        $ppSecret  = $data['paypal_secret'] ?? Setting::get('paypal_secret', '');
+        $ppReady   = $data['pay_paypal_enabled'] === '1' && $data['paypal_client_id'] !== '' && $ppSecret !== '';
+        $stripeOk  = $data['pay_stripe_enabled'] === '1' && $pub && $sec;
+        if ($data['pay_cod_enabled'] === '0' && !$stripeOk && !$ppReady) {
+            return back()->withInput()->with('error', 'At least one payment method must stay enabled. Turn Cash on Delivery back on or finish the Stripe / PayPal setup.');
         }
 
         Setting::setMany($data);
+        \Illuminate\Support\Facades\Cache::forget('settings.all');
+        if (isset($data['paypal_secret']) || $data['paypal_client_id'] !== (string) Setting::get('paypal_client_id', '')) {
+            \Illuminate\Support\Facades\Cache::flush(); // drop any PayPal token cached for old credentials
+        }
 
-        // Verify the secret key actually works so a typo is caught here, not at checkout
+        // Verify the keys actually work so a typo is caught here, not at checkout
+        $notes = [];
         if ($data['pay_stripe_enabled'] === '1') {
             try {
-                $acct = \App\Support\Payments::stripe('GET', '/v1/balance');
-                $mode = str_contains($pub, '_test_') ? 'test' : 'live';
-                return back()->with('success', "Payment settings saved. Stripe connected in {$mode} mode.");
+                \App\Support\Payments::stripe('GET', '/v1/balance');
+                $notes[] = 'Stripe connected in ' . (str_contains($pub, '_test_') ? 'test' : 'live') . ' mode.';
             } catch (\Throwable $e) {
                 return back()->with('error', 'Settings saved, but Stripe rejected the secret key: ' . $e->getMessage());
             }
         }
+        if ($data['pay_paypal_enabled'] === '1') {
+            if (!$ppReady) {
+                return back()->with('error', 'Settings saved, but PayPal is enabled without a Client ID and Secret — it will not show at checkout until both are entered.');
+            }
+            try {
+                \App\Support\PayPal::token(true);
+                $notes[] = 'PayPal connected in ' . $data['paypal_mode'] . ' mode.';
+            } catch (\Throwable $e) {
+                return back()->with('error', 'Settings saved, but PayPal rejected the credentials: ' . $e->getMessage() . ' (sandbox and live use different keys — check the mode).');
+            }
+        }
 
-        return back()->with('success', 'Payment settings saved.');
+        return back()->with('success', trim('Payment settings saved. ' . implode(' ', $notes)));
     }
 
     public function test(Request $request)

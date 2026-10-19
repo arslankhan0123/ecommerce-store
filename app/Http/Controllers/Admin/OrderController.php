@@ -40,7 +40,7 @@ class OrderController extends Controller {
 
         $request->validate([
             'customer_id'      => 'nullable|exists:customers,id',
-            'payment_method'   => 'required|in:cash_on_delivery,bank_transfer,card,other',
+            'payment_method'   => 'required|in:cash_on_delivery,bank_transfer,card,paypal,other',
             'payment_status'   => 'required|in:unpaid,paid,refunded',
             'status'           => 'required|in:pending,processing,shipped,delivered,cancelled',
             'discount'         => 'nullable|numeric|min:0',
@@ -130,7 +130,7 @@ class OrderController extends Controller {
         $request->validate([
             'status'         => 'required|in:pending,processing,shipped,delivered,cancelled',
             'payment_status' => 'required|in:unpaid,paid,refunded',
-            'payment_method' => 'required|in:cash_on_delivery,bank_transfer,card,other',
+            'payment_method' => 'required|in:cash_on_delivery,bank_transfer,card,paypal,other',
             'notes'          => 'nullable|string',
         ]);
         $wasPaid = $order->payment_status === 'paid';

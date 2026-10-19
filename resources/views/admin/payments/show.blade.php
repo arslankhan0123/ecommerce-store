@@ -10,11 +10,11 @@
             <p class="text-sm text-gray-400 mt-0.5">{{ $payment->created_at->format('M d, Y · h:i A') }} · {{ $payment->provider_label }}</p>
         </div>
         <div class="flex items-center gap-2">
-            @if($payment->provider === 'stripe' && $payment->payment_intent_id)
+            @if(in_array($payment->provider, ['stripe','paypal']) && $payment->payment_intent_id)
             <form method="POST" action="{{ route('admin.payments.sync', $payment) }}">@csrf
                 <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    Refresh from Stripe
+                    Refresh from {{ $payment->provider === 'paypal' ? 'PayPal' : 'Stripe' }}
                 </button>
             </form>
             @endif
@@ -91,12 +91,24 @@
                 </div>
                 @endif
                 @else
+                @if($payment->provider === 'paypal')
+                <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                    <div><dt class="text-xs text-gray-400">Paid via</dt><dd class="font-medium text-gray-800">PayPal account</dd></div>
+                    <div><dt class="text-xs text-gray-400">Payer email</dt><dd class="font-medium text-gray-800 break-all">{{ $payment->billing_email ?: '—' }}</dd></div>
+                    <div><dt class="text-xs text-gray-400">Payer name</dt><dd class="font-medium text-gray-800">{{ $payment->cardholder_name ?: '—' }}</dd></div>
+                    <div><dt class="text-xs text-gray-400">Payer country</dt><dd class="font-medium text-gray-800">{{ $payment->card_country ?: '—' }}</dd></div>
+                    <div><dt class="text-xs text-gray-400">PayPal order</dt><dd class="font-mono text-xs text-gray-700 break-all">{{ $payment->payment_intent_id ?: '—' }}</dd></div>
+                    <div><dt class="text-xs text-gray-400">Capture ID</dt><dd class="font-mono text-xs text-gray-700 break-all">{{ $payment->charge_id ?: '—' }}</dd></div>
+                </dl>
+                <div class="mt-5 p-3 rounded-xl bg-slate-50 text-xs text-gray-500 leading-relaxed"><b class="text-gray-700">Verifying a customer:</b> match the <b>payer email</b> and <b>name</b>, or the PayPal order / capture ID from their PayPal receipt. PayPal does not share the funding card with merchants.</div>
+                @else
                 <p class="text-sm text-gray-400">
                     @if($payment->provider === 'cod') Cash on delivery — no card involved.
                     @elseif($payment->status === 'pending') No card has been submitted yet for this attempt.
                     @else Card details were not captured. @if($payment->payment_intent_id)Try <b>Refresh from Stripe</b>.@endif
                     @endif
                 </p>
+                @endif
                 @endif
                 @if($payment->failure_message)
                 <div class="mt-4 p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700"><b>Last error:</b> {{ $payment->failure_message }}</div>
@@ -135,6 +147,13 @@
                 @if($payment->ip_address)<div class="flex justify-between text-sm"><span class="text-gray-500">Customer IP</span><span class="font-mono text-xs text-gray-700">{{ $payment->ip_address }}</span></div>@endif
             </div>
 
+            @if($payment->provider === 'paypal' && $payment->payment_intent_id)
+            <div class="bg-white rounded-2xl p-5 space-y-3" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">PayPal references</p>
+                <div><p class="text-xs text-gray-400">Order ID</p><p class="font-mono text-xs text-gray-700 break-all">{{ $payment->payment_intent_id }}</p></div>
+                @if($payment->charge_id)<div><p class="text-xs text-gray-400">Capture / transaction ID</p><a href="https://www.{{ \App\Support\PayPal::mode() === 'sandbox' ? 'sandbox.' : '' }}paypal.com/activity/payment/{{ $payment->charge_id }}" target="_blank" rel="noopener" class="font-mono text-xs text-indigo-600 hover:underline break-all">{{ $payment->charge_id }}</a></div>@endif
+            </div>
+            @endif
             @if($payment->provider === 'stripe')
             <div class="bg-white rounded-2xl p-5 space-y-3" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Stripe references</p>

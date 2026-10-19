@@ -35,6 +35,9 @@ Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.in
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/checkout/stripe/intent', [CheckoutController::class, 'stripeIntent'])->name('checkout.stripe.intent');
 Route::get('/checkout/stripe/return/{orderNumber}', [CheckoutController::class, 'stripeReturn'])->name('checkout.stripe.return');
+Route::post('/checkout/paypal/capture', [CheckoutController::class, 'paypalCapture'])->name('checkout.paypal.capture');
+Route::get('/checkout/paypal/return/{orderNumber}', [CheckoutController::class, 'paypalReturn'])->name('checkout.paypal.return');
+Route::get('/checkout/paypal/cancel/{orderNumber}', [CheckoutController::class, 'paypalCancel'])->name('checkout.paypal.cancel');
 Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle'])->name('webhooks.stripe');
 Route::get('/order-confirmation/{orderNumber}', [CheckoutController::class, 'confirmation'])->name('order.confirmation');
 Route::get('/order/{orderNumber}/invoice', [CheckoutController::class, 'invoice'])->name('order.invoice');

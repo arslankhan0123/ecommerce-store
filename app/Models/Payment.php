@@ -52,7 +52,7 @@ class Payment extends Model
 
     public function getProviderLabelAttribute(): string
     {
-        return ['stripe' => 'Card (Stripe)', 'cod' => 'Cash on Delivery'][$this->provider] ?? ucfirst($this->provider);
+        return ['stripe' => 'Card (Stripe)', 'paypal' => 'PayPal', 'cod' => 'Cash on Delivery'][$this->provider] ?? ucfirst($this->provider);
     }
 
     public function getStatusColorAttribute(): string

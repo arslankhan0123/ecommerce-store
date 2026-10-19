@@ -18,6 +18,7 @@ class Payments
 {
     public const COD    = 'cash_on_delivery';
     public const STRIPE = 'card';
+    public const PAYPAL = 'paypal';
 
     /** Methods the admin has switched on, in display order. */
     public static function enabledMethods(): array
@@ -37,6 +38,14 @@ class Payments
                 'desc'  => 'Visa, Mastercard, Amex and more. Secured by Stripe.',
                 'icon'  => 'fa-credit-card',
                 'tag'   => 'Instant',
+            ];
+        }
+        if (PayPal::enabled()) {
+            $m[self::PAYPAL] = [
+                'label' => 'PayPal',
+                'desc'  => 'Pay with your PayPal balance, linked bank or card — no account needed for guest checkout.',
+                'icon'  => 'fa-brands fa-paypal',
+                'tag'   => null,
             ];
         }
         return $m;
@@ -178,7 +187,7 @@ class Payments
     {
         return Payment::create([
             'order_id'          => $order->id,
-            'provider'          => $order->payment_method === self::STRIPE ? 'stripe' : 'cod',
+            'provider'          => match ($order->payment_method) { self::STRIPE => 'stripe', self::PAYPAL => 'paypal', default => 'cod' },
             'status'            => 'pending',
             'payment_intent_id' => $order->payment_intent_id,
             'amount'            => round((float) $order->total * (float) ($order->exchange_rate ?: 1), 2),
@@ -211,6 +220,27 @@ class Payments
             self::syncCardDetails($pay, $order->payment_intent_id);
         }
         return true;
+    }
+
+    /** Store what PayPal told us about a capture on the ledger row. */
+    public static function fillFromPayPal(Payment $pay, array $summary): void
+    {
+        $pay->forceFill(array_filter([
+            'charge_id'       => $summary['capture_id'] ?? null,
+            'amount'          => isset($summary['amount']) ? (float) $summary['amount'] : null,
+            'currency'        => $summary['currency'] ?? null,
+            'billing_email'   => $summary['payer_email'] ?? null,
+            'cardholder_name' => $summary['payer_name'] ?? null,
+            'card_country'    => $summary['country'] ?? null,
+            'card_wallet'     => 'paypal',
+            'failure_message' => $summary['reason'] ?? null,
+        ], fn ($v) => $v !== null))->save();
+    }
+
+    /** True for any online method whose order is only real once paid. */
+    public static function isOnline(?string $method): bool
+    {
+        return in_array($method, [self::STRIPE, self::PAYPAL], true);
     }
 
     /** Record a failed / abandoned attempt with Stripe's reason. */
@@ -297,7 +327,7 @@ class Payments
         if ($pay && $pay->status === 'pending') {
             $pay->forceFill(['status' => 'cancelled'])->save();
         }
-        if ($order->payment_intent_id) {
+        if ($order->payment_method === self::STRIPE && $order->payment_intent_id) {
             self::cancelIntent($order->payment_intent_id);
         }
     }

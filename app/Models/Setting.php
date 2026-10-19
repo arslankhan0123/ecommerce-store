@@ -12,7 +12,7 @@ class Setting extends Model
     protected $fillable = ['key', 'value'];
 
     /** Keys stored encrypted at rest. */
-    protected const SECRET_KEYS = ['mail_password', 'stripe_secret_key', 'stripe_webhook_secret'];
+    protected const SECRET_KEYS = ['mail_password', 'stripe_secret_key', 'stripe_webhook_secret', 'paypal_secret'];
 
     public static function defaults(): array
     {
@@ -49,6 +49,10 @@ class Setting extends Model
             'stripe_publishable_key' => '',
             'stripe_secret_key'      => '',
             'stripe_webhook_secret'  => '',
+            'pay_paypal_enabled'     => '0',
+            'paypal_mode'            => 'sandbox',
+            'paypal_client_id'       => '',
+            'paypal_secret'          => '',
         ];
     }
 

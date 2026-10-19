@@ -54,7 +54,9 @@
 .paybox .pe-note{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--faint)}
 .paybox .pe-note b{color:var(--ink-2)}
 .testmode{display:inline-flex;align-items:center;gap:6px;background:#fff5e0;color:#b36b00;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.payopt.is-paypal:has(input:checked) .ic{background:#003087}
 .payopt .brands{display:flex;gap:4px;margin-top:6px}
+#paypalButtons{min-height:48px}
 .payopt .brands span{font-size:10px;font-weight:800;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink-2);background:#fff}
 </style>
 @endpush
@@ -91,14 +93,24 @@
             <h3><i class="fa-solid fa-wallet"></i> Payment Method</h3>
             @php $selected = old('payment_method', array_key_first($methods)); @endphp
             @forelse($methods as $code => $m)
-              <label class="payopt {{ $code === 'card' ? 'has-form' : '' }}">
+              <label class="payopt {{ in_array($code, ['card','paypal']) ? 'has-form' : '' }} {{ $code === 'paypal' ? 'is-paypal' : '' }}">
                 <input type="radio" name="payment_method" value="{{ $code }}" {{ $selected === $code ? 'checked' : '' }} required>
-                <span class="ic"><i class="fa-solid {{ $m['icon'] }}"></i></span>
+                <span class="ic"><i class="{{ str_starts_with($m['icon'], 'fa-brands') ? $m['icon'] : 'fa-solid '.$m['icon'] }}"></i></span>
                 <span><b>{{ $m['label'] }}@if($code === 'card' && str_starts_with($stripeKey ?? '', 'pk_test_'))<span class="testmode"><i class="fa-solid fa-flask"></i> Test mode</span>@endif</b><small>{{ $m['desc'] }}</small>
                   @if($code === 'card')<span class="brands"><span>VISA</span><span>Mastercard</span><span>AMEX</span><span>Apple Pay</span><span>G Pay</span></span>@endif
                 </span>
                 @if(!empty($m['tag']))<span class="tag">{{ $m['tag'] }}</span>@endif
               </label>
+              @if($code === 'paypal')
+                <div class="paybox" id="paypalBox">
+                  <div class="pe-wrap" style="min-height:60px">
+                    <div class="pe-load" id="ppLoad"><i class="fa-solid fa-spinner fa-spin"></i> Loading PayPal…</div>
+                    <div id="paypalButtons"></div>
+                  </div>
+                  <div class="pe-err" id="ppErr"></div>
+                  <div class="pe-note"><i class="fa-solid fa-lock" style="color:var(--ok)"></i> You'll approve <b id="ppAmount">{{ zprice(array_sum(array_map(fn($i)=>$i['price']*$i['quantity'],$cart))) }}</b> in the PayPal window{{ (($paypalCurrency ?? null) && strtoupper(zcur()['code']) !== $paypalCurrency) ? ' — charged in '.$paypalCurrency.' because PayPal does not support '.zcur()['code'] : '' }}. Fill in your details above first.</div>
+                </div>
+              @endif
               @if($code === 'card')
                 <div class="paybox" id="stripeBox">
                   <div class="pe-wrap">
@@ -134,6 +146,7 @@
           <hr>
           <div class="tot"><span>Total</span><b>{{ zprice($subtotal+$shipping) }}</b></div>
           <button type="submit" class="btn-g place" id="placeBtn" {{ empty($methods) ? 'disabled' : '' }}><i class="fa-solid fa-lock"></i> <span id="placeTxt">Place Order</span></button>
+          <div id="ppPlaceNote" style="display:none;margin-top:16px;padding:12px 14px;border-radius:12px;background:#fff7e6;border:1px solid #ffe3a3;color:#7a5200;font-size:13px;font-weight:600;text-align:center"><i class="fa-brands fa-paypal"></i> Complete your order with the PayPal button in the Payment Method section.</div>
           <div class="secure"><i class="fa-solid fa-shield-halved"></i> Prices & stock are re-verified on our server</div>
           <div style="display:flex;justify-content:center;margin-top:12px">@include('shop.partials.payment-icons', ['size' => 'sm'])</div>
           <a href="{{ route('cart.index') }}" style="display:block;text-align:center;margin-top:14px;font-size:13px;font-weight:700;color:var(--muted)"><i class="fa-solid fa-arrow-left"></i> Back to cart</a>
@@ -146,6 +159,7 @@
 
 @push('scripts')
 @if($stripeKey)<script src="https://js.stripe.com/v3/"></script>@endif
+@if($paypalClient ?? null)<script src="https://www.paypal.com/sdk/js?client-id={{ urlencode($paypalClient) }}&currency={{ $paypalCurrency }}&intent=capture&components=buttons&disable-funding=card,credit,paylater" data-page-type="checkout"></script>@endif
 <script>
 (function(){
   const form=document.getElementById('coForm'), btn=document.getElementById('placeBtn'), txt=document.getElementById('placeTxt');
@@ -155,9 +169,11 @@
   let stripe=null, elements=null, mounted=false, mounting=false, busy=false;
 
   const method=()=> (form.querySelector('input[name=payment_method]:checked')||{}).value;
+  const PAYPAL_ON=@json((bool) ($paypalClient ?? false));
+  const CAPTURE_URL=@json(route('checkout.paypal.capture'));
   const setBusy=(on,label)=>{ busy=on; btn.disabled=on; btn.innerHTML=on?'<i class="fa-solid fa-spinner fa-spin"></i> '+label:'<i class="fa-solid fa-lock"></i> <span id="placeTxt">'+(method()==='card'?'Pay now':'Place Order')+'</span>'; };
-  const showErr=m=>{ const e=document.getElementById('peErr'); if(!e) return; e.textContent=m||''; e.style.display=m?'block':'none'; };
-  const relabel=()=>{ const t=document.getElementById('placeTxt'); if(t) t.textContent=method()==='card'?'Pay now':'Place Order'; };
+  const showErr=m=>{ const e=document.getElementById(method()==='paypal'?'ppErr':'peErr'); if(!e) return; e.textContent=m||''; e.style.display=m?'block':'none'; };
+  const relabel=()=>{ const t=document.getElementById('placeTxt'); if(t) t.textContent=method()==='card'?'Pay now':'Place Order'; btn.style.display=method()==='paypal'?'none':''; const n=document.getElementById('ppPlaceNote'); if(n) n.style.display=method()==='paypal'?'block':'none'; };
 
   async function mountStripe(){
     if(mounted||mounting||!STRIPE_KEY) return; mounting=true; showErr('');
@@ -176,10 +192,46 @@
     finally{ mounting=false; }
   }
 
-  form.querySelectorAll('input[name=payment_method]').forEach(r=>r.addEventListener('change',()=>{ relabel(); if(method()==='card') mountStripe(); }));
-  if(method()==='card') mountStripe(); relabel();
+  /* ── PayPal buttons: our order is created only when the buyer clicks the button ── */
+  let ppMounted=false, ppOrderNumber=null;
+  function mountPayPal(){
+    if(ppMounted||!PAYPAL_ON||!window.paypal) { if(!window.paypal&&PAYPAL_ON){ const l=document.getElementById('ppLoad'); if(l) l.innerHTML='<i class="fa-solid fa-triangle-exclamation" style="color:#b4124b"></i> PayPal failed to load (ad blocker?). Please choose another method.'; } return; }
+    ppMounted=true;
+    paypal.Buttons({
+      style:{layout:'vertical',color:'gold',shape:'rect',label:'paypal',height:48},
+      onInit:(data,actions)=>{ document.getElementById('ppLoad').style.display='none'; },
+      onClick:(data,actions)=>{
+        // Validate the delivery form first (same rules as the normal submit)
+        showErr('');
+        if(!form.reportValidity()) return actions.reject();
+        return actions.resolve();
+      },
+      createOrder:async()=>{
+        const fd=new FormData(form); fd.set('payment_method','paypal');
+        const r=await fetch(form.action,{method:'POST',headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:fd});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok||!j.ok||!j.paypal_order_id){ const m=j.message||Object.values(j.errors||{}).flat()[0]||'Could not start PayPal checkout.'; showErr(m); throw new Error(m); }
+        ppOrderNumber=j.order; return j.paypal_order_id;
+      },
+      onApprove:async(data)=>{
+        showErr(''); const box=document.getElementById('paypalBox'); box.style.opacity='.6';
+        const fd=new FormData(); fd.append('order',ppOrderNumber); fd.append('paypal_order_id',data.orderID);
+        const r=await fetch(CAPTURE_URL,{method:'POST',headers:{'X-CSRF-TOKEN':token,'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:fd});
+        const j=await r.json().catch(()=>({}));
+        box.style.opacity='';
+        if(!r.ok||!j.ok){ showErr(j.message||'PayPal payment could not be completed.'); return; }
+        location.href=j.redirect;
+      },
+      onCancel:()=>{ if(ppOrderNumber) fetch(@json(url('/checkout/paypal/cancel'))+'/'+ppOrderNumber,{headers:{'Accept':'application/json'}}).catch(()=>{}); ppOrderNumber=null; showErr('PayPal payment was cancelled — nothing was charged.'); },
+      onError:(err)=>{ console.error(err); if(!document.getElementById('ppErr').textContent) showErr('PayPal ran into a problem. Please try again or choose another method.'); }
+    }).render('#paypalButtons');
+  }
+
+  form.querySelectorAll('input[name=payment_method]').forEach(r=>r.addEventListener('change',()=>{ relabel(); if(method()==='card') mountStripe(); if(method()==='paypal') mountPayPal(); }));
+  if(method()==='card') mountStripe(); if(method()==='paypal') mountPayPal(); relabel();
 
   form.addEventListener('submit',async function(ev){
+    if(method()==='paypal'){ ev.preventDefault(); showErr('Use the PayPal button above to pay.'); return; }
     if(method()!=='card'){ setBusy(true,'Placing order…'); return; } // normal COD post
     ev.preventDefault(); if(busy) return;
     if(!mounted||!stripe||!elements){ showErr('The card form is still loading — one moment.'); return; }

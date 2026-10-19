@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Setting;
 use App\Support\Currency;
 use App\Support\Payments;
+use App\Support\PayPal;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,8 @@ class CheckoutController extends Controller
             'cart'          => $cart,
             'methods'       => Payments::enabledMethods(),
             'stripeKey'     => Payments::stripeReady() ? Payments::stripePublishableKey() : null,
+            'paypalClient'  => PayPal::enabled() ? PayPal::clientId() : null,
+            'paypalCurrency'=> PayPal::enabled() ? (in_array(strtoupper(Currency::current()['code']), PayPal::SUPPORTED, true) ? strtoupper(Currency::current()['code']) : 'USD') : null,
         ]);
     }
 
@@ -80,6 +83,7 @@ class CheckoutController extends Controller
         ]);
         $wantsJson = $request->expectsJson();
         $isCard    = $request->payment_method === Payments::STRIPE;
+        $isPayPal  = $request->payment_method === Payments::PAYPAL;
 
         $cart = session('cart', []);
         if (empty($cart)) {
@@ -93,8 +97,14 @@ class CheckoutController extends Controller
         if (session('last_order_fingerprint') === $fingerprint) {
             $orderId = session('last_order_id');
             if ($orderId && ($existing = Order::find($orderId))) {
-                if ($existing->payment_method === Payments::STRIPE && $existing->payment_status !== 'paid' && $existing->status !== 'cancelled') {
+                if (Payments::isOnline($existing->payment_method) && $existing->payment_status !== 'paid' && $existing->status !== 'cancelled') {
                     $intent = session('stripe_intent');
+                    if ($existing->payment_method === Payments::PAYPAL && $existing->payment_intent_id) {
+                        // Same PayPal attempt — hand the existing PayPal order back to the buttons
+                        return $wantsJson
+                            ? response()->json(['ok' => true, 'paypal' => true, 'paypal_order_id' => $existing->payment_intent_id, 'order' => $existing->order_number])
+                            : redirect()->route('checkout.index');
+                    }
                     if (!empty($intent['id']) && $intent['id'] === $existing->payment_intent_id) {
                         // Same card attempt being retried (e.g. first card declined) — reuse the order
                         $return = route('checkout.stripe.return', $existing->order_number);
@@ -114,7 +124,7 @@ class CheckoutController extends Controller
 
         // Any earlier card attempt that was never paid is stale by now — release its stock
         if (($prevId = session('last_order_id')) && ($prev = Order::find($prevId))
-            && $prev->payment_method === Payments::STRIPE && $prev->payment_status !== 'paid' && $prev->status !== 'cancelled') {
+            && Payments::isOnline($prev->payment_method) && $prev->payment_status !== 'paid' && $prev->status !== 'cancelled') {
             Payments::cancelAndRestock($prev);
         }
 
@@ -135,7 +145,7 @@ class CheckoutController extends Controller
         }
 
         try {
-            $order = DB::transaction(function () use ($request, $cart, $currency, $ip, $geo, $isCard, $intent) {
+            $order = DB::transaction(function () use ($request, $cart, $currency, $ip, $geo, $isCard, $isPayPal, $intent) {
 
                 $subtotal    = 0;
                 $lineItems   = [];
@@ -242,6 +252,22 @@ class CheckoutController extends Controller
                     : redirect()->to($return);
             }
 
+            if ($isPayPal) {
+                // Create the PayPal order now that the total is final; the buttons approve it, then we capture.
+                try {
+                    $ppId = PayPal::createOrder($order);
+                    if ($ppId === '') throw new \RuntimeException('PayPal did not return an order id.');
+                } catch (\RuntimeException $e) {
+                    Payments::cancelAndRestock($order);
+                    throw $e;
+                }
+                $order->forceFill(['payment_intent_id' => $ppId])->save();
+                Payments::attemptFor($order)->forceFill(['payment_intent_id' => $ppId])->save();
+                return $wantsJson
+                    ? response()->json(['ok' => true, 'paypal' => true, 'paypal_order_id' => $ppId, 'order' => $order->order_number])
+                    : redirect()->route('checkout.index')->with('checkout_error', 'Please enable JavaScript to pay with PayPal.');
+            }
+
             // ── COD: done ───────────────────────────────────────────────
             session()->forget(['cart', 'stripe_intent']);
             $this->sendOrderEmails($order);
@@ -255,6 +281,95 @@ class CheckoutController extends Controller
                 ? response()->json(['message' => $e->getMessage()], 422)
                 : back()->withInput()->with('checkout_error', $e->getMessage());
         }
+    }
+
+    /** POST /checkout/paypal/capture — the buttons' onApprove: capture and confirm. */
+    public function paypalCapture(Request $request)
+    {
+        $request->validate(['order' => 'required|string', 'paypal_order_id' => 'required|string']);
+        $order = Order::where('order_number', $request->order)->firstOrFail();
+        if ((int) session('last_order_id') !== (int) $order->id || $order->payment_intent_id !== $request->paypal_order_id) {
+            return response()->json(['message' => 'This payment does not belong to your session.'], 403);
+        }
+        return $this->finishPayPal($order, true);
+    }
+
+    /** GET /checkout/paypal/return/{orderNumber} — redirect flow fallback (e.g. Pay Later / some banks). */
+    public function paypalReturn(string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+        if ((int) session('last_order_id') !== (int) $order->id) abort(403);
+        return $this->finishPayPal($order, false);
+    }
+
+    /** GET /checkout/paypal/cancel/{orderNumber} — buyer closed the PayPal window. */
+    public function paypalCancel(string $orderNumber, Request $request)
+    {
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+        if ((int) session('last_order_id') === (int) $order->id && $order->payment_status !== 'paid' && $order->status !== 'cancelled') {
+            Payments::markFailed($order, 'cancelled', 'Buyer cancelled at PayPal');
+            Payments::cancelAndRestock($order);
+        }
+        return $request->expectsJson()
+            ? response()->json(['ok' => true])
+            : redirect()->route('checkout.index')->with('checkout_error', 'PayPal payment was cancelled. Your cart is still here if you want to try again.');
+    }
+
+    private function finishPayPal(Order $order, bool $json)
+    {
+        $done = fn () => $json
+            ? response()->json(['ok' => true, 'redirect' => route('order.confirmation', $order->order_number)])
+            : redirect()->route('order.confirmation', $order->order_number);
+
+        if ($order->payment_status === 'paid') {
+            session()->forget(['cart', 'stripe_intent']);
+            return $done();
+        }
+        if (!$order->payment_intent_id) {
+            $msg = 'No PayPal payment was started for this order.';
+            return $json ? response()->json(['message' => $msg], 422) : redirect()->route('checkout.index')->with('checkout_error', $msg);
+        }
+
+        try {
+            $po = PayPal::getOrder($order->payment_intent_id);
+            if (($po['status'] ?? '') === 'APPROVED') {
+                $po = PayPal::captureOrder($order->payment_intent_id);
+            }
+        } catch (\RuntimeException $e) {
+            $msg = $e->getMessage();
+            // "already captured" races are a success
+            if (stripos($msg, 'ORDER_ALREADY_CAPTURED') !== false) {
+                $po = PayPal::getOrder($order->payment_intent_id);
+            } else {
+                Payments::markFailed($order, 'pending', $msg);
+                return $json ? response()->json(['message' => 'PayPal could not complete the payment: ' . $msg], 422)
+                             : redirect()->route('checkout.index')->with('checkout_error', 'PayPal could not complete the payment: ' . $msg);
+            }
+        }
+
+        $sum = PayPal::summarize($po);
+        $pay = Payments::attemptFor($order);
+        Payments::fillFromPayPal($pay, $sum);
+
+        if ($sum['status'] === 'COMPLETED') {
+            if (Payments::markPaid($order, $order->payment_intent_id)) {
+                $this->sendOrderEmails($order);
+            }
+            session()->forget(['cart', 'stripe_intent']);
+            return $done();
+        }
+        if ($sum['status'] === 'PENDING') {
+            // e.g. eCheck / manual review — treat like a processing card payment
+            session()->forget(['cart', 'stripe_intent']);
+            session()->flash('payment_processing', true);
+            return $done();
+        }
+
+        $reason = $sum['reason'] ?: ('PayPal status: ' . $sum['status']);
+        Payments::markFailed($order, 'failed', $reason);
+        Payments::cancelAndRestock($order);
+        $msg = 'PayPal payment was not completed (' . $reason . '). Please try again or choose another method.';
+        return $json ? response()->json(['message' => $msg], 422) : redirect()->route('checkout.index')->with('checkout_error', $msg);
     }
 
     /**
@@ -310,11 +425,13 @@ class CheckoutController extends Controller
     {
         $order = $this->findSessionOrder($orderNumber);
         // A card order that hasn't been paid yet is not confirmed: re-check with Stripe first
-        if ($order->payment_method === Payments::STRIPE && $order->payment_status !== 'paid' && !session('payment_processing')) {
+        if (Payments::isOnline($order->payment_method) && $order->payment_status !== 'paid' && !session('payment_processing')) {
             if ($order->status === 'cancelled') {
-                return redirect()->route('checkout.index')->with('checkout_error', 'That card payment was not completed. Please place the order again.');
+                return redirect()->route('checkout.index')->with('checkout_error', 'That payment was not completed. Please place the order again.');
             }
-            return redirect()->route('checkout.stripe.return', $order->order_number);
+            return $order->payment_method === Payments::PAYPAL
+                ? redirect()->route('checkout.paypal.return', $order->order_number)
+                : redirect()->route('checkout.stripe.return', $order->order_number);
         }
         return view('shop.confirmation', compact('order'));
     }

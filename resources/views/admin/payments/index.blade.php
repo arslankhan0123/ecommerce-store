@@ -37,6 +37,7 @@
         <select name="provider" class="form-input text-sm w-40">
             <option value="">All methods</option>
             <option value="stripe" {{ request('provider')==='stripe'?'selected':'' }}>Card (Stripe)</option>
+            <option value="paypal" {{ request('provider')==='paypal'?'selected':'' }}>PayPal</option>
             <option value="cod"    {{ request('provider')==='cod'?'selected':'' }}>Cash on Delivery</option>
         </select>
         <select name="status" class="form-input text-sm w-36">
@@ -96,6 +97,9 @@
                             </div>
                             <p class="text-xs text-gray-400 mt-0.5">Exp {{ $p->card_expiry }}@if($p->card_funding) · {{ ucfirst($p->card_funding) }}@endif @if($p->card_country) · {{ $p->card_country }}@endif</p>
                             @if($p->card_id)<a href="{{ route('admin.payments.index', ['card' => $p->card_fingerprint]) }}" class="inline-block mt-1 font-mono text-[11px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded hover:bg-indigo-100" title="Card ID — click to see every payment with this exact card">{{ $p->card_id }}</a>@endif
+                            @elseif($p->provider === 'paypal')
+                            <div class="flex items-center gap-2"><span class="inline-flex items-center justify-center h-6 px-2 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-blue-50 text-blue-800">PayPal</span><span class="text-sm text-gray-700 truncate max-w-[160px]">{{ $p->billing_email ?: '—' }}</span></div>
+                            @if($p->cardholder_name)<p class="text-xs text-gray-400 mt-0.5">{{ $p->cardholder_name }}@if($p->card_country) · {{ $p->card_country }}@endif</p>@endif
                             @else<span class="text-gray-400 text-sm">—</span>@endif
                         </td>
                         <td class="font-semibold text-gray-800 whitespace-nowrap">{{ $p->amount_label }}<span class="block text-xs font-normal text-gray-400">{{ $p->currency }}</span></td>

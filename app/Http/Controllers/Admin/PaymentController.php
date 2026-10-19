@@ -55,8 +55,23 @@ class PaymentController extends Controller
     /** Re-fetch card details / status from Stripe for this payment. */
     public function sync(Payment $payment)
     {
+        if ($payment->provider === 'paypal' && $payment->payment_intent_id) {
+            try {
+                $po = \App\Support\PayPal::getOrder($payment->payment_intent_id);
+            } catch (\Throwable $e) {
+                return back()->with('error', 'PayPal lookup failed: ' . $e->getMessage());
+            }
+            $sum = \App\Support\PayPal::summarize($po);
+            Payments::fillFromPayPal($payment, $sum);
+            if ($sum['status'] === 'COMPLETED' && $payment->order && $payment->order->payment_status !== 'paid') {
+                Payments::markPaid($payment->order, $payment->payment_intent_id);
+            } elseif ($sum['status'] === 'REFUNDED' || $sum['status'] === 'PARTIALLY_REFUNDED') {
+                $payment->forceFill(['status' => 'refunded'])->save();
+            }
+            return back()->with('success', 'Payment details refreshed from PayPal.');
+        }
         if ($payment->provider !== 'stripe' || !$payment->payment_intent_id) {
-            return back()->with('error', 'Only Stripe payments can be refreshed.');
+            return back()->with('error', 'Only Stripe and PayPal payments can be refreshed.');
         }
         try {
             $pi = Payments::retrieveIntent($payment->payment_intent_id, true);

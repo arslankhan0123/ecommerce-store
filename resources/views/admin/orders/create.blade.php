@@ -141,7 +141,9 @@
                         <select name="payment_method" class="form-input w-full text-sm">
                             <option value="cash_on_delivery">Cash on Delivery</option>
                             <option value="bank_transfer">Bank Transfer</option>
-                            <option value="online_payment">Online Payment</option>
+                            <option value="card">Card (Stripe)</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                 </div>

@@ -25,7 +25,7 @@ class Order extends Model {
     /** Human label for the payment method. */
     public function getPaymentLabelAttribute(): string
     {
-        return ['cash_on_delivery' => 'Cash on Delivery', 'card' => 'Card (Stripe)', 'bank_transfer' => 'Bank Transfer'][$this->payment_method] ?? ucwords(str_replace('_', ' ', (string) $this->payment_method));
+        return ['cash_on_delivery' => 'Cash on Delivery', 'card' => 'Card (Stripe)', 'paypal' => 'PayPal', 'bank_transfer' => 'Bank Transfer'][$this->payment_method] ?? ucwords(str_replace('_', ' ', (string) $this->payment_method));
     }
 
     /** Format a base-currency amount in the currency this order was placed in. */

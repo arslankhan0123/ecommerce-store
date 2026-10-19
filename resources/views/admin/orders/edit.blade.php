@@ -73,7 +73,7 @@
                 <div class="bg-white rounded-2xl p-5 space-y-3" style="box-shadow:0 2px 16px rgba(0,0,0,.06)">
                     <h3 class="font-semibold text-gray-700">Payment Method</h3>
                     <select name="payment_method" class="form-input w-full">
-                        @foreach(['cash_on_delivery'=>'Cash on Delivery','bank_transfer'=>'Bank Transfer','card'=>'Card','other'=>'Other'] as $val=>$label)
+                        @foreach(['cash_on_delivery'=>'Cash on Delivery','bank_transfer'=>'Bank Transfer','card'=>'Card (Stripe)','paypal'=>'PayPal','other'=>'Other'] as $val=>$label)
                         <option value="{{ $val }}" {{ old('payment_method',$order->payment_method)===$val?'selected':'' }}>{{ $label }}</option>
                         @endforeach
                     </select>

@@ -39,12 +39,16 @@
 .grand{display:flex;justify-content:space-between;align-items:center;border-top:1.5px solid var(--line);margin-top:10px;padding-top:12px}
 .grand span{font-size:16px;font-weight:800}
 .grand b{font-size:28px;font-weight:800;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.next{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:640px){.next{grid-template-columns:1fr}}
-.next div{background:var(--surface);border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start}
-.next div i{width:40px;height:40px;border-radius:12px;background:#fff;display:grid;place-items:center;color:var(--p);box-shadow:var(--shadow);flex-shrink:0}
-.next b{font-size:13.5px;display:block}
-.next small{color:var(--muted);font-size:12.5px}
+.next{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;position:relative}
+@media(max-width:720px){.next{grid-template-columns:1fr}}
+.next .nx{background:var(--surface);border-radius:16px;padding:18px 18px 18px 16px;display:flex;gap:14px;align-items:flex-start;position:relative;border:1px solid transparent;transition:.25s}
+.next .nx:hover{border-color:var(--line);background:#fff;box-shadow:var(--shadow);transform:translateY(-2px)}
+.next .nx i{width:44px;height:44px;border-radius:13px;background:var(--brand-grad);display:grid;place-items:center;color:#fff;font-size:17px;flex-shrink:0;box-shadow:0 10px 20px -10px rgba(var(--shadow-rgb),.7)}
+.next .nx .tx{min-width:0}
+.next .nx b{font-size:14.5px;display:block;line-height:1.25;margin-bottom:4px}
+.next .nx small{display:block;color:var(--muted);font-size:13px;line-height:1.5}
+.next .nx .n{position:absolute;top:10px;right:12px;font-size:11px;font-weight:800;color:var(--faint)}
+.next .nx.done i{background:var(--ok);box-shadow:0 10px 20px -10px rgba(20,184,138,.7)}
 .bank{background:var(--p-soft);border:1px solid #d9ccff;border-radius:16px;padding:18px 20px;margin-bottom:16px;display:flex;gap:12px;font-size:14px;color:#3b2a8a}
 .acts{display:flex;gap:12px;flex-wrap:wrap}
 .acts a{flex:1;min-width:180px;height:50px;border-radius:14px;font-size:15px}
@@ -72,14 +76,14 @@
       <div class="kv">
         <div><small>Order number</small><b class="onum">#{{ $order->order_number }}</b></div>
         <div><small>Placed on</small><b>{{ $order->created_at->format('d M Y, g:i A') }}</b></div>
-        <div><small>Payment</small><b>@if($order->payment_method==='cash_on_delivery')<span class="pill g"><i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery</span>@elseif($order->payment_method==='card')<span class="pill {{ $order->payment_status==='paid' ? 'g' : 'b' }}"><i class="fa-solid fa-credit-card"></i> Card{{ $order->payment_status==='paid' ? ' · Paid' : '' }}</span>@elseif($order->payment_method==='bank_transfer')<span class="pill b"><i class="fa-solid fa-building-columns"></i> Bank Transfer</span>@else<span class="pill b">{{ ucwords(str_replace('_',' ',$order->payment_method)) }}</span>@endif</b></div>
+        <div><small>Payment</small><b>@if($order->payment_method==='cash_on_delivery')<span class="pill g"><i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery</span>@elseif($order->payment_method==='card')<span class="pill {{ $order->payment_status==='paid' ? 'g' : 'b' }}"><i class="fa-solid fa-credit-card"></i> Card{{ $order->payment_status==='paid' ? ' · Paid' : '' }}</span>@elseif($order->payment_method==='paypal')<span class="pill {{ $order->payment_status==='paid' ? 'g' : 'b' }}"><i class="fa-brands fa-paypal"></i> PayPal{{ $order->payment_status==='paid' ? ' · Paid' : '' }}</span>@elseif($order->payment_method==='bank_transfer')<span class="pill b"><i class="fa-solid fa-building-columns"></i> Bank Transfer</span>@else<span class="pill b">{{ ucwords(str_replace('_',' ',$order->payment_method)) }}</span>@endif</b></div>
         <div><small>Status</small><b><span class="pill y"><i class="fa-regular fa-clock"></i> {{ ucfirst($order->status) }}</span> <span class="pill {{ $order->payment_status==='paid'?'g':'y' }}">{{ ucfirst($order->payment_status) }}</span></b></div>
       </div>
     </div>
 
-    @if($order->payment_method==='card' && $order->payment_status==='paid')
-    <div class="bank reveal" style="background:#e6f9f2;border-color:#bdeedb;color:#0d6a4f"><i class="fa-solid fa-circle-check" style="font-size:18px;margin-top:2px"></i><div><b>Payment received — {{ zorder_price($order, $order->total) }}</b><br>Your card was charged successfully{{ $order->paid_at ? " on ".$order->paid_at->format("d M Y, g:i A") : "" }}. A receipt from Stripe is on its way to {{ $order->customer_email }}.</div></div>
-    @elseif($order->payment_method==='card')
+    @if(in_array($order->payment_method, ['card','paypal']) && $order->payment_status==='paid')
+    <div class="bank reveal" style="background:#e6f9f2;border-color:#bdeedb;color:#0d6a4f"><i class="fa-solid fa-circle-check" style="font-size:18px;margin-top:2px"></i><div><b>Payment received — {{ zorder_price($order, $order->total) }}</b><br>{{ $order->payment_method==='paypal' ? 'Your PayPal payment went through' : 'Your card was charged successfully' }}{{ $order->paid_at ? " on ".$order->paid_at->format("d M Y, g:i A") : "" }}. A receipt from {{ $order->payment_method==='paypal' ? 'PayPal' : 'Stripe' }} is on its way to {{ $order->customer_email }}.</div></div>
+    @elseif(in_array($order->payment_method, ['card','paypal']))
     <div class="bank reveal"><i class="fa-solid fa-hourglass-half" style="font-size:18px;margin-top:2px"></i><div><b>Payment is being processed</b><br>Your bank is still confirming the payment. We'll email you as soon as it clears — no need to pay again.</div></div>
     @endif
     @if($order->payment_method==='bank_transfer')
@@ -117,9 +121,9 @@
     <div class="card-z reveal" data-delay="3">
       <h3><i class="fa-solid fa-route"></i> What happens next?</h3>
       <div class="next">
-        <div><i class="fa-solid fa-envelope-open-text"></i><div><b>Confirmation email</b><small>Arriving in your inbox shortly.</small></div></div>
-        <div><i class="fa-solid fa-box-open"></i><div><b>Packed within 24h</b><small>We'll prepare your order carefully.</small></div></div>
-        <div><i class="fa-solid fa-truck-fast"></i><div><b>Delivered in 2–5 days</b><small>Our rider will call before arrival.</small></div></div>
+        <div class="nx done"><i class="fa-solid fa-envelope-open-text"></i><div class="tx"><b>Confirmation email</b><small>Sent to {{ $order->customer_email }} with your invoice attached.</small></div><span class="n">1</span></div>
+        <div class="nx"><i class="fa-solid fa-box-open"></i><div class="tx"><b>Packed within 24 hours</b><small>We check every item and pack it carefully.</small></div><span class="n">2</span></div>
+        <div class="nx"><i class="fa-solid fa-truck-fast"></i><div class="tx"><b>Delivered in 2–5 days</b><small>Our rider calls you before arriving{{ $order->payment_method === 'cash_on_delivery' ? ' — keep '.zorder_price($order, $order->total).' ready' : '' }}.</small></div><span class="n">3</span></div>
       </div>
     </div>
 

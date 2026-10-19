@@ -235,7 +235,7 @@
             $stripeReady = $stripeOn && !empty($s['stripe_publishable_key']) && !empty($s['stripe_secret_key']);
             $stripeMode  = str_starts_with((string)($s['stripe_publishable_key'] ?? ''), 'pk_live_') ? 'live' : 'test';
         @endphp
-        <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)" x-data="{stripe: {{ $stripeOn ? 'true' : 'false' }}, showSk:false, showWh:false}">
+        <div class="bg-white rounded-2xl p-6" style="box-shadow:0 2px 16px rgba(0,0,0,.06)" x-data="{stripe: {{ $stripeOn ? 'true' : 'false' }}, showSk:false, showWh:false, paypal: {{ ($s['pay_paypal_enabled'] ?? '0') === '1' ? 'true' : 'false' }}, showPp:false}">
             <div class="flex items-start justify-between gap-4 mb-6">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white"
@@ -247,10 +247,20 @@
                         <p class="text-gray-500 text-sm">Choose what customers can pay with. Only enabled methods appear at checkout.</p>
                     </div>
                 </div>
-                <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full {{ $stripeReady ? ($stripeMode === 'live' ? 'text-green-700 bg-green-50' : 'text-sky-700 bg-sky-50') : 'text-gray-600 bg-gray-100' }}">
-                    <span class="w-1.5 h-1.5 rounded-full inline-block {{ $stripeReady ? ($stripeMode === 'live' ? 'bg-green-500' : 'bg-sky-500') : 'bg-gray-400' }}"></span>
-                    {{ $stripeReady ? 'Stripe ' . $stripeMode . ' mode' : 'Stripe off' }}
-                </span>
+                @php
+                    $ppReady = ($s['pay_paypal_enabled'] ?? '0') === '1' && !empty($s['paypal_client_id']) && !empty($s['paypal_secret']);
+                    $ppMode  = ($s['paypal_mode'] ?? 'sandbox') === 'live' ? 'live' : 'sandbox';
+                @endphp
+                <div class="flex flex-col items-end gap-1.5">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full {{ $stripeReady ? ($stripeMode === 'live' ? 'text-green-700 bg-green-50' : 'text-sky-700 bg-sky-50') : 'text-gray-600 bg-gray-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full inline-block {{ $stripeReady ? ($stripeMode === 'live' ? 'bg-green-500' : 'bg-sky-500') : 'bg-gray-400' }}"></span>
+                        {{ $stripeReady ? 'Stripe ' . $stripeMode : 'Stripe off' }}
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full {{ $ppReady ? ($ppMode === 'live' ? 'text-green-700 bg-green-50' : 'text-sky-700 bg-sky-50') : 'text-gray-600 bg-gray-100' }}">
+                        <span class="w-1.5 h-1.5 rounded-full inline-block {{ $ppReady ? ($ppMode === 'live' ? 'bg-green-500' : 'bg-sky-500') : 'bg-gray-400' }}"></span>
+                        {{ $ppReady ? 'PayPal ' . $ppMode : 'PayPal off' }}
+                    </span>
+                </div>
             </div>
 
             <form method="POST" action="{{ route('admin.settings.payments') }}" autocomplete="off">
@@ -309,6 +319,47 @@
                             <code class="bg-white px-1.5 py-0.5 rounded border border-sky-100 select-all">{{ url('/webhooks/stripe') }}</code>
                             with events <code class="bg-white px-1 rounded">payment_intent.succeeded</code>, <code class="bg-white px-1 rounded">payment_intent.payment_failed</code>, <code class="bg-white px-1 rounded">payment_intent.canceled</code>, and paste its signing secret above.
                             Test with card <code class="bg-white px-1.5 py-0.5 rounded border border-sky-100">4242 4242 4242 4242</code>, any future date, any CVC.
+                        </div>
+                    </div>
+                </div>
+
+                {{-- PayPal --}}
+                <div class="rounded-xl border border-slate-200 overflow-hidden mb-6">
+                    <label class="flex items-start gap-3 p-4 bg-slate-50 cursor-pointer">
+                        <input type="checkbox" name="pay_paypal_enabled" value="1" x-model="paypal" class="w-5 h-5 mt-0.5 rounded text-indigo-600">
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-800 text-sm">PayPal</div>
+                            <div class="text-gray-500 text-xs">PayPal buttons at checkout — PayPal balance, linked bank, or guest card. Needs a PayPal Business account. Charged in the customer's currency when PayPal supports it, otherwise in USD.</div>
+                        </div>
+                        <svg class="w-10 h-6" viewBox="0 0 24 24" fill="#003087" aria-label="PayPal"><path d="M7.1 21.3H3.7a.6.6 0 0 1-.6-.7L5.9 2.9c.1-.5.5-.9 1-.9h6.6c2.2 0 3.9.5 4.9 1.5.9.9 1.2 2.1 1 3.7-.6 4.1-3 6.3-7.1 6.3h-2.1c-.5 0-.9.4-1 .9l-1.1 6.9zm10.3-13.6c.1-.5.1-1 0-1.3-.4-.5-1.3-.8-2.7-.8H9.3l-1.4 8.8h1.5c3 0 5.1-1.5 5.6-4.6.1-.8.3-1.5.4-2.1z"/></svg>
+                    </label>
+                    <div x-show="paypal" class="p-4 border-t border-slate-200 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="form-label">Mode</label>
+                                <select name="paypal_mode" class="form-input">
+                                    <option value="sandbox" {{ $ppMode === 'sandbox' ? 'selected' : '' }}>Sandbox (testing)</option>
+                                    <option value="live" {{ $ppMode === 'live' ? 'selected' : '' }}>Live</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="form-label">Client ID</label>
+                                <input type="text" name="paypal_client_id" value="{{ old('paypal_client_id', $s['paypal_client_id'] ?? '') }}" placeholder="AbCd…" spellcheck="false" class="form-input font-mono text-sm @error('paypal_client_id') border-red-400 @enderror">
+                                @error('paypal_client_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                                <p class="text-gray-400 text-xs mt-1.5">Public by design — it only identifies your app to the PayPal buttons.</p>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="form-label">Secret</label>
+                                <div class="relative">
+                                    <input :type="showPp ? 'text' : 'password'" name="paypal_secret" value="" placeholder="{{ !empty($s['paypal_secret']) ? '•••••••• (saved — leave blank to keep)' : 'EFgH…' }}" autocomplete="new-password" spellcheck="false" class="form-input font-mono text-sm pr-11">
+                                    <button type="button" @click="showPp=!showPp" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                                </div>
+                                <p class="text-gray-400 text-xs mt-1.5">Stored encrypted, used only on the server. Verified against PayPal when you save.</p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-sky-50 border border-sky-100 text-xs text-sky-800 leading-relaxed">
+                            <b>Setup:</b> developer.paypal.com → Apps &amp; Credentials → choose <b>Sandbox</b> or <b>Live</b> → Create App → copy the Client ID and Secret here and pick the matching mode.
+                            To test, pay in the PayPal window with a sandbox <i>personal</i> account (Testing Tools → Sandbox Accounts).
                         </div>
                     </div>
                 </div>
